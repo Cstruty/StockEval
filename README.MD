@@ -21,20 +21,20 @@ Based on these metrics, it calculates an overall score (0–100) for each stock 
 ---
 
 ## Installation
-Go to the official Python website:
-https://www.python.org/downloads/
 
-Download Python and (macOS)
+
+1) Download Python and (macOS)
 -Open a terminal
 ```bash
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-```bash
 brew install python 
-Verify python is install
+```
+2) Verify python is installed
+```bash
 python3 --version
+```
+3) Download yfinance and pandas
 
-Download yfinance and pandas
-Open the terminal
 ```bash
 pip install yfinance pandas
