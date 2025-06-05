@@ -24,6 +24,7 @@ Based on these metrics, it calculates an overall score (0–100) for each stock 
 
 
 1) Download Python and (macOS)
+
 -Open a terminal
 ```bash
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
