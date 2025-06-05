@@ -20,10 +20,10 @@ Based on these metrics, it calculates an overall score (0–100) for each stock 
 
 ---
 
-## Installation
+## Installation  (macOS)
 
 
-1) Download Python and install extensions (macOS)
+1) Download Python 
 
 -Open a terminal
 ```bash
