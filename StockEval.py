@@ -1,9 +1,18 @@
 import yfinance as yf
 import pandas as pd
-import math
+import requests
+import re
 
-# Try to extract current liabilities using multiple possible label variations
+# --- Configuration ---
+API_KEY = "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"
+API_URL = "https://openrouter.ai/api/v1/chat/completions"
+
+# --- Helper Functions ---
+
 def get_current_liabilities(balance_sheet):
+    """
+    Extract current liabilities from balance sheet with possible label variations.
+    """
     possible_keys = [
         'Current Liabilities',
         'Total Current Liabilities',
@@ -15,230 +24,347 @@ def get_current_liabilities(balance_sheet):
             return balance_sheet.loc[key].values[0]
     return 0
 
-# Calculate Return on Capital Employed (ROCE) = EBIT / Capital Employed
 def calc_roce(ticker_obj):
-    try:
-        fin = ticker_obj.financials  # Annual income statement
-        if fin is None or fin.empty:
-            return 0
-        ebit = fin.loc['Operating Income'].values[0]
-
-        balance_sheet = ticker_obj.balance_sheet  # Annual balance sheet
-        if balance_sheet is None or balance_sheet.empty:
-            return 0
-
-        total_assets = balance_sheet.loc['Total Assets'].values[0]
-        current_liabilities = get_current_liabilities(balance_sheet)
-        capital_employed = total_assets - current_liabilities
-
-        return ebit / capital_employed if capital_employed else 0
-    except Exception:
-        return 0
-
-def calc_interest_coverage(ticker_obj):
+    """
+    Calculate Return on Capital Employed (ROCE).
+    ROCE = EBIT / (Total Assets - Current Liabilities)
+    """
     try:
         fin = ticker_obj.financials
         if fin is None or fin.empty:
             return 0
-
-        if 'Operating Income' not in fin.index:
+        ebit = fin.loc['Operating Income'].values[0]
+        balance_sheet = ticker_obj.balance_sheet
+        if balance_sheet is None or balance_sheet.empty:
             return 0
+        total_assets = balance_sheet.loc['Total Assets'].values[0]
+        current_liabilities = get_current_liabilities(balance_sheet)
+        capital_employed = total_assets - current_liabilities
+        return ebit / capital_employed if capital_employed else 0
+    except:
+        return 0
 
-        ebit_series = fin.loc['Operating Income']
-        ebit = ebit_series.dropna().iloc[0]
-
-        # Try to find interest expense rows, prioritize exact matches
-        possible_interest_labels = [
+def calc_interest_coverage(ticker_obj):
+    """
+    Calculate Interest Coverage Ratio.
+    Interest Coverage = EBIT / Interest Expense
+    """
+    try:
+        fin = ticker_obj.financials
+        if fin is None or fin.empty or 'Operating Income' not in fin.index:
+            return 0
+        ebit = fin.loc['Operating Income'].dropna().iloc[0]
+        possible_labels = [
             'Interest Expense',
             'Interest Expense Non Operating',
             'Net Interest Income',
             'Total Other Finance Cost'
         ]
-
         interest_expense = 0
-        for label in possible_interest_labels:
+        for label in possible_labels:
             if label in fin.index:
                 vals = fin.loc[label].dropna()
                 if not vals.empty:
-                    val = vals.iloc[0]
-                    if val != 0:
-                        interest_expense = abs(val)
-                        print(f"Using {label} with value {interest_expense} as interest expense")
-                        break
-
-        # Fallback: search any label containing "interest" but exclude those with "income"
+                    interest_expense = abs(vals.iloc[0])
+                    break
+        # fallback search for interest-related rows
         if interest_expense == 0:
-            interest_rows = [label for label in fin.index if ('interest' in label.lower()) and ('income' not in label.lower())]
+            interest_rows = [l for l in fin.index if 'interest' in l.lower() and 'income' not in l.lower()]
             for label in interest_rows:
                 vals = fin.loc[label].dropna()
                 if not vals.empty:
-                    val = vals.iloc[0]
-                    if val != 0:
-                        interest_expense = abs(val)
-                        print(f"Fallback using {label} with value {interest_expense} as interest expense")
-                        break
-
-        if interest_expense == 0:
-            print("No valid interest expense found.")
-            return 0
-
-        return ebit / interest_expense
-
-    except Exception as e:
-        print(f"Interest coverage error: {e}")
+                    interest_expense = abs(vals.iloc[0])
+                    break
+        return ebit / interest_expense if interest_expense else 0
+    except:
         return 0
 
-
-
-
-# Calculate Net Margin = Net Income / Revenue (from latest quarter)
 def calc_net_margin(ticker_obj):
+    """
+    Calculate Net Margin from quarterly financials.
+    Net Margin = Net Income / Total Revenue
+    """
     try:
         fin = ticker_obj.quarterly_financials
         if fin is None or fin.empty:
             return 0
         net_income = fin.loc['Net Income'].values[0] if 'Net Income' in fin.index else 0
-        if 'Total Revenue' in fin.index:
-            total_revenue = fin.loc['Total Revenue'].values[0]
-        elif 'Operating Revenue' in fin.index:
-            total_revenue = fin.loc['Operating Revenue'].values[0]
-        else:
-            total_revenue = 0
-        return net_income / total_revenue if total_revenue else 0
-    except Exception:
+        revenue = fin.loc['Total Revenue'].values[0] if 'Total Revenue' in fin.index else (
+            fin.loc['Operating Revenue'].values[0] if 'Operating Revenue' in fin.index else 0
+        )
+        return net_income / revenue if revenue else 0
+    except:
         return 0
 
-# Calculate CCR (Cash Conversion Ratio) using TTM = Operating Cash Flow / Net Income
 def calc_cash_conversion_ratio_ttm(ticker_obj):
+    """
+    Calculate Cash Conversion Ratio = Operating Cash Flow / Net Income (Trailing Twelve Months)
+    """
     try:
         cashflow = ticker_obj.cashflow
         financials = ticker_obj.financials
-
         if cashflow is None or financials is None:
             return 0
-
-        if 'Operating Cash Flow' not in cashflow.index or 'Net Income' not in financials.index:
-            return 0
-
-        # Use the most recent annual Operating Cash Flow and Net Income (take the first column)
-        cfo_annual = cashflow.loc['Operating Cash Flow'].iloc[0]
-        net_income_annual = financials.loc['Net Income'].iloc[0]
-
-        if net_income_annual == 0:
-            return 0
-
-        return cfo_annual / net_income_annual
-
-    except Exception:
+        cfo = cashflow.loc['Operating Cash Flow'].iloc[0] if 'Operating Cash Flow' in cashflow.index else 0
+        ni = financials.loc['Net Income'].iloc[0] if 'Net Income' in financials.index else 0
+        return cfo / ni if ni else 0
+    except:
         return 0
 
+def calc_pe_ratio(ticker_obj):
+    """
+    Get P/E ratio, preferring trailingPE, then forwardPE.
+    """
+    try:
+        info = ticker_obj.info
+        pe = info.get("trailingPE") or info.get("forwardPE") or 0
+        return pe
+    except:
+        return 0
 
-# Calculate a score (0–100) using weighted scaling for each metric
-def calculate_score(roce, interest_cov, gross_margin, net_margin, ccr):
+def calc_gross_profit_to_assets(ticker_obj):
+    """
+    Calculate Gross Profit to Assets ratio.
+    """
+    try:
+        info = ticker_obj.info
+        balance_sheet = ticker_obj.balance_sheet
+        if balance_sheet is None or balance_sheet.empty:
+            return 0
+        total_assets = balance_sheet.loc['Total Assets'].values[0]
+        gross_profit = info.get("grossProfits", None)  # raw gross profits, not margin
+        if gross_profit is None or total_assets == 0:
+            return 0
+        return gross_profit / total_assets
+    except:
+        return 0
+
+def calculate_score(roce, interest_cov, gross_margin, net_margin, ccr, gp_assets):
+    """
+    Calculate composite score based on financial metrics with weighted caps.
+    """
     score = 0
-    score += max(min((roce / 0.15) * 30, 30), 0)               # ROCE → up to 30 points
-    score += max(min((interest_cov / 10) * 30, 30), 0)         # Interest Coverage → up to 30 points
-    score += max(min((gross_margin / 0.40) * 15, 15), 0)       # Gross Margin → up to 15 points
-    score += max(min((net_margin / 0.15) * 15, 15), 0)         # Net Margin → up to 15 points
-    score += max(min((ccr / 0.90) * 10, 10), 0)                # CCR → up to 10 points
+    score += max(min((roce / 0.15) * 30, 30), 0)
+    score += max(min((interest_cov / 10) * 30, 30), 0)
+    score += max(min((gross_margin / 0.40) * 15, 15), 0)
+    score += max(min((net_margin / 0.15) * 15, 15), 0)
+    score += max(min((ccr / 0.90) * 10, 10), 0)
+    score += max(min((gp_assets / 0.3) * 10, 10), 0)  # new metric worth 10%
     return min(round(score), 100)
 
-
-# Apply color based on value thresholds (used for HTML styling)
 def color_metric(val, good, okay):
+    """
+    Return HTML span with color based on thresholds for metrics.
+    """
     try:
         val_num = float(val.strip('%x'))
     except:
         return val
-    if val_num >= good:
-        color = 'green'
-    elif val_num >= okay:
-        color = 'orange'
-    else:
-        color = 'red'
-    return f'<span style=\"color:{color}\">{val}</span>'
+    color = 'green' if val_num >= good else 'orange' if val_num >= okay else 'red'
+    return f'<span style="color:{color}">{val}</span>'
 
-# Color the score value (special formatting rule)
 def color_score(val):
+    """
+    Color the overall score: green (>=80), orange (>=50), red (<50).
+    """
     try:
         val_num = float(val.strip('/100'))
     except:
         return val
-    if val_num >= 80:
-        color = 'green'
-    elif val_num >= 50:
-        color = 'orange'
-    else:
-        color = 'red'
-    return f'<span style=\"color:{color}\">{val}</span>'
+    color = 'green' if val_num >= 80 else 'orange' if val_num >= 50 else 'red'
+    return f'<span style="color:{color}">{val}</span>'
 
-# Main loop to screen tickers and calculate metrics
-def screen_stocks(tickers):
+def highlight_yes_no(text):
+    """
+    Highlight 'Yes' in green and 'No' in red (bold).
+    """
+    text = re.sub(r'\bYes\b', '<span style="color:green;font-weight:bold;">Yes</span>', text)
+    text = re.sub(r'\bNo\b', '<span style="color:red;font-weight:bold;">No</span>', text)
+    return text
+
+def ask_qualitative_questions(ticker, financial_summary):
+    """
+    Send qualitative questions prompt to AI and return response.
+    """
+    prompt = f"""For {ticker}, respond clearly in bullet points. 
+Each bullet point must start with "Yes" or "No", followed by a short label of the question in parentheses, then a brief explanation.
+Do not restate the question.
+
+Then at the end give a final score out of eight.
+
+Answer the following:
+
+1. Does this company have a wide moat? (Wide Moat)
+2. Is it highly scalable? (Scalable)
+3. Is it focused on cash flow generation? (Cash Flow Focus)
+4. Does it have low need for reinvestment (R&D, capex)? (Low Reinvestment)
+5. Does it have pricing power? (Pricing Power)
+6. Does it show high operating predictability? (Predictability)
+7. Is it mainly driven by organic growth? (Organic Growth)
+8. Does it have a clear growth strategy? (Growth Strategy)
+
+Financial summary:
+{financial_summary}
+"""
+
+    headers = {
+        "Authorization": f"Bearer {API_KEY}",
+        "Content-Type": "application/json",
+        "HTTP-Referer": "http://localhost",
+        "X-Title": "Stock Screener App"
+    }
+
+    json_data = {
+        "model": "deepseek/deepseek-chat-v3-0324:free",
+        "messages": [
+            {"role": "user", "content": prompt}
+        ],
+        "max_tokens": 300,
+        "temperature": 0.7,
+        "stream": False
+    }
+
+    response = requests.post(API_URL, headers=headers, json=json_data)
+
+    if response.status_code != 200:
+        print("Error:", response.status_code, response.text)
+        return "No qualitative analysis available."
+
+    try:
+        result_json = response.json()
+        content = result_json['choices'][0]['message']['content']
+        return content
+    except Exception as e:
+        print(f"Error parsing response: {e}")
+        return "No qualitative analysis available."
+
+def screen_stocks(tickers, run_ai=True):
+    """
+    Main screening function: fetches financial data, calculates metrics,
+    optionally runs qualitative AI, and collects results.
+    """
     screened = []
+    qualitative_list = []
+
     for ticker in tickers:
         print(f"Evaluating {ticker}...")
         try:
             stock = yf.Ticker(ticker)
             info = stock.info
-
-            company_name = info.get("longName", "N/A")
-            current_price = info.get("currentPrice", 0)
-
-            # Calculate all metrics
+            name = info.get("longName", "N/A")
+            price = info.get("currentPrice", 0)
+            pe_ratio = calc_pe_ratio(stock)
             roce = calc_roce(stock)
             interest_cov = calc_interest_coverage(stock)
             gross_margin = info.get("grossMargins", 0)
             net_margin = calc_net_margin(stock)
             ccr = calc_cash_conversion_ratio_ttm(stock)
+            gp_assets = calc_gross_profit_to_assets(stock)
 
-            # Show metrics in terminal
-            print(f"{ticker}: Price=${current_price:.2f}, ROCE={roce:.3f}, IntCov={interest_cov:.2f}, GM={gross_margin:.2f}, NM={net_margin:.2f}, CCR={ccr:.4f}")
+            print(f"{ticker}: Price=${price:.2f}, P/E={pe_ratio:.2f}, ROCE={roce:.2%}, IntCov={interest_cov:.2f}, GM={gross_margin:.2%}, NM={net_margin:.2%}, CCR={ccr:.2%}, GP/Assets={gp_assets:.2%}")
 
-            # Compute overall score
-            score_val = round(calculate_score(roce, interest_cov, gross_margin, net_margin, ccr), 2)
+            score_val = round(calculate_score(roce, interest_cov, gross_margin, net_margin, ccr, gp_assets), 2)
 
-            # Format and store the result
+            summary = f"""ROCE: {roce:.2%}
+Interest Coverage: {interest_cov:.2f}x
+Gross Margin: {gross_margin:.2%}
+Net Margin: {net_margin:.2%}
+Cash Conversion Ratio: {ccr:.2%}
+Gross Profit to Assets: {gp_assets:.2%}"""
+
+            qual = "Qualitative analysis not run."
+            if run_ai:
+                qual_resp = ask_qualitative_questions(ticker, summary)
+                if qual_resp:
+                    qual = qual_resp.replace('\n', '<br>')
+                    qual = highlight_yes_no(qual)
+                else:
+                    qual = "No qualitative analysis available."
+
             screened.append({
                 "Ticker": ticker,
-                "Company Name": company_name,
-                "Current Price": f"${current_price:.2f}",
+                "Company Name": name,
+                "Current Price": f"${price:.2f}",
+                "P/E Ratio": f"{pe_ratio:.2f}" if pe_ratio else "N/A",
                 "ROCE": f"{round(roce * 100)}%",
                 "Interest Coverage": f"{round(interest_cov)}x",
                 "Gross Margin": f"{round(gross_margin * 100)}%",
                 "Net Margin": f"{round(net_margin * 100)}%",
                 "Cash Conversion Ratio (FCF)": f"{round(ccr * 100)}%",
+                "Gross Profit / Assets": f"{round(gp_assets * 100)}%",
                 "Score": f"{round(score_val)}/100"
+            })
+
+            qualitative_list.append({
+                "Ticker": ticker,
+                "Qualitative Analysis": qual
             })
 
         except Exception as e:
             print(f"Failed to evaluate {ticker}: {e}")
-    return pd.DataFrame(screened)
 
-# Load tickers from a plain text file
+    df_screened = pd.DataFrame(screened)
+    df_qual = pd.DataFrame(qualitative_list)
+
+    return df_screened, df_qual
+
+
+# --- Main Execution ---
+
+# Load tickers from "tickers.txt"
+# First line "YESAI" enables qualitative AI analysis; otherwise AI is off.
 with open("tickers.txt", "r") as f:
-    tickers = [line.strip().upper() for line in f if line.strip()]
+    lines = [line.strip() for line in f if line.strip()]
+if lines and lines[0].upper() == "YESAI":
+    run_ai_flag = True
+    tickers = [line.upper() for line in lines[1:]]
+else:
+    run_ai_flag = False
+    tickers = [line.upper() for line in lines]
 
-# Run screening on the loaded tickers
-results = screen_stocks(tickers)
+# Run screening
+results_df, qual_df = screen_stocks(tickers, run_ai=run_ai_flag)
 
-# Show result in terminal
-print("\nScreened Stocks:")
-print(results)
-
-# Format results with color for display in HTML
-styled_results = results.copy()
+# Apply color formatting to key financial columns
+styled = results_df.copy()
 for col, good, okay in [
     ("ROCE", 15, 5),
     ("Interest Coverage", 10, 3),
     ("Gross Margin", 30, 15),
     ("Net Margin", 15, 5),
-    ("Cash Conversion Ratio (FCF)", 90, 70)
+    ("Cash Conversion Ratio (FCF)", 90, 70),
+    ("Gross Profit / Assets", 30, 10)
 ]:
-    styled_results[col] = styled_results[col].apply(lambda x: color_metric(x, good, okay))
+    styled[col] = styled[col].apply(lambda x: color_metric(x, good, okay))
+styled["Score"] = styled["Score"].apply(color_score)
 
-# Apply coloring to the score separately
-styled_results["Score"] = styled_results["Score"].apply(color_score)
+# Convert dataframes to HTML (escape=False for proper HTML rendering)
+main_table_html = styled.to_html(index=False, escape=False)
+qual_table_html = qual_df.to_html(index=False, escape=False)
 
-# Export the color-coded table to an HTML file
-styled_results.to_html("screened_stocks.html", index=False, escape=False)
+# Combine both tables into a full HTML page
+full_html = f"""
+<html>
+<head>
+<title>Stock Screening Results</title>
+<style>
+  table {{ border-collapse: collapse; width: 100%; }}
+  th, td {{ border: 1px solid #ddd; padding: 8px; vertical-align: top; }}
+  th {{ background-color: #f2f2f2; }}
+</style>
+</head>
+<body>
+<h2>Main Stock Screening Table</h2>
+{main_table_html}
+<br><br>
+<h2>Qualitative Analysis</h2>
+{qual_table_html}
+</body>
+</html>
+"""
+
+# Save results to HTML file
+with open("screened_stocks.html", "w", encoding="utf-8") as f:
+    f.write(full_html)
+
 print("Results saved to screened_stocks.html")
