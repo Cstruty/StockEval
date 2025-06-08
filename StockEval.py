@@ -4,15 +4,12 @@ import requests
 import re
 
 # --- Configuration ---
-API_KEY = "ADD HERE"
+API_KEY = "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"
 API_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 # --- Helper Functions ---
 
 def get_current_liabilities(balance_sheet):
-    """
-    Extract current liabilities from balance sheet with possible label variations.
-    """
     possible_keys = [
         'Current Liabilities',
         'Total Current Liabilities',
@@ -25,10 +22,6 @@ def get_current_liabilities(balance_sheet):
     return 0
 
 def calc_roce(ticker_obj):
-    """
-    Calculate Return on Capital Employed (ROCE).
-    ROCE = EBIT / (Total Assets - Current Liabilities)
-    """
     try:
         fin = ticker_obj.financials
         if fin is None or fin.empty:
@@ -45,10 +38,6 @@ def calc_roce(ticker_obj):
         return 0
 
 def calc_interest_coverage(ticker_obj):
-    """
-    Calculate Interest Coverage Ratio.
-    Interest Coverage = EBIT / Interest Expense
-    """
     try:
         fin = ticker_obj.financials
         if fin is None or fin.empty or 'Operating Income' not in fin.index:
@@ -67,7 +56,6 @@ def calc_interest_coverage(ticker_obj):
                 if not vals.empty:
                     interest_expense = abs(vals.iloc[0])
                     break
-        # fallback search for interest-related rows
         if interest_expense == 0:
             interest_rows = [l for l in fin.index if 'interest' in l.lower() and 'income' not in l.lower()]
             for label in interest_rows:
@@ -80,10 +68,6 @@ def calc_interest_coverage(ticker_obj):
         return 0
 
 def calc_net_margin(ticker_obj):
-    """
-    Calculate Net Margin from quarterly financials.
-    Net Margin = Net Income / Total Revenue
-    """
     try:
         fin = ticker_obj.quarterly_financials
         if fin is None or fin.empty:
@@ -97,9 +81,6 @@ def calc_net_margin(ticker_obj):
         return 0
 
 def calc_cash_conversion_ratio_ttm(ticker_obj):
-    """
-    Calculate Cash Conversion Ratio = Operating Cash Flow / Net Income (Trailing Twelve Months)
-    """
     try:
         cashflow = ticker_obj.cashflow
         financials = ticker_obj.financials
@@ -112,9 +93,6 @@ def calc_cash_conversion_ratio_ttm(ticker_obj):
         return 0
 
 def calc_pe_ratio(ticker_obj):
-    """
-    Get P/E ratio, preferring trailingPE, then forwardPE.
-    """
     try:
         info = ticker_obj.info
         pe = info.get("trailingPE") or info.get("forwardPE") or 0
@@ -123,16 +101,13 @@ def calc_pe_ratio(ticker_obj):
         return 0
 
 def calc_gross_profit_to_assets(ticker_obj):
-    """
-    Calculate Gross Profit to Assets ratio.
-    """
     try:
         info = ticker_obj.info
         balance_sheet = ticker_obj.balance_sheet
         if balance_sheet is None or balance_sheet.empty:
             return 0
         total_assets = balance_sheet.loc['Total Assets'].values[0]
-        gross_profit = info.get("grossProfits", None)  # raw gross profits, not margin
+        gross_profit = info.get("grossProfits", None)
         if gross_profit is None or total_assets == 0:
             return 0
         return gross_profit / total_assets
@@ -140,22 +115,16 @@ def calc_gross_profit_to_assets(ticker_obj):
         return 0
 
 def calculate_score(roce, interest_cov, gross_margin, net_margin, ccr, gp_assets):
-    """
-    Calculate composite score based on financial metrics with weighted caps.
-    """
     score = 0
     score += max(min((roce / 0.15) * 30, 30), 0)
     score += max(min((interest_cov / 10) * 30, 30), 0)
     score += max(min((gross_margin / 0.40) * 15, 15), 0)
     score += max(min((net_margin / 0.15) * 15, 15), 0)
     score += max(min((ccr / 0.90) * 10, 10), 0)
-    score += max(min((gp_assets / 0.3) * 10, 10), 0)  # new metric worth 10%
+    score += max(min((gp_assets / 0.3) * 10, 10), 0)
     return min(round(score), 100)
 
 def color_metric(val, good, okay):
-    """
-    Return HTML span with color based on thresholds for metrics.
-    """
     try:
         val_num = float(val.strip('%x'))
     except:
@@ -164,28 +133,20 @@ def color_metric(val, good, okay):
     return f'<span style="color:{color}">{val}</span>'
 
 def color_score(val):
-    """
-    Color the overall score: green (>=80), orange (>=50), red (<50).
-    """
     try:
-        val_num = float(val.strip('/100'))
+        val_num = float(val.replace('/100', ''))
     except:
         return val
     color = 'green' if val_num >= 80 else 'orange' if val_num >= 50 else 'red'
     return f'<span style="color:{color}">{val}</span>'
 
+
 def highlight_yes_no(text):
-    """
-    Highlight 'Yes' in green and 'No' in red (bold).
-    """
     text = re.sub(r'\bYes\b', '<span style="color:green;font-weight:bold;">Yes</span>', text)
     text = re.sub(r'\bNo\b', '<span style="color:red;font-weight:bold;">No</span>', text)
     return text
 
 def ask_qualitative_questions(ticker, financial_summary):
-    """
-    Send qualitative questions prompt to AI and return response.
-    """
     prompt = f"""For {ticker}, respond clearly in bullet points. 
 Each bullet point must start with "Yes" or "No", followed by a short label of the question in parentheses, then a brief explanation.
 Do not restate the question.
@@ -216,9 +177,7 @@ Financial summary:
 
     json_data = {
         "model": "deepseek/deepseek-chat-v3-0324:free",
-        "messages": [
-            {"role": "user", "content": prompt}
-        ],
+        "messages": [{"role": "user", "content": prompt}],
         "max_tokens": 300,
         "temperature": 0.7,
         "stream": False
@@ -239,10 +198,6 @@ Financial summary:
         return "No qualitative analysis available."
 
 def screen_stocks(tickers, run_ai=True):
-    """
-    Main screening function: fetches financial data, calculates metrics,
-    optionally runs qualitative AI, and collects results.
-    """
     screened = []
     qualitative_list = []
 
@@ -253,6 +208,14 @@ def screen_stocks(tickers, run_ai=True):
             info = stock.info
             name = info.get("longName", "N/A")
             price = info.get("currentPrice", 0)
+            div_yield = info.get("dividendYield")
+            if div_yield:
+                div_yield = f"{round(div_yield, 5)}%"
+            else:
+                div_yield = "N/A"
+
+            #div_yield = f"{round(div_yield * 100, 2)}%" if div_yield else "N/A"
+
             pe_ratio = calc_pe_ratio(stock)
             roce = calc_roce(stock)
             interest_cov = calc_interest_coverage(stock)
@@ -261,7 +224,7 @@ def screen_stocks(tickers, run_ai=True):
             ccr = calc_cash_conversion_ratio_ttm(stock)
             gp_assets = calc_gross_profit_to_assets(stock)
 
-            print(f"{ticker}: Price=${price:.2f}, P/E={pe_ratio:.2f}, ROCE={roce:.2%}, IntCov={interest_cov:.2f}, GM={gross_margin:.2%}, NM={net_margin:.2%}, CCR={ccr:.2%}, GP/Assets={gp_assets:.2%}")
+            print(f"{ticker}: Price=${price:.2f}, DivYld={div_yield}, P/E={pe_ratio:.2f}, ROCE={roce:.2%}, IntCov={interest_cov:.2f}, GM={gross_margin:.2%}, NM={net_margin:.2%}, CCR={ccr:.2%}, GP/Assets={gp_assets:.2%}")
 
             score_val = round(calculate_score(roce, interest_cov, gross_margin, net_margin, ccr, gp_assets), 2)
 
@@ -285,6 +248,7 @@ Gross Profit to Assets: {gp_assets:.2%}"""
                 "Ticker": ticker,
                 "Company Name": name,
                 "Current Price": f"${price:.2f}",
+                "Dividend Yield": div_yield,
                 "P/E Ratio": f"{pe_ratio:.2f}" if pe_ratio else "N/A",
                 "ROCE": f"{round(roce * 100)}%",
                 "Interest Coverage": f"{round(interest_cov)}x",
@@ -308,11 +272,8 @@ Gross Profit to Assets: {gp_assets:.2%}"""
 
     return df_screened, df_qual
 
-
 # --- Main Execution ---
 
-# Load tickers from "tickers.txt"
-# First line "YESAI" enables qualitative AI analysis; otherwise AI is off.
 with open("tickers.txt", "r") as f:
     lines = [line.strip() for line in f if line.strip()]
 if lines and lines[0].upper() == "YESAI":
@@ -322,10 +283,8 @@ else:
     run_ai_flag = False
     tickers = [line.upper() for line in lines]
 
-# Run screening
 results_df, qual_df = screen_stocks(tickers, run_ai=run_ai_flag)
 
-# Apply color formatting to key financial columns
 styled = results_df.copy()
 for col, good, okay in [
     ("ROCE", 15, 5),
@@ -333,16 +292,15 @@ for col, good, okay in [
     ("Gross Margin", 30, 15),
     ("Net Margin", 15, 5),
     ("Cash Conversion Ratio (FCF)", 90, 70),
-    ("Gross Profit / Assets", 30, 10)
+    ("Gross Profit / Assets", 30, 10),
+    ("Dividend Yield", 3, 1)
 ]:
     styled[col] = styled[col].apply(lambda x: color_metric(x, good, okay))
 styled["Score"] = styled["Score"].apply(color_score)
 
-# Convert dataframes to HTML (escape=False for proper HTML rendering)
 main_table_html = styled.to_html(index=False, escape=False)
 qual_table_html = qual_df.to_html(index=False, escape=False)
 
-# Combine both tables into a full HTML page
 full_html = f"""
 <html>
 <head>
@@ -363,7 +321,6 @@ full_html = f"""
 </html>
 """
 
-# Save results to HTML file
 with open("screened_stocks.html", "w", encoding="utf-8") as f:
     f.write(full_html)
 
