@@ -4,7 +4,7 @@ import requests
 import re
 
 # --- Configuration ---
-API_KEY = "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"
+API_KEY = "ADD HERE"
 API_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 # --- Helper Functions ---
