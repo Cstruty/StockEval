@@ -136,11 +136,11 @@ This project is open for personal or educational use.
 
 Questions or suggestions? Feel free to open an issue or contact the author.
 
-css
+vbnet
 Copy
 Edit
 
-Let me know if you want to include a badge (e.g. Python version, license, etc.) or a sample image of the HTML output.
+Let me know if you'd like this turned into a downloadable file or need a version with example screenshots.
 
 
 
@@ -148,11 +148,3 @@ Let me know if you want to include a badge (e.g. Python version, license, etc.) 
 
 
 
-
-
-
-Tools
-
-
-
-ChatGPT can 
