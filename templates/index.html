@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    <title>Stock Watchlist</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+</head>
+
+<body>
+    <div id="page-background">
+
+        <!-- Initial centered view -->
+        <div id="initial-view" class="centered-view expanded">
+            <h1>Stock Watchlist</h1>
+
+            <div class="search-container">
+                <div class="input-wrapper">
+                    <input id="search" type="text" oninput="searchTicker()" placeholder="Search by name or symbol"
+                        autocomplete="off" />
+                    <div id="suggestions"></div>
+                </div>
+
+                <input type="file" id="excel-import" accept=".xlsx" style="display:none"
+                    onchange="importFromExcel(event)" />
+
+                <button onclick="document.getElementById('excel-import').click()" style="margin-top: 10px;">
+                    <svg viewBox="0 0 24 24" width="12" height="12">
+                        <path d="M8 11h-6v10h20v-10h-6v-2h8v14h-24v-14h8v2zm-1-4l5-6 5 6h-4v11h-2v-11h-4z" />
+                    </svg>
+                    Import
+                </button>
+
+                <button id="export-btn" onclick="exportToExcel()" style="margin-top: 10px; display: none;">
+                    <svg viewBox="0 0 24 24" width="12" height="12">
+                        <path d="M8 11h-6v10h20v-10h-6v-2h8v14h-24v-14h8v2zm5 2h4l-5 6-5-6h4v-12h2v12z" />
+                    </svg>
+                    Export
+                </button>
+            </div>
+
+            <div id="quote-container"></div>
+        </div>
+
+        <!-- Watchlist / Results view -->
+        <div id="results-view" style="display: none;">
+            <h2>My Watchlist</h2>
+
+            <div id="watchlist">
+                <table id="watchlist-table">
+                    <thead>
+                        <tr>
+                            <th>Symbol</th>
+                            <th>Company Name</th>
+                            <th>Price</th>
+                            <th>Dividend Yield</th>
+                            <th>P/E Ratio</th>
+                            <th>ROCE</th>
+                            <th>Interest Coverage</th>
+                            <th>Gross Margin</th>
+                            <th>Net Margin</th>
+                            <th>Cash Conversion Ratio (FCF)</th>
+                            <th>Gross Profit / Assets</th>
+                            <th>Score</th>
+                            <th>
+                                AI Analysis<br>
+                                <button onclick="runAllAI()">Run All</button>
+                            </th>
+                            <th>Delete</th>
+                        </tr>
+                    </thead>
+                    <tbody id="watchlist-body"></tbody>
+                </table>
+            </div>
+
+            <div id="result" style="margin-top: 20px;"></div>
+        </div>
+
+        <!-- Modal container -->
+        <div id="ai-modal">
+            <div id="ai-modal-content">
+                <button class="modal-close" onclick="closeModal()">✖</button>
+                <div id="modal-content"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+
+</html>

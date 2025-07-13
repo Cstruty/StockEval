@@ -1,0 +1,362 @@
+/* ==== General Reset and Typography ==== */
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+}
+
+input,
+button,
+table,
+th,
+td,
+h1,
+h2,
+div,
+span {
+  color: white;
+}
+
+/* ==== Background ==== */
+#page-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+  background: linear-gradient(135deg, #1e1e1e, #646464, #1e1e1e);
+  background-size: 300% 300%;
+  animation: moveDiagonalGradient 40s ease infinite;
+}
+
+@keyframes moveDiagonalGradient {
+  0% {
+    background-position: 0% 0%;
+  }
+
+  50% {
+    background-position: 100% 100%;
+  }
+
+  100% {
+    background-position: 0% 0%;
+  }
+}
+
+/* ==== Layout Containers ==== */
+#initial-view,
+#results-view {
+  margin-top: 20px;
+  padding: 0 20px;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.centered-view.expanded {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  transition: all 0.5s ease;
+}
+
+.centered-view.shrunk {
+  height: auto;
+  align-items: flex-start;
+  padding-top: 20px;
+  transition: all 0.5s ease;
+}
+
+.centered-view.expanded h1 {
+  font-size: 3em;
+  margin-bottom: 20px;
+}
+
+.centered-view.shrunk h1 {
+  font-size: 1.5em;
+  margin-bottom: 10px;
+}
+
+/* ==== Watchlist Table ==== */
+#watchlist {
+  max-height: 750px;
+  overflow-y: auto;
+  border: 1px solid #1e1e1e;
+  border-radius: 8px;
+}
+
+#watchlist-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-family: Arial, sans-serif;
+}
+
+#watchlist-table thead th {
+  position: sticky;
+  top: 0;
+  background-color: #1e1e1e;
+  padding: 8px 12px;
+  text-align: center;
+  user-select: none;
+  z-index: 10;
+}
+
+tbody tr {
+  background-color: rgba(255, 255, 255, 0.1);
+  transition: background-color 0.3s ease;
+}
+
+tbody tr:nth-child(even) {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+tbody tr:hover {
+  background-color: rgba(26, 26, 26, 1);
+}
+
+td {
+  padding: 10px 15px;
+  text-align: center;
+  border-right: 1px solid rgba(255, 255, 255, 0.15);
+  vertical-align: middle;
+}
+
+td:last-child {
+  border-right: none;
+}
+
+/* ==== Buttons ==== */
+button,
+td button {
+  background: white;
+  border: 2px solid #1e1e1e;
+  color: #1e1e1e;
+  padding: 6px 14px;
+  font-weight: 600;
+  font-size: 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  user-select: none;
+  outline: none;
+  box-shadow: none;
+}
+
+td button {
+  padding: 4px 10px;
+  font-size: 13px;
+  border-radius: 4px;
+}
+
+button:hover:not(:disabled),
+td button:hover:not(:disabled) {
+  background-color: #1e1e1e;
+  color: white;
+  border-color: #1e1e1e;
+}
+
+button:disabled {
+  color: #aaa;
+  border-color: #ccc;
+  cursor: not-allowed;
+  background: white;
+  box-shadow: none;
+}
+
+button svg {
+  width: 15px;
+  height: 15px;
+  fill: currentColor;
+  margin-right: 6px;
+  transition: fill 0.3s ease;
+}
+
+button:focus-visible {
+  box-shadow: 0 0 0 3px rgba(26, 26, 26, 1);
+}
+
+/* ==== Inputs ==== */
+input[type="text"],
+#search {
+  background: white;
+  border: 2px solid #1e1e1e;
+  color: #1e1e1e;
+  padding: 6px 14px;
+  font-weight: 600;
+  font-size: 14px;
+  border-radius: 6px;
+  outline: none;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+  user-select: text;
+  flex: 1 1 auto;
+  min-width: 0;
+  background-clip: padding-box;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+input[type="text"]:focus,
+#search:focus {
+  border-color: #1e1e1e;
+  box-shadow: 0 0 0 3px rgba(26, 26, 26, 1);
+  background: white;
+  color: #1e1e1e;
+}
+
+/* ==== Search Suggestion Dropdown ==== */
+.search-container {
+  position: relative;
+  width: 100%;
+  min-width: 532px;
+  max-width: 400px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.search-container button {
+  transform: translateY(-5px);
+}
+
+.input-wrapper {
+  position: relative;
+  flex: 1;
+  padding: 0;
+  margin: 0;
+}
+
+#search {
+  width: 100%;
+  margin: 0;
+}
+
+#suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  max-height: 200px;
+  overflow-y: auto;
+  background: #2a2a2a;
+  border: 1px solid #444;
+  border-top: none;
+  border-radius: 0 0 6px 6px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  z-index: 999;
+  font-size: 14px;
+  opacity: 0.95;
+}
+
+.suggestion-item {
+  padding: 10px 14px;
+  cursor: pointer;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  transition: background-color 0.2s ease;
+}
+
+.suggestion-item:hover {
+  background-color: #3a3a3a;
+}
+
+/* ==== Modal ==== */
+#ai-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+#ai-modal-content {
+  background: #ffffff;
+  color: #1e1e1e !important;
+  border-radius: 12px;
+  padding: 25px 30px;
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 40px rgba(26, 26, 26, 1);
+  position: relative;
+  font-family: Arial, sans-serif;
+}
+
+#ai-modal-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+#ai-modal-content::-webkit-scrollbar-thumb {
+  background-color: #1e1e1e;
+  border-radius: 4px;
+}
+
+.modal-close {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: transparent;
+  border: none;
+  font-size: 22px;
+  font-weight: bold;
+  color: #1e1e1e;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.modal-close:hover {
+  color: #001f3f;
+}
+
+#modal-content h3 {
+  margin-top: 0;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+#modal-content,
+#modal-content h3,
+#modal-content p {
+  color: #1e1e1e !important;
+}
+
+#modal-content p {
+  font-size: 1rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  margin-bottom: 0;
+}
+
+/* ==== Quote Section ==== */
+#quote-container {
+  transition: opacity 2s ease;
+  margin-top: 20px;
+  min-height: 80px;
+  font-style: italic;
+  font-size: 1.1em;
+  color: white;
+  max-width: 400px;
+  text-align: center;
+  user-select: none;
+}

@@ -2,14 +2,20 @@ import yfinance as yf
 import pandas as pd
 import requests
 import re
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # --- Configuration ---
-API_KEY = "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"
+
+API_KEY = os.getenv("API_KEY")
 API_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 # --- Helper Functions ---
 
 def get_current_liabilities(balance_sheet):
+    # Try to find current liabilities using common keys in the balance sheet index
     possible_keys = [
         'Current Liabilities',
         'Total Current Liabilities',
@@ -33,6 +39,7 @@ def calc_roce(ticker_obj):
         total_assets = balance_sheet.loc['Total Assets'].values[0]
         current_liabilities = get_current_liabilities(balance_sheet)
         capital_employed = total_assets - current_liabilities
+        # Return ROCE as EBIT divided by capital employed
         return ebit / capital_employed if capital_employed else 0
     except:
         return 0
@@ -43,19 +50,24 @@ def calc_interest_coverage(ticker_obj):
         if fin is None or fin.empty or 'Operating Income' not in fin.index:
             return 0
         ebit = fin.loc['Operating Income'].dropna().iloc[0]
+
         possible_labels = [
             'Interest Expense',
             'Interest Expense Non Operating',
             'Net Interest Income',
             'Total Other Finance Cost'
         ]
+
         interest_expense = 0
+        # Look for interest expense in known labels
         for label in possible_labels:
             if label in fin.index:
                 vals = fin.loc[label].dropna()
                 if not vals.empty:
                     interest_expense = abs(vals.iloc[0])
                     break
+
+        # Fallback: look for any interest-related rows excluding interest income
         if interest_expense == 0:
             interest_rows = [l for l in fin.index if 'interest' in l.lower() and 'income' not in l.lower()]
             for label in interest_rows:
@@ -63,6 +75,8 @@ def calc_interest_coverage(ticker_obj):
                 if not vals.empty:
                     interest_expense = abs(vals.iloc[0])
                     break
+
+        # Return interest coverage ratio (EBIT / Interest Expense)
         return ebit / interest_expense if interest_expense else 0
     except:
         return 0
@@ -88,6 +102,7 @@ def calc_cash_conversion_ratio_ttm(ticker_obj):
             return 0
         cfo = cashflow.loc['Operating Cash Flow'].iloc[0] if 'Operating Cash Flow' in cashflow.index else 0
         ni = financials.loc['Net Income'].iloc[0] if 'Net Income' in financials.index else 0
+        # Return cash conversion ratio: Operating Cash Flow / Net Income
         return cfo / ni if ni else 0
     except:
         return 0
@@ -115,6 +130,7 @@ def calc_gross_profit_to_assets(ticker_obj):
         return 0
 
 def calculate_score(roce, interest_cov, gross_margin, net_margin, ccr, gp_assets):
+    # Calculate composite score weighted by thresholds and max caps
     score = 0
     score += max(min((roce / 0.15) * 30, 30), 0)
     score += max(min((interest_cov / 10) * 30, 30), 0)
@@ -125,6 +141,7 @@ def calculate_score(roce, interest_cov, gross_margin, net_margin, ccr, gp_assets
     return min(round(score), 100)
 
 def color_metric(val, good, okay):
+    # Color code metric string based on thresholds good and okay
     try:
         val_num = float(val.strip('%x'))
     except:
@@ -133,6 +150,7 @@ def color_metric(val, good, okay):
     return f'<span style="color:{color}">{val}</span>'
 
 def color_score(val):
+    # Color code score string: green >=80, orange >=50, else red
     try:
         val_num = float(val.replace('/100', ''))
     except:
@@ -141,12 +159,52 @@ def color_score(val):
     return f'<span style="color:{color}">{val}</span>'
 
 
-def highlight_yes_no(text):
-    text = re.sub(r'\bYes\b', '<span style="color:green;font-weight:bold;">Yes</span>', text)
-    text = re.sub(r'\bNo\b', '<span style="color:red;font-weight:bold;">No</span>', text)
+def highlight(text):
+    # Highlight specific keywords and scoring/confidence metrics in qualitative text
+
+    # Highlight Yes / No with green/red bold
+    text = re.sub(r'\bYes\b', r'<span style="color:green;font-weight:bold;">Yes</span>', text)
+    text = re.sub(r'\bNo\b', r'<span style="color:red;font-weight:bold;">No</span>', text)
+
+    # Highlight Final Score with color based on value (red, orange, green)
+    def color_final_score(match):
+        score_str = match.group(2)
+        try:
+            score = int(score_str.split('/')[0])
+            if score >= 7:
+                color = 'green'
+            elif score >= 5:
+                color = 'orange'
+            else:
+                color = 'red'
+            return f'{match.group(1)}<span style="color:{color};font-weight:bold;">{score_str}</span>'
+        except:
+            return match.group(0)
+
+    text = re.sub(r'(?i)(Final Score:\s*)(\d+/8)', color_final_score, text)
+
+    # Highlight Confidence with color based on percent (red, orange, green)
+    def color_confidence(match):
+        conf_str = match.group(2).replace('%', '')
+        try:
+            conf = int(conf_str)
+            if conf >= 80:
+                color = 'green'
+            elif conf >= 60:
+                color = 'orange'
+            else:
+                color = 'red'
+            return f'{match.group(1)}<span style="color:{color};font-weight:bold;">{match.group(2)}</span>'
+        except:
+            return match.group(0)
+
+    text = re.sub(r'(?i)(Confidence:\s*)(\d+%?)', color_confidence, text)
+
     return text
 
+
 def ask_qualitative_questions(ticker, financial_summary):
+    # Prepare prompt to ask the AI qualitative questions about the stock based on summary
     prompt = f"""For {ticker}, respond clearly in bullet points. 
 Each bullet point must start with "Yes" or "No", followed by a short label of the question in parentheses, then a brief explanation.
 Do not restate the question.
@@ -164,8 +222,10 @@ Answer the following:
 7. Is it mainly driven by organic growth? (Organic Growth)
 8. Does it have a clear growth strategy? (Growth Strategy)
 
+Also add a confidence metric after the score out 100%
 Financial summary:
 {financial_summary}
+
 """
 
     headers = {
@@ -195,7 +255,60 @@ Financial summary:
         return content
     except Exception as e:
         print(f"Error parsing response: {e}")
-        return "No qualitative analysis available."
+        return "No qualitative analysis available. Most likely too many results ran today. Please try again tomorrow."
+
+
+def evaluate_single_ticker(ticker, run_ai=False):
+    try:
+        stock = yf.Ticker(ticker)
+        info = stock.info
+        name = info.get("longName", "N/A")
+        price = info.get("currentPrice", 0)
+        div_yield = info.get("dividendYield")
+        div_yield = f"{round(div_yield * 100, 2)}%" if div_yield else "N/A"
+
+        pe_ratio = calc_pe_ratio(stock)
+        roce = calc_roce(stock)
+        interest_cov = calc_interest_coverage(stock)
+        gross_margin = info.get("grossMargins", 0)
+        net_margin = calc_net_margin(stock)
+        ccr = calc_cash_conversion_ratio_ttm(stock)
+        gp_assets = calc_gross_profit_to_assets(stock)
+
+        score_val = calculate_score(roce, interest_cov, gross_margin, net_margin, ccr, gp_assets)
+
+        summary = f"""ROCE: {roce:.2%}
+Interest Coverage: {interest_cov:.2f}x
+Gross Margin: {gross_margin:.2%}
+Net Margin: {net_margin:.2%}
+Cash Conversion Ratio: {ccr:.2%}
+Gross Profit to Assets: {gp_assets:.2%}"""
+
+        qual = ""
+        if run_ai:
+            qual_resp = ask_qualitative_questions(ticker, summary)
+            if qual_resp:
+                qual = highlight(qual_resp.replace('\n', '<br>'))
+
+        return {
+            "Symbol": ticker,
+            "Company Name": name,
+            "Price": f"${price:.2f}",
+            "Dividend Yield": div_yield,
+            "P/E Ratio": f"{pe_ratio:.2f}" if pe_ratio else "N/A",
+            "ROCE": f"{round(roce * 100)}%",
+            "Interest Coverage": f"{round(interest_cov)}x",
+            "Gross Margin": f"{round(gross_margin * 100)}%",
+            "Net Margin": f"{round(net_margin * 100)}%",
+            "Cash Conversion Ratio (FCF)": f"{round(ccr * 100)}%",
+            "Gross Profit / Assets": f"{round(gp_assets * 100)}%",
+            "Score": f"{round(score_val)}/100",
+            "Qualitative": qual
+        }
+
+    except Exception as e:
+        print(f"Error evaluating {ticker}: {e}")
+        return {"error": str(e)}
 
 def screen_stocks(tickers, run_ai=True):
     screened = []
@@ -209,12 +322,7 @@ def screen_stocks(tickers, run_ai=True):
             name = info.get("longName", "N/A")
             price = info.get("currentPrice", 0)
             div_yield = info.get("dividendYield")
-            if div_yield:
-                div_yield = f"{round(div_yield, 5)}%"
-            else:
-                div_yield = "N/A"
-
-            #div_yield = f"{round(div_yield * 100, 2)}%" if div_yield else "N/A"
+            div_yield = f"{round(div_yield, 5)}%" if div_yield else "N/A"
 
             pe_ratio = calc_pe_ratio(stock)
             roce = calc_roce(stock)
@@ -240,7 +348,7 @@ Gross Profit to Assets: {gp_assets:.2%}"""
                 qual_resp = ask_qualitative_questions(ticker, summary)
                 if qual_resp:
                     qual = qual_resp.replace('\n', '<br>')
-                    qual = highlight_yes_no(qual)
+                    qual = highlight(qual)
                 else:
                     qual = "No qualitative analysis available."
 
@@ -271,57 +379,3 @@ Gross Profit to Assets: {gp_assets:.2%}"""
     df_qual = pd.DataFrame(qualitative_list)
 
     return df_screened, df_qual
-
-# --- Main Execution ---
-
-with open("tickers.txt", "r") as f:
-    lines = [line.strip() for line in f if line.strip()]
-if lines and lines[0].upper() == "YESAI":
-    run_ai_flag = True
-    tickers = [line.upper() for line in lines[1:]]
-else:
-    run_ai_flag = False
-    tickers = [line.upper() for line in lines]
-
-results_df, qual_df = screen_stocks(tickers, run_ai=run_ai_flag)
-
-styled = results_df.copy()
-for col, good, okay in [
-    ("ROCE", 15, 5),
-    ("Interest Coverage", 10, 3),
-    ("Gross Margin", 30, 15),
-    ("Net Margin", 15, 5),
-    ("Cash Conversion Ratio (FCF)", 90, 70),
-    ("Gross Profit / Assets", 30, 10),
-    ("Dividend Yield", 3, 1)
-]:
-    styled[col] = styled[col].apply(lambda x: color_metric(x, good, okay))
-styled["Score"] = styled["Score"].apply(color_score)
-
-main_table_html = styled.to_html(index=False, escape=False)
-qual_table_html = qual_df.to_html(index=False, escape=False)
-
-full_html = f"""
-<html>
-<head>
-<title>Stock Screening Results</title>
-<style>
-  table {{ border-collapse: collapse; width: 100%; }}
-  th, td {{ border: 1px solid #ddd; padding: 8px; vertical-align: top; }}
-  th {{ background-color: #f2f2f2; }}
-</style>
-</head>
-<body>
-<h2>Main Stock Screening Table</h2>
-{main_table_html}
-<br><br>
-<h2>Qualitative Analysis</h2>
-{qual_table_html}
-</body>
-</html>
-"""
-
-with open("screened_stocks.html", "w", encoding="utf-8") as f:
-    f.write(full_html)
-
-print("Results saved to screened_stocks.html")
