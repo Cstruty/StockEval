@@ -16,11 +16,14 @@
 
             <div class="search-container">
                 <div class="input-wrapper">
-                    <input id="search" type="text" oninput="searchTicker()" placeholder="Search by name or symbol"
+                    <input id="search" type="text" style = "width: 210px" oninput="searchTicker()" placeholder="Search by name or symbol"
                         autocomplete="off" />
+   
                     <div id="suggestions"></div>
+                                     
                 </div>
-
+                <input id="raw-ticker-input" type="text" style = "width: 5px" placeholder="LNR.TO"
+                        onkeydown="if(event.key === 'Enter') evaluateRawTicker()" autocomplete="off" />
                 <input type="file" id="excel-import" accept=".xlsx" style="display:none"
                     onchange="importFromExcel(event)" />
 

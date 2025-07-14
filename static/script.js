@@ -22,6 +22,21 @@ async function searchTicker() {
         suggestionsDiv.appendChild(item);
     });
 }
+function evaluateRawTicker() {
+  const input = document.getElementById('raw-ticker-input');
+  const ticker = input.value.trim().toUpperCase();
+  if (!ticker) {
+    alert('Please enter a ticker symbol.');
+    return;
+  }
+  // Clear raw ticker input field after submitting
+  input.value = '';
+  // Show the results view
+  showResults();
+  // Call your existing evaluateStock function to add it to watchlist
+  evaluateStock(ticker);
+}
+
 
 // Fetch detailed evaluation for a stock and add row if not duplicate
 async function evaluateStock(symbol) {

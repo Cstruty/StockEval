@@ -225,12 +225,13 @@ input[type="text"]:focus,
 .search-container {
   position: relative;
   width: 100%;
-  min-width: 532px;
-  max-width: 400px;
+  max-width: 550px; 
+  min-width: 420px; 
   display: flex;
   align-items: center;
   gap: 10px;
 }
+
 
 .search-container button {
   transform: translateY(-5px);
