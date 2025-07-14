@@ -265,7 +265,7 @@ def evaluate_single_ticker(ticker, run_ai=False):
         name = info.get("longName", "N/A")
         price = info.get("currentPrice", 0)
         div_yield = info.get("dividendYield")
-        div_yield = f"{round(div_yield * 100, 2)}%" if div_yield else "N/A"
+        div_yield = f"{div_yield:.2f}%" if div_yield else "N/A"
 
         pe_ratio = calc_pe_ratio(stock)
         roce = calc_roce(stock)
