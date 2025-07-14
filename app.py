@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, jsonify
 import pandas as pd
 import os
 from StockEval import evaluate_single_ticker
+from FetchTickers import load_ticker_data
 
 app = Flask(__name__)
 
@@ -23,18 +24,19 @@ def index():
 
 @app.route('/search_ticker')
 def search_ticker():
-    # Get query param, lowercase for case-insensitive search
     query = request.args.get('q', '').lower()
     if not query:
         return jsonify([])
 
-    # Filter tickers that start with query in either Name or Symbol
+    # Load ticker data freshly or from cache
+    #ticker_df = load_ticker_data()
+
+    # Now filter for matches
     starts_with = ticker_df[
         ticker_df['Name'].str.lower().str.startswith(query) | 
         ticker_df['Symbol'].str.lower().str.startswith(query)
     ]
 
-    # Filter tickers containing query but excluding the starts_with ones
     contains = ticker_df[
         ~ticker_df.index.isin(starts_with.index) & (
             ticker_df['Name'].str.lower().str.contains(query) | 
@@ -42,14 +44,11 @@ def search_ticker():
         )
     ]
 
-    # Sort results by Market Cap descending for relevance
     starts_with = starts_with.sort_values(by='Market Cap', ascending=False)
     contains = contains.sort_values(by='Market Cap', ascending=False)
 
-    # Combine and limit to 10 results
     matches = pd.concat([starts_with, contains]).head(10)
 
-    # Clean company names by removing common suffixes like "Common Stock", "ADR", etc.
     matches['Name'] = matches['Name'].str.replace(
         r'\s*\((.*?)\)|\b(Common Stock|Ordinary Shares|Class [A-Z]|ADR|ADS|Units|Warrants)\b',
         '',
@@ -57,12 +56,12 @@ def search_ticker():
         regex=True
     ).str.strip()
 
-    # Select only Name and Symbol columns for response
+    # Return Name and Symbol (with .TO already appended for Canadian)
     filtered = matches[['Name', 'Symbol']]
 
-    # Convert to list of dicts for JSON serialization
     results = filtered.to_dict(orient='records')
     return jsonify(results)
+
 
 @app.route('/add', methods=['POST'])
 def add_ticker():
@@ -113,4 +112,5 @@ def run_qualitative():
     return jsonify(results)
 
 if __name__ == '__main__':
+    #load_ticker_data()
     app.run(debug=False)
