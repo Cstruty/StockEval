@@ -41,3 +41,5 @@ pip install yfinance pandas
 ---
 ## Updating Ticker List
 The application now downloads the latest list of U.S. and Canadian tickers at startup using `fetch_latest_tickers()` in `ticker_fetcher.py`. If the download fails, it falls back to the cached `tickers.csv` file.
+
+`fetch_latest_tickers()` expects the downloaded CSV to contain the columns `ticker`, `name`, `is_etf` and `exchange`. The script then queries Yahoo Finance for each ticker to obtain the current market cap, which is added to the resulting DataFrame.
