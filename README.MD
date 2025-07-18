@@ -49,3 +49,18 @@ back to the cached `tickers.csv` file.
 `symbol`, `name`, `is_etf` and `exchange`. The script then queries Yahoo
 Finance for each ticker to obtain the current market cap, which is added to the
 resulting DataFrame.
+
+## Parsing Nasdaq Screener JSON
+
+The repository also includes `parse_nasdaq_rows.py` for working with the raw
+JSON from the Nasdaq screener. The utility extracts the `symbol`, `name`,
+`marketCap` and `country` fields from the `rows` array.
+
+Run it by passing the downloaded JSON file:
+
+```bash
+python parse_nasdaq_rows.py nasdaq.json > clean_rows.json
+```
+
+The output is a simplified list of dictionaries containing only the selected
+fields.
