@@ -2,16 +2,23 @@ from flask import Flask, render_template, request, jsonify
 import pandas as pd
 import os
 from StockEval import evaluate_single_ticker
+from ticker_fetcher import fetch_latest_tickers
 
 app = Flask(__name__)
 
-# Load tickers from CSV on startup if it exists, else create empty DataFrame
+# Load tickers on startup. Attempt to fetch from the web first and fall back
+# to the cached CSV if downloading fails.
 TICKERS_CSV = "tickers.csv"
-if os.path.exists(TICKERS_CSV):
-    ticker_df = pd.read_csv(TICKERS_CSV)
-else:
-    # Columns as expected for search/filtering
-    ticker_df = pd.DataFrame(columns=["Symbol", "Name", "Market Cap"])
+try:
+    ticker_df = fetch_latest_tickers()
+    ticker_df.to_csv(TICKERS_CSV, index=False)
+except Exception as e:
+    print(f"Using cached tickers due to error: {e}")
+    if os.path.exists(TICKERS_CSV):
+        ticker_df = pd.read_csv(TICKERS_CSV)
+    else:
+        # Columns as expected for search/filtering
+        ticker_df = pd.DataFrame(columns=["Symbol", "Name", "Market", "Market Cap"])
 
 # In-memory watchlist to store added stocks temporarily (resets on server restart)
 watchlist = []
