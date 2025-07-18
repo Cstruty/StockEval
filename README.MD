@@ -38,3 +38,6 @@ Download yfinance and pandas
 Open the terminal
 ```bash
 pip install yfinance pandas
+---
+## Updating Ticker List
+The application now downloads the latest list of U.S. and Canadian tickers at startup using `fetch_latest_tickers()` in `ticker_fetcher.py`. If the download fails, it falls back to the cached `tickers.csv` file.
