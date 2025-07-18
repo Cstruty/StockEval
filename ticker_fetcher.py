@@ -1,19 +1,20 @@
-import io
 import pandas as pd
 import requests
 
-# These endpoints now return only the following columns:
-# ticker, name, is_etf, exchange
-US_URL = "https://dumbstockapi.com/stock?exchanges=NYSE,NASDAQ,AMEX&format=csv"
-CA_URL = "https://dumbstockapi.com/stock?exchanges=TSX&format=csv"
+# Endpoint for pulling ticker data from MarketCap. The API is expected to
+# return JSON with at least the fields `symbol`/`ticker`, `name`, and
+# `exchange`.
+MC_URL = (
+    "https://api.marketcap.com/v3/stock/list?exchanges=NYSE,NASDAQ,AMEX,TSX"
+)
 YF_QUOTE_URL = "https://query1.finance.yahoo.com/v7/finance/quote?symbols={}"
 
 
-def _download_csv(url):
-    """Download a CSV file and return a DataFrame."""
+def _download_json(url):
+    """Download JSON data and return the parsed object."""
     resp = requests.get(url, timeout=10)
     resp.raise_for_status()
-    return pd.read_csv(io.StringIO(resp.text))
+    return resp.json()
 
 
 def _fetch_market_cap(symbol):
@@ -31,40 +32,36 @@ def _fetch_market_cap(symbol):
 
 
 def fetch_latest_tickers():
-    """Return ticker information for U.S. and Canadian stocks.
+    """Return ticker information for U.S. and Canadian stocks via MarketCap.
 
     The result contains Symbol, Name, Market and Market Cap sorted by
-    Market Cap descending. If any download fails, that portion is skipped.
+    Market Cap descending. If the download fails, an exception is raised.
     """
-    frames = []
-    sources = {"US": US_URL, "CA": CA_URL}
+    try:
+        data = _download_json(MC_URL)
+    except Exception as exc:
+        raise RuntimeError(f"Failed to download ticker data: {exc}")
 
-    for market, url in sources.items():
-        try:
-            df = _download_csv(url)
-        except Exception as exc:
-            print(f"Failed to download {market} tickers: {exc}")
+    records = data.get("data") if isinstance(data, dict) else data
+    rows = []
+    for item in records:
+        symbol = item.get("symbol") or item.get("ticker")
+        name = item.get("name") or item.get("companyName")
+        exchange = item.get("exchange")
+        if not symbol or not name or not exchange:
             continue
+        is_etf = item.get("is_etf") or item.get("etf", False)
+        rows.append({
+            "Symbol": symbol,
+            "Name": name,
+            "is_etf": is_etf,
+            "Market": exchange,
+        })
 
-        # Column names are expected to be ticker, name, is_etf and exchange
-        mapping = {col.lower().strip(): col for col in df.columns}
-        symbol_col = mapping.get("ticker")
-        name_col = mapping.get("name")
-        etf_col = mapping.get("is_etf")
-        exchange_col = mapping.get("exchange")
-
-        if not symbol_col or not name_col or not exchange_col:
-            print(f"Missing columns in {market} data; skipping")
-            continue
-
-        sub = df[[symbol_col, name_col, etf_col, exchange_col]].copy()
-        sub.columns = ["Symbol", "Name", "is_etf", "Market"]
-        frames.append(sub)
-
-    if not frames:
+    if not rows:
         raise RuntimeError("No ticker data could be fetched")
 
-    result = pd.concat(frames, ignore_index=True)
+    result = pd.DataFrame(rows)
 
     # Fetch market caps individually using Yahoo Finance
     result["Market Cap"] = result["Symbol"].apply(_fetch_market_cap)
