@@ -5,7 +5,7 @@ import requests
 # These endpoints now return only the following columns:
 # ticker, name, is_etf, exchange
 US_URL = "https://dumbstockapi.com/stock?exchanges=NYSE,NASDAQ,AMEX&format=csv"
-CA_URL = "https://dumbstockapi.com/stock?exchanges=TSX,TSXV&format=csv"
+CA_URL = "https://dumbstockapi.com/stock?exchanges=TSX&format=csv"
 YF_QUOTE_URL = "https://query1.finance.yahoo.com/v7/finance/quote?symbols={}"
 
 
