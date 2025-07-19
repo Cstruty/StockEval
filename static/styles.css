@@ -326,6 +326,11 @@ input[type="text"]:focus,
   color: #1e1e1e;
 }
 
+#weight-modal-content input[type="number"] {
+  color: #1e1e1e;
+  text-align: right;
+}
+
 #ai-modal-content {
   background: #ffffff;
   color: #1e1e1e !important;
