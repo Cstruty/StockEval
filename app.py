@@ -84,8 +84,20 @@ def search_ticker():
         regex=True
     ).str.strip()
 
-    # Select only Name and Symbol columns for response
-    filtered = matches[['Name', 'Symbol']]
+    # Map country to short form
+    def country_short(c):
+        if isinstance(c, str):
+            if c.lower() == 'canada':
+                return 'CAD'
+            if c.lower() == 'united states':
+                return 'USA'
+            return c[:3].upper()
+        return ''
+
+    matches['CountryShort'] = matches['Country'].apply(country_short)
+
+    # Select relevant columns for response
+    filtered = matches[['Name', 'Symbol', 'CountryShort']]
 
     # Convert to list of dicts for JSON serialization
     results = filtered.to_dict(orient='records')
@@ -116,7 +128,12 @@ def delete_ticker(symbol):
 
 @app.route('/evaluate/<ticker>')
 def evaluate(ticker):
-    result = evaluate_single_ticker(ticker.upper(), run_ai=False)
+    symbol = ticker.upper()
+    match = ticker_df[ticker_df['Symbol'].str.upper() == symbol]
+    eval_symbol = symbol
+    if not match.empty and str(match['Country'].values[0]).lower() == 'canada':
+        eval_symbol = f"{symbol}.TO"
+    result = evaluate_single_ticker(eval_symbol, run_ai=False)
     return jsonify(result)
 
 @app.route("/run_qualitative", methods=["POST"])
@@ -129,7 +146,12 @@ def run_qualitative():
     results = []
     for ticker in tickers:
         # Run evaluation including AI qualitative analysis
-        result = evaluate_single_ticker(ticker.upper(), run_ai=True)
+        symbol = ticker.upper()
+        match = ticker_df[ticker_df['Symbol'].str.upper() == symbol]
+        eval_symbol = symbol
+        if not match.empty and str(match['Country'].values[0]).lower() == 'canada':
+            eval_symbol = f"{symbol}.TO"
+        result = evaluate_single_ticker(eval_symbol, run_ai=True)
         if "Qualitative" in result:
             results.append({
                 "Symbol": result["Symbol"],

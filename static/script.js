@@ -12,7 +12,8 @@ async function searchTicker() {
     data.forEach(stock => {
         const item = document.createElement("div");
         item.className = "suggestion-item";
-        item.innerText = `${stock.Name} (${stock.Symbol})`;
+        const country = stock.CountryShort ? ` - ${stock.CountryShort}` : '';
+        item.innerText = `${stock.Name} (${stock.Symbol})${country}`;
         item.onclick = () => {
             document.getElementById("search").value = '';
             showResults();
