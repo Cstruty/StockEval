@@ -1,17 +1,37 @@
 from flask import Flask, render_template, request, jsonify
 import pandas as pd
 import os
+from datetime import datetime, timedelta
 from StockEval import evaluate_single_ticker
-from ticker_fetcher import fetch_latest_tickers
+from ticker_fetcher import  main as fetch_main  # assuming main() is defined in ticker_fetcher
 
 app = Flask(__name__)
 
-# Load tickers on startup. Attempt to fetch from the web first and fall back
-# to the cached CSV if downloading fails.
 TICKERS_CSV = "tickers.csv"
+ticker_df = pd.DataFrame()
+
+# Helper to check if file is older than 3 months
+def is_file_older_than_months(file_path, months):
+    if not os.path.exists(file_path):
+        return True
+    file_time = datetime.fromtimestamp(os.path.getmtime(file_path))
+    return datetime.now() - file_time > timedelta(days=30 * months)
+
 try:
-    ticker_df = fetch_latest_tickers()
-    ticker_df.to_csv(TICKERS_CSV, index=False)
+    if is_file_older_than_months(TICKERS_CSV, 3):
+        print("Ticker CSV is older than 3 months. Refreshing...")
+        fetch_main()  # this should update the CSV as part of main()
+    
+    ticker_df = pd.read_csv(TICKERS_CSV)
+
+except Exception as e:
+    print(f"Using cached tickers due to error: {e}")
+    if os.path.exists(TICKERS_CSV):
+        ticker_df = pd.read_csv(TICKERS_CSV)
+    else:
+        # Fallback: empty DataFrame
+        ticker_df = pd.DataFrame(columns=["Symbol", "Name", "Market", "Market Cap"])
+
 except Exception as e:
     print(f"Using cached tickers due to error: {e}")
     if os.path.exists(TICKERS_CSV):
@@ -96,7 +116,6 @@ def delete_ticker(symbol):
 
 @app.route('/evaluate/<ticker>')
 def evaluate(ticker):
-    # Evaluate stock fundamentals without AI (fast)
     result = evaluate_single_ticker(ticker.upper(), run_ai=False)
     return jsonify(result)
 
