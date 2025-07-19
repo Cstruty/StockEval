@@ -97,13 +97,14 @@
                 <button class="modal-close" onclick="closeWeightModal()">✖</button>
                 <h3>Adjust Scoring Weights</h3>
                 <div class="weight-inputs">
-                    <label>ROCE <input type="number" id="weight-roce"></label><br>
-                    <label>Interest Coverage <input type="number" id="weight-interest"></label><br>
-                    <label>Gross Margin <input type="number" id="weight-gross"></label><br>
-                    <label>Net Margin <input type="number" id="weight-net"></label><br>
-                    <label>Cash Conversion Ratio <input type="number" id="weight-ccr"></label><br>
-                    <label>Gross Profit / Assets <input type="number" id="weight-gp"></label><br>
+                    <label>ROCE <input type="number" id="weight-roce" oninput="updateWeightTotal()"></label>
+                    <label>Interest Coverage <input type="number" id="weight-interest" oninput="updateWeightTotal()"></label>
+                    <label>Gross Margin <input type="number" id="weight-gross" oninput="updateWeightTotal()"></label>
+                    <label>Net Margin <input type="number" id="weight-net" oninput="updateWeightTotal()"></label>
+                    <label>Cash Conversion Ratio <input type="number" id="weight-ccr" oninput="updateWeightTotal()"></label>
+                    <label>Gross Profit / Assets <input type="number" id="weight-gp" oninput="updateWeightTotal()"></label>
                 </div>
+                <div id="weight-total" style="text-align:right; margin-top:8px;">Total: 0</div>
                 <button onclick="saveWeights()">Save</button>
             </div>
         </div>

@@ -321,7 +321,8 @@ input[type="text"]:focus,
 }
 
 #weight-modal-content label {
-  display: block;
+  display: flex;
+  justify-content: space-between;
   margin-bottom: 8px;
   color: #1e1e1e;
 }
@@ -329,6 +330,14 @@ input[type="text"]:focus,
 #weight-modal-content input[type="number"] {
   color: #1e1e1e;
   text-align: right;
+  width: 70px;
+}
+
+#weight-total {
+  text-align: right;
+  font-weight: bold;
+  color: #1e1e1e;
+  margin-bottom: 10px;
 }
 
 #ai-modal-content {

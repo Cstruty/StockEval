@@ -16,13 +16,38 @@ function openWeightModal() {
     document.getElementById('weight-ccr').value = scoringWeights.ccr;
     document.getElementById('weight-gp').value = scoringWeights.gpAssets;
     document.getElementById('weight-modal').style.display = 'flex';
+    updateWeightTotal();
 }
 
 function closeWeightModal() {
     document.getElementById('weight-modal').style.display = 'none';
 }
 
+function getWeightTotal() {
+    return (
+        (parseFloat(document.getElementById('weight-roce').value) || 0) +
+        (parseFloat(document.getElementById('weight-interest').value) || 0) +
+        (parseFloat(document.getElementById('weight-gross').value) || 0) +
+        (parseFloat(document.getElementById('weight-net').value) || 0) +
+        (parseFloat(document.getElementById('weight-ccr').value) || 0) +
+        (parseFloat(document.getElementById('weight-gp').value) || 0)
+    );
+}
+
+function updateWeightTotal() {
+    const total = getWeightTotal();
+    const display = document.getElementById('weight-total');
+    if (display) {
+        display.innerText = `Total: ${total}`;
+    }
+}
+
 function saveWeights() {
+    const total = getWeightTotal();
+    if (total !== 100) {
+        alert('Total weight must equal 100');
+        return;
+    }
     scoringWeights.roce = parseFloat(document.getElementById('weight-roce').value) || 0;
     scoringWeights.interestCov = parseFloat(document.getElementById('weight-interest').value) || 0;
     scoringWeights.grossMargin = parseFloat(document.getElementById('weight-gross').value) || 0;
@@ -485,3 +510,8 @@ setInterval(() => {
         cycleQuotes();
     }, 1000); // fade out 1s, fade in 0.5s inside showQuote
 }, 10000); // every 10 seconds
+
+// update total weight when inputs change
+document.querySelectorAll('#weight-modal input[type="number"]').forEach(inp => {
+    inp.addEventListener('input', updateWeightTotal);
+});
