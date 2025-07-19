@@ -91,6 +91,7 @@ span {
 
 /* ==== Watchlist Table ==== */
 #watchlist {
+  position: relative;
   max-height: 750px;
   overflow-y: auto;
   border: 1px solid #1e1e1e;
@@ -188,9 +189,11 @@ button svg {
 }
 
 #settings-btn {
-  float: right;
-  margin-left: 10px;
+  position: absolute;
+  top: 8px;
+  right: 8px;
   padding: 4px 8px;
+  z-index: 20;
 }
 
 button:focus-visible {

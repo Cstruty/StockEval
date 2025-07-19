@@ -48,11 +48,11 @@
         <!-- Watchlist / Results view -->
         <div id="results-view" style="display: none;">
             <h2 style="display: inline-block;">My Watchlist</h2>
-            <button id="settings-btn" onclick="openWeightModal()" title="Adjust scoring weights" style="float:right;">
-                ⚙
-            </button>
 
             <div id="watchlist">
+                <button id="settings-btn" onclick="openWeightModal()" title="Adjust scoring weights">
+                    ⚙
+                </button>
                 <table id="watchlist-table">
                     <thead>
                         <tr>
@@ -105,7 +105,12 @@
                     <label>Gross Profit / Assets <input type="number" id="weight-gp" oninput="updateWeightTotal()"></label>
                 </div>
                 <div id="weight-total" style="text-align:right; margin-top:8px;">Total: 0</div>
-                <button onclick="saveWeights()">Save</button>
+                <button onclick="saveWeights()">
+                    <svg viewBox="0 0 24 24" width="12" height="12">
+                        <path d="M17 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zM12 19c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm2-10H6V5h8v4z"/>
+                    </svg>
+                    Save
+                </button>
             </div>
         </div>
 
