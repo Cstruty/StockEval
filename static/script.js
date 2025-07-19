@@ -12,7 +12,8 @@ async function searchTicker() {
     data.forEach(stock => {
         const item = document.createElement("div");
         item.className = "suggestion-item";
-        item.innerText = `${stock.Name} (${stock.Symbol})`;
+        const country = stock.CountryShort ? ` -${stock.CountryShort}` : '';
+        item.innerText = `${stock.Name} (${stock.Symbol})${country}`;
         item.onclick = () => {
             document.getElementById("search").value = '';
             showResults();
@@ -272,7 +273,7 @@ window.showResults = function () {
 // Generate HTML row for watchlist table with color-coded metrics
 function buildRow(data) {
     const preferredOrder = [
-        "Symbol", "Company Name", "Price", "Dividend Yield", "P/E Ratio",
+        "Symbol", "Company Name", "Country", "Price", "Dividend Yield", "P/E Ratio",
         "ROCE", "Interest Coverage", "Gross Margin", "Net Margin",
         "Cash Conversion Ratio (FCF)", "Gross Profit / Assets", "Score"
     ];
@@ -299,6 +300,7 @@ function buildRow(data) {
     row += "</tr>";
     return row;
 }
+
 
 // Remove a stock row from the watchlist table by symbol
 function removeRow(symbol) {

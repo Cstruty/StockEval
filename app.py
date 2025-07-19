@@ -76,17 +76,20 @@ def search_ticker():
     # Combine and limit to 10 results
     matches = pd.concat([starts_with, contains]).head(10)
 
-    # Clean company names by removing common suffixes like "Common Stock", "ADR", etc.
-    matches['Name'] = matches['Name'].str.replace(
-        r'\s*\((.*?)\)|\b(Common Stock|Ordinary Shares|Class [A-Z]|ADR|ADS|Units|Warrants)\b',
-        '',
-        case=False,
-        regex=True
-    ).str.strip()
+    # Map country to short form
+    def country_short(c):
+        if isinstance(c, str):
+            if c.lower() == 'canada':
+                return 'CAD'
+            if c.lower() == 'united states':
+                return 'USA'
+            return c[:3].upper()
+        return ''
 
-    # Select only Name and Symbol columns for response
-    filtered = matches[['Name', 'Symbol']]
+    matches['CountryShort'] = matches['Country'].apply(country_short)
 
+    # Select relevant columns for response
+    filtered = matches[['Name', 'Symbol', 'CountryShort']]
     # Convert to list of dicts for JSON serialization
     results = filtered.to_dict(orient='records')
     return jsonify(results)

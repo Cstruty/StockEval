@@ -293,6 +293,7 @@ Gross Profit to Assets: {gp_assets:.2%}"""
         return {
             "Symbol": ticker,
             "Company Name": name,
+            "Country" : info.get("country"),
             "Price": f"${price:.2f}",
             "Dividend Yield": div_yield,
             "P/E Ratio": f"{pe_ratio:.2f}" if pe_ratio else "N/A",
