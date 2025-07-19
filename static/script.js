@@ -2,8 +2,8 @@
 const scoringWeights = {
     roce: 30,
     interestCov: 30,
-    grossMargin: 15,
-    netMargin: 15,
+    grossMargin: 10,
+    netMargin: 10,
     ccr: 10,
     gpAssets: 10
 };
@@ -382,12 +382,17 @@ function closeModal() {
 }
 
 // Close modal if clicking outside content
-document.getElementById("ai-modal").addEventListener("click", function (e) {
-    const content = document.getElementById("modal-content");
-    if (!content.contains(e.target)) {
-        closeModal();
-    }
-});
+function enableClickOutsideToClose(modalId, contentId, closeFn) {
+    const modal = document.getElementById(modalId);
+    const content = document.getElementById(contentId);
+    if (!modal || !content) return;
+
+    modal.addEventListener("click", function (e) {
+        if (!content.contains(e.target)) {
+            closeFn(); // e.g. closeModal() or your custom close
+        }
+    });
+}
 
 // Transition from initial view to results view, show export button
 window.showResults = function () {
@@ -502,6 +507,9 @@ function cycleQuotes() {
     showQuote(currentQuoteIndex);
     currentQuoteIndex = (currentQuoteIndex + 1) % quotes.length;
 }
+//Init
+enableClickOutsideToClose("ai-modal", "modal-content", closeModal);
+enableClickOutsideToClose("weight-modal", "weight-modal-content", closeWeightModal);
 
 cycleQuotes();
 setInterval(() => {
