@@ -3,7 +3,7 @@ import pandas as pd
 import os
 from datetime import datetime, timedelta
 from StockEval import evaluate_single_ticker
-from ticker_fetcher import  main as fetch_main  # assuming main() is defined in ticker_fetcher
+from ticker_fetcher import main as fetch_main
 
 app = Flask(__name__)
 
@@ -20,18 +20,8 @@ def is_file_older_than_months(file_path, months):
 try:
     if is_file_older_than_months(TICKERS_CSV, 3):
         print("Ticker CSV is older than 3 months. Refreshing...")
-        fetch_main()  # this should update the CSV as part of main()
-    
+        fetch_main()  # update the CSV if needed
     ticker_df = pd.read_csv(TICKERS_CSV)
-
-except Exception as e:
-    print(f"Using cached tickers due to error: {e}")
-    if os.path.exists(TICKERS_CSV):
-        ticker_df = pd.read_csv(TICKERS_CSV)
-    else:
-        # Fallback: empty DataFrame
-        ticker_df = pd.DataFrame(columns=["Symbol", "Name", "Market", "Market Cap"])
-
 except Exception as e:
     print(f"Using cached tickers due to error: {e}")
     if os.path.exists(TICKERS_CSV):
@@ -40,18 +30,16 @@ except Exception as e:
         # Columns as expected for search/filtering
         ticker_df = pd.DataFrame(columns=["Symbol", "Name", "Market", "Market Cap"])
 
-# In-memory watchlist to store added stocks temporarily (resets on server restart)
-watchlist = []
-
 @app.route('/')
 def index():
-    # Render main page and pass current watchlist
-    return render_template('index.html', watchlist=watchlist)
+    # Render main page
+    return render_template('index.html')
 
 @app.route('/search_ticker')
 def search_ticker():
     # Get query param, lowercase for case-insensitive search
     query = request.args.get('q', '').lower()
+    print(f"Search query: {query}")
     if not query:
         return jsonify([])
 
@@ -94,31 +82,10 @@ def search_ticker():
     results = filtered.to_dict(orient='records')
     return jsonify(results)
 
-@app.route('/add', methods=['POST'])
-def add_ticker():
-    symbol = request.form.get('symbol').upper()
-    # Find matching name from ticker_df, safe access by checking existence
-    name_row = ticker_df[ticker_df['Symbol'].str.upper() == symbol]
-    if name_row.empty:
-        return jsonify({"error": "Ticker not found"}), 404
-    name = name_row['Name'].values[0]
-
-    # Add to watchlist if not already added
-    if not any(stock['symbol'] == symbol for stock in watchlist):
-        watchlist.append({'symbol': symbol, 'name': name})
-
-    # Return rendered HTML snippet for the new watchlist row
-    return render_template('watchlist_item.html', stock={'symbol': symbol, 'name': name})
-
-@app.route('/delete/<symbol>', methods=['POST'])
-def delete_ticker(symbol):
-    global watchlist
-    # Remove stock from watchlist by symbol
-    watchlist = [stock for stock in watchlist if stock['symbol'] != symbol.upper()]
-    return jsonify(success=True)
 
 @app.route('/evaluate/<ticker>')
 def evaluate(ticker):
+    print(f"Evaluating ticker: {ticker}")
     result = evaluate_single_ticker(ticker.upper(), run_ai=False)
     return jsonify(result)
 
@@ -126,6 +93,7 @@ def evaluate(ticker):
 def run_qualitative():
     data = request.json
     tickers = data.get("tickers", [])
+    print(f"Running qualitative for: {tickers}")
     if not tickers:
         return jsonify({"error": "No tickers provided"}), 400
 

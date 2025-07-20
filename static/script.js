@@ -9,6 +9,7 @@ const scoringWeights = {
 };
 
 function openWeightModal() {
+    console.log('Opening weight modal');
     document.getElementById('weight-roce').value = scoringWeights.roce;
     document.getElementById('weight-interest').value = scoringWeights.interestCov;
     document.getElementById('weight-gross').value = scoringWeights.grossMargin;
@@ -20,6 +21,7 @@ function openWeightModal() {
 }
 
 function closeWeightModal() {
+    console.log('Closing weight modal');
     document.getElementById('weight-modal').style.display = 'none';
 }
 
@@ -75,6 +77,7 @@ function saveWeights() {
     scoringWeights.netMargin = parseFloat(document.getElementById('weight-net').value) || 0;
     scoringWeights.ccr = parseFloat(document.getElementById('weight-ccr').value) || 0;
     scoringWeights.gpAssets = parseFloat(document.getElementById('weight-gp').value) || 0;
+    console.log('Weights saved', scoringWeights);
     closeWeightModal();
     updateScores();
     showToast('Scores updated');
@@ -147,11 +150,10 @@ function evaluateRawTicker() {
     alert('Please enter a ticker symbol.');
     return;
   }
+  console.log('Raw ticker entered', ticker);
   // Clear raw ticker input field after submitting
   input.value = '';
-  // Show the results view
   showResults();
-  // Call your existing evaluateStock function to add it to watchlist
   evaluateStock(ticker);
 }
 
@@ -159,6 +161,7 @@ function evaluateRawTicker() {
 // Fetch detailed evaluation for a stock and add row if not duplicate
 async function evaluateStock(symbol) {
     if (!symbol) return;
+    console.log('Evaluating', symbol);
     try {
         const res = await fetch(`/evaluate/${symbol}`);
         const data = await res.json();
@@ -186,6 +189,7 @@ async function evaluateStock(symbol) {
 
 // Run AI qualitative analysis for a single stock row, update button accordingly
 async function runAIForRow(symbol, btn) {
+    console.log('Running AI analysis for', symbol);
     btn.disabled = true;
     btn.innerHTML = `<img src="static/icons/loading.gif" alt="Loading" style="width:16px; height:16px;">`;
     try {
@@ -215,6 +219,7 @@ async function runAIForRow(symbol, btn) {
 
 // Run AI qualitative analysis for all stocks and update buttons
 async function runAllAI() {
+    console.log('Running AI analysis for all tickers');
     const rows = Array.from(document.querySelectorAll("#watchlist-body tr"));
     const symbols = rows.map(row => row.id.replace("row-", ""));
     if (symbols.length === 0) {
@@ -265,6 +270,7 @@ async function runAllAI() {
 function importFromExcel(event) {
     const file = event.target.files[0];
     if (!file) return;
+    console.log('Importing from Excel');
     showResults();
     const reader = new FileReader();
     reader.onload = function (e) {
@@ -388,11 +394,13 @@ function exportToExcel() {
     XLSX.utils.book_append_sheet(wb, weightSheet, "Scoring Weight");
 
     XLSX.writeFile(wb, "watchlist.xlsx");
+    console.log('Exported watchlist to Excel');
 }
 
 
 // Show modal popup with title and content
 function showModal(title, content) {
+    console.log('Showing modal', title);
     const modal = document.getElementById("ai-modal");
     const container = document.getElementById("modal-content");
     container.innerHTML = `<h3>${title}</h3><p>${content}</p>`;
@@ -401,6 +409,7 @@ function showModal(title, content) {
 
 // Close the modal popup
 function closeModal() {
+    console.log('Closing AI modal');
     document.getElementById("ai-modal").style.display = "none";
 }
 
@@ -470,7 +479,10 @@ function buildRow(data) {
 // Remove a stock row from the watchlist table by symbol
 function removeRow(symbol) {
     const row = document.getElementById(`row-${symbol}`);
-    if (row) row.remove();
+    if (row) {
+        row.remove();
+        console.log('Removed row', symbol);
+    }
 }
 
 // Color code metric value based on thresholds

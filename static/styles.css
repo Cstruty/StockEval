@@ -288,7 +288,7 @@ input[type="number"]:focus,
 }
 
 /* ==== Modal ==== */
-#ai-modal {
+.modal-overlay {
   display: none;
   position: fixed;
   inset: 0;
@@ -300,27 +300,25 @@ input[type="number"]:focus,
   box-sizing: border-box;
 }
 
-#weight-modal {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.6);
-  z-index: 1000;
-  justify-content: center;
-  align-items: center;
-  box-sizing: border-box;
-}
-
-#weight-modal-content {
+.modal-content {
   background: #ffffff;
   color: #1e1e1e !important;
   border-radius: 12px;
   padding: 25px 30px;
-  max-width: 400px;
   width: 90%;
   box-shadow: 0 10px 40px rgba(26, 26, 26, 1);
   position: relative;
   font-family: Arial, sans-serif;
+}
+
+#weight-modal-content {
+  max-width: 400px;
+}
+
+#ai-modal-content {
+  max-width: 600px;
+  max-height: 80vh;
+  overflow-y: auto;
 }
 
 #weight-modal-content label {
@@ -345,19 +343,6 @@ input[type="number"]:focus,
 }
 
 
-#ai-modal-content {
-  background: #ffffff;
-  color: #1e1e1e !important;
-  border-radius: 12px;
-  padding: 25px 30px;
-  max-width: 600px;
-  width: 90%;
-  max-height: 80vh;
-  overflow-y: auto;
-  box-shadow: 0 10px 40px rgba(26, 26, 26, 1);
-  position: relative;
-  font-family: Arial, sans-serif;
-}
 
 #ai-modal-content::-webkit-scrollbar {
   width: 8px;
