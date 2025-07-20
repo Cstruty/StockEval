@@ -188,12 +188,14 @@ button svg {
 }
 
 #settings-btn {
-  position: absolute;
-  top: 18px;
-  right: 8px;
-  padding: 4px 8px;
+  padding: 6px 20px;    /* smaller padding */
+  font-size: 0.85em;    /* slightly smaller text */
+  line-height: 1;
+  border-radius: 6px;   /* optional: a bit of rounding */
   z-index: 20;
+
 }
+
 
 button:focus-visible {
   box-shadow: 0 0 0 3px rgba(26, 26, 26, 1);
@@ -561,4 +563,24 @@ input[type="number"]:focus,
 
 th:hover .sort-arrows {
   visibility: visible;
+}
+.th-label {
+  display: flex;
+  align-items: center;    /* Vertically center the label & arrows */
+  justify-content: center; /* Horizontally center the group in the cell */
+  width: 100%;            /* Ensures the group fills the cell */
+  min-height: 28px;       /* (Optional) Sets a min height for alignment */
+  margin-left: 10px;
+}
+.sort-arrows {
+  display: flex;         /* Keep both arrows on the same row */
+  gap: 2px;              /* Space between arrows */
+  font-size: 1em;
+  cursor: pointer;
+  margin-right: 8px; /* Add this for extra space after arrows */
+}
+.sort-arrows span {
+  /* Optional: styles for arrows */
+  padding: 0 1px;
+  user-select: none;
 }

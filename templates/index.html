@@ -16,14 +16,14 @@
 
             <div class="search-container">
                 <div class="input-wrapper">
-                    <input id="search" type="text" style = "width: 210px" oninput="searchTicker()" placeholder="Search by name or symbol"
-                        autocomplete="off" />
-   
+                    <input id="search" type="text" style="width: 210px" oninput="searchTicker()"
+                        placeholder="Search by name or symbol" autocomplete="off" />
+
                     <div id="suggestions"></div>
-                                     
+
                 </div>
-                <input id="raw-ticker-input" type="text" style = "width: 5px" placeholder="LNR.TO"
-                        onkeydown="if(event.key === 'Enter') evaluateRawTicker()" autocomplete="off" />
+                <input id="raw-ticker-input" type="text" style="width: 5px" placeholder="LNR.TO"
+                    onkeydown="if(event.key === 'Enter') evaluateRawTicker()" autocomplete="off" />
                 <input type="file" id="excel-import" accept=".xlsx" style="display:none"
                     onchange="importFromExcel(event)" />
 
@@ -54,105 +54,145 @@
                     <thead>
                         <tr>
                             <th title="Ticker symbol">
-                                Symbol
-                                <span class="sort-arrows">
-                                    <span onclick="sortTable('symbol', true)">▲</span>
-                                    <span onclick="sortTable('symbol', false)">▼</span>
-                                </span>
-                            </th>
-                            <th title="Company name and country">
-                                Company
-                                <span class="sort-arrows">
-                                    <span onclick="sortTable('company', true)">▲</span>
-                                    <span onclick="sortTable('company', false)">▼</span>
-                                </span><br>
-                                <small>Country</small>
-                            </th>
-                            <th title="Current stock price">
-                                Price
-                                <span class="sort-arrows">
-                                    <span onclick="sortTable('price', false)">▲</span>
-                                    <span onclick="sortTable('price', true)">▼</span>
-                                </span>
-                            </th>
-                            <th title="Annual dividends as a percent of price">
-                                Dividend Yield
-                                <span class="sort-arrows">
-                                    <span onclick="sortTable('dividend_yield', false)">▲</span>
-                                    <span onclick="sortTable('dividend_yield', true)">▼</span>
-                                </span>
-                            </th>
-                            <th title="Price to earnings ratio">
-                                P/E Ratio
-                                <span class="sort-arrows">
-                                    <span onclick="sortTable('pe_ratio', false)">▲</span>
-                                    <span onclick="sortTable('pe_ratio', true)">▼</span>
-                                </span>
-                            </th>
-                            <th title="Return on Capital Employed">
-                                ROCE
-                                <span class="sort-arrows">
-                                    <span onclick="sortTable('roce', false)">▲</span>
-                                    <span onclick="sortTable('roce', true)">▼</span>
-                                </span>
-                            </th>
-                            <th title="Measures the ability to cover interest. A ratio of 10x suggests a more controlled financial position">
-                                Interest Coverage
-                                <span class="sort-arrows">
-                                    <span onclick="sortTable('interestcov', false)">▲</span>
-                                    <span onclick="sortTable('interestcov', true)">▼</span>
-                                </span>
-                            </th>
-                            <th title="Gross profit as a percent of revenue">
-                                Gross Margin
-                                <span class="sort-arrows">
-                                    <span onclick="sortTable('gross_margin', false)">▲</span>
-                                    <span onclick="sortTable('gross_margin', true)">▼</span>
-                                </span>
-                            </th>
-                            <th title="Net income as a percent of revenue">
-                                Net Margin
-                                <span class="sort-arrows">
-                                    <span onclick="sortTable('net_margin', false)">▲</span>
-                                    <span onclick="sortTable('net_margin', true)">▼</span>
-                                </span>
-                            </th>
-                            <th title="Free cash flow divided by net income">
-                                Cash Conversion Ratio (FCF)
-                                <span class="sort-arrows">
-                                    <span onclick="sortTable('ccr', false)">▲</span>
-                                    <span onclick="sortTable('ccr', true)">▼</span>
-                                </span>
-                            </th>
-                            <th title="Gross profit relative to total assets">
-                                Gross Profit / Assets
-                                <span class="sort-arrows">
-                                    <span onclick="sortTable('gp_assets', false)">▲</span>
-                                    <span onclick="sortTable('gp_assets', true)">▼</span>
-                                </span>
-                            </th>
-                            <th style="min-width: 100px;" title="Composite financial score 0-100">
-                                <div style="display: flex; align-items: center; gap: 8px; justify-content: center; padding-right: 20px">
-                                    Score
+                                <div class="th-label">
+
+                                    Symbol
                                     <span class="sort-arrows">
-                                        <span onclick="sortTable('score', false)">▲</span>
-                                        <span onclick="sortTable('score', true)">▼</span>
+                                        <span onclick="sortTable('symbol', true)">▲</span>
+                                        <span onclick="sortTable('symbol', false)">▼</span>
                                     </span>
-                                    <button id="settings-btn" onclick="openWeightModal()" title="Adjust scoring weights" style="margin: 0; padding: 2px 8px;">
-                                    ⚙
-                                    </button>
+                                </div>
+                            </th>
+                            <th>
+                                <div class="th-label">
+                                    <div class="label-column">
+                                        <span>Company</span>
+                                        <small>Country</small>
+                                    </div>
+                                    <span class="sort-arrows">
+                                        <span onclick="sortTable('company', true)">▲</span>
+                                        <span onclick="sortTable('company', false)">▼</span>
+                                    </span>
                                 </div>
                             </th>
 
+                            <th title="Current stock price">
+                                <div class="th-label">
+                                    Price
+                                    <span class="sort-arrows">
+                                        <span onclick="sortTable('price', false)">▲</span>
+                                        <span onclick="sortTable('price', true)">▼</span>
+                                    </span>
+                                </div>
+                            </th>
+                            <th title="Annual dividends as a percent of price">
+                                <div class="th-label">
+                                    Dividend Yield
+                                    <span class="sort-arrows">
+                                        <span onclick="sortTable('dividend_yield', false)">▲</span>
+                                        <span onclick="sortTable('dividend_yield', true)">▼</span>
+                                    </span>
+                                </div>
+                            </th>
+                            <th title="Price to earnings ratio">
+                                <div class="th-label">
+
+                                    P/E Ratio
+                                    <span class="sort-arrows">
+                                        <span onclick="sortTable('pe_ratio', false)">▲</span>
+                                        <span onclick="sortTable('pe_ratio', true)">▼</span>
+                                    </span>
+                                </div>
+                            </th>
+                            <th
+                                title="-Return on Capital Employed  &#10-ROCE above 15% may indicate better profitability">
+                                <div class="th-label">
+
+                                    ROCE
+                                    <span class="sort-arrows">
+                                        <span onclick="sortTable('roce', false)">▲</span>
+                                        <span onclick="sortTable('roce', true)">▼</span>
+                                    </span>
+                                </div>
+                            </th>
+                            <th
+                                title="-Measures the ability to cover interest  &#10-A ratio of 10x suggests a more controlled financial position">
+                                <div class="th-label">
+                                    Interest Coverage
+                                    <span class="sort-arrows">
+                                        <span onclick="sortTable('interestcov', false)">▲</span>
+                                        <span onclick="sortTable('interestcov', true)">▼</span>
+                                    </span>
+                                </div>
+                            </th>
+                            <th
+                                title="-Gross profit as a percent of revenue &#10-A margin above 30% may indicate a stronger competitive postion">
+                                <div class="th-label">
+
+                                    Gross Margin
+                                    <span class="sort-arrows">
+                                        <span onclick="sortTable('gross_margin', false)">▲</span>
+                                        <span onclick="sortTable('gross_margin', true)">▼</span>
+                                    </span>
+                                </div>
+                            </th>
+                            <th
+                                title="-Portion of revenue that exceeds all expenses &#10-A net margin above 15% suggests a greater ability of generating net income">
+                                <div class="th-label">
+
+                                    Net Margin
+                                    <span class="sort-arrows">
+                                        <span onclick="sortTable('net_margin', false)">▲</span>
+                                        <span onclick="sortTable('net_margin', true)">▼</span>
+                                    </span>
+                                </div>
+                            </th>
+                            <th
+                                title="-How efficiently a company is converting its income into free cash flo w&#10-A higher FCF can suggest dividend increases, buyback programs">
+                                <div class="th-label">
+
+                                    Cash Conversion Ratio (FCF)
+                                    <span class="sort-arrows">
+                                        <span onclick="sortTable('ccr', false)">▲</span>
+                                        <span onclick="sortTable('ccr', true)">▼</span>
+                                    </span>
+                                </div>
+                            </th>
+                            <th
+                                title="-Gross profit relative to total assets &#10;-Shows how efficiently a company uses its assets to generate profit">
+                                <div class="th-label">
+
+                                    Gross Profit / Assets
+                                    <span class="sort-arrows">
+                                        <span onclick="sortTable('gp_assets', false)">▲</span>
+                                        <span onclick="sortTable('gp_assets', true)">▼</span>
+                                    </span>
+                                </div>
+                            </th>
+                            <th style="min-width: 100px;" title="Composite financial score 0-100">
+                                <div class="th-flex"
+                                    style="display: flex; flex-direction: row; align-items: center; justify-content: center;">
+                                    <div
+                                        style=" flex-direction: column;">
+                                        Score
+                                        <button id="settings-btn" onclick="openWeightModal()"
+                                            title="Adjust scoring weights" style="margin-top: 6px;">
+                                            ⚙
+                                        </button>
+                                    </div>
+                                    <span class="sort-arrows" style="margin-left: 12px;">
+                                        <span onclick="sortTable('score', false)">▲</span>
+                                        <span onclick="sortTable('score', true)">▼</span>
+                                    </span>
+                                </div>
+                            </th>
+
+
                             <th title="Qualitative insights generated by AI">
                                 AI Analysis
-                                <span class="sort-arrows">
-                                    <span onclick="sortTable('ai', false)">▲</span>
-                                    <span onclick="sortTable('ai', true)">▼</span>
-                                </span><br>
                                 <button onclick="runAllAI()">Run All</button>
                             </th>
-                            <th title="Remove row">Delete</th>
+                            <th>Delete</th>
                         </tr>
                     </thead>
                     <tbody id="watchlist-body"></tbody>
@@ -179,43 +219,44 @@
                 </div>
                 <div class="weight-inputs">
                     <label>ROCE <input type="number" id="weight-roce" oninput="updateWeightTotal()"></label>
-                    <label>Interest Coverage <input type="number" id="weight-interest" oninput="updateWeightTotal()"></label>
+                    <label>Interest Coverage <input type="number" id="weight-interest"
+                            oninput="updateWeightTotal()"></label>
                     <label>Gross Margin <input type="number" id="weight-gross" oninput="updateWeightTotal()"></label>
                     <label>Net Margin <input type="number" id="weight-net" oninput="updateWeightTotal()"></label>
-                    <label>Cash Conversion Ratio <input type="number" id="weight-ccr" oninput="updateWeightTotal()"></label>
-                    <label>Gross Profit / Assets <input type="number" id="weight-gp" oninput="updateWeightTotal()"></label>
+                    <label>Cash Conversion Ratio <input type="number" id="weight-ccr"
+                            oninput="updateWeightTotal()"></label>
+                    <label>Gross Profit / Assets <input type="number" id="weight-gp"
+                            oninput="updateWeightTotal()"></label>
                 </div>
                 <div id="weight-chart-container">
                     <div id="weight-chart">
                         <div class="weight-label">Weight</div>
                         <svg viewBox="0 0 100 100">
-                            <circle class="bg" cx="50" cy="30" r="25"/>
-                            <circle class="progress green" cx="50" cy="30" r="25"/>
-                            <text id="weight-chart-text"
-                                x="50" y="30"
-                                text-anchor="middle"
-                                dominant-baseline="middle"
-                            >87</text>
+                            <circle class="bg" cx="50" cy="30" r="25" />
+                            <circle class="progress green" cx="50" cy="30" r="25" />
+                            <text id="weight-chart-text" x="50" y="30" text-anchor="middle"
+                                dominant-baseline="middle">87</text>
                         </svg>
                     </div>
                     <button onclick="saveWeights()">
                         <svg viewBox="0 0 24 24" width="12" height="12">
-                            <path d="M17 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zM12 19c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm2-10H6V5h8v4z"/>
+                            <path
+                                d="M17 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zM12 19c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm2-10H6V5h8v4z" />
                         </svg>
                         Save
                     </button>
                 </div>
 
-                
+
             </div>
 
-    </div>
+        </div>
 
-    <div id="toast">
-        <span id="toast-message"></span>
-        <button id="toast-close" onclick="hideToast()">✖</button>
-    </div>
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
+        <div id="toast">
+            <span id="toast-message"></span>
+            <button id="toast-close" onclick="hideToast()">✖</button>
+        </div>
+        <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 
 </html>
