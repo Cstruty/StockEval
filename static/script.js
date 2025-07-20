@@ -85,7 +85,8 @@ function saveWeights() {
 
 function parseMetric(val, isPercent) {
     if (!val) return 0;
-    val = String(val).replace(/[%x]/g, '');
+    // Remove percentage signs, multiplier x, dollar signs and commas
+    val = String(val).replace(/[%,x$]/g, '').replace(/,/g, '');
     let num = parseFloat(val);
     if (isNaN(num)) return 0;
     return isPercent ? num / 100 : num;
