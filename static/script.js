@@ -50,9 +50,17 @@ function updateWeightDonut(total) {
     circle.style.strokeDashoffset = offset;
     text.textContent = total;
     circle.classList.remove('green','red','black');
-    if (total === 100) circle.classList.add('green');
-    else if (total > 100) circle.classList.add('red');
-    else circle.classList.add('black');
+    text.classList.remove('green','red','black');
+    if (total === 100) {
+        circle.classList.add('green');
+        text.classList.add('green');
+    } else if (total > 100) {
+        circle.classList.add('red');
+        text.classList.add('red');
+    } else {
+        circle.classList.add('black');
+        text.classList.add('black');
+    }
 }
 
 function saveWeights() {

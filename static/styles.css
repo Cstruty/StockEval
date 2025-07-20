@@ -475,3 +475,15 @@ input[type="text"]:focus,
   font-size: 18px;
   fill: #1e1e1e;
 }
+
+#weight-chart text.green {
+  fill: #28a745;
+}
+
+#weight-chart text.red {
+  fill: red;
+}
+
+#weight-chart text.black {
+  fill: #000;
+}
