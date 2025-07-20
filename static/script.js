@@ -598,15 +598,19 @@ setInterval(() => {
     }, 1000); // fade out 1s, fade in 0.5s inside showQuote
 }, 10000); // every 10 seconds
 
+function hideToast() {
+    const toast = document.getElementById('toast');
+    if (toast) toast.classList.remove('show');
+}
+
 function showToast(msg) {
     const toast = document.getElementById('toast');
-    if (!toast) return;
-    toast.textContent = msg;
+    const msgSpan = document.getElementById('toast-message');
+    if (!toast || !msgSpan) return;
+    msgSpan.textContent = msg;
     toast.classList.add('show');
     clearTimeout(showToast._timeout);
-    showToast._timeout = setTimeout(() => {
-        toast.classList.remove('show');
-    }, 10000);
+    showToast._timeout = setTimeout(hideToast, 10000);
 }
 
 // update total weight when inputs change

@@ -96,7 +96,7 @@
                                     <span onclick="sortTable('roce', true)">▼</span>
                                 </span>
                             </th>
-                            <th title="Measures the ability to cover interest; 10x suggests a more controlled financial position">
+                            <th title="Measures the ability to cover interest. A ratio of 10x suggests a more controlled financial position">
                                 Interest Coverage
                                 <span class="sort-arrows">
                                     <span onclick="sortTable('interestcov', false)">▲</span>
@@ -211,7 +211,10 @@
 
     </div>
 
-    <div id="toast"></div>
+    <div id="toast">
+        <span id="toast-message"></span>
+        <button id="toast-close" onclick="hideToast()">✖</button>
+    </div>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 
