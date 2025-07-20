@@ -313,6 +313,7 @@ input[type="number"]:focus,
 
 #weight-modal-content {
   max-width: 400px;
+  padding-bottom: 10px;
 }
 
 #ai-modal-content {
@@ -520,4 +521,26 @@ input[type="number"]:focus,
 
 #weight-chart text.black {
   fill: #000;
+}
+
+.country-sub {
+  font-size: 0.8em;
+  opacity: 0.8;
+}
+
+.sort-arrows {
+  display: inline-flex;
+  flex-direction: column;
+  margin-left: 4px;
+  font-size: 0.75em;
+  line-height: 0.75em;
+}
+
+.sort-arrows span {
+  cursor: pointer;
+  user-select: none;
+}
+
+.sort-arrows span:hover {
+  color: #ccc;
 }

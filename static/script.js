@@ -113,9 +113,30 @@ function updateScores() {
             gpAssets: parseFloat(row.dataset.gp_assets || 0)
         };
         const score = calculateScore(metrics);
-        const cell = row.cells[12];
+        const cell = row.cells[11];
         if (cell) cell.innerHTML = colorScore(`${score}/100`);
+        row.dataset.score = score;
     });
+}
+
+function sortTable(column, asc) {
+    const tbody = document.getElementById('watchlist-body');
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+    rows.sort((a, b) => {
+        if (column === 'company') {
+            const av = (a.dataset.company || '').toLowerCase();
+            const bv = (b.dataset.company || '').toLowerCase();
+            if (av < bv) return asc ? -1 : 1;
+            if (av > bv) return asc ? 1 : -1;
+            return 0;
+        } else if (column === 'score') {
+            const av = parseFloat(a.dataset.score || 0);
+            const bv = parseFloat(b.dataset.score || 0);
+            return asc ? av - bv : bv - av;
+        }
+        return 0;
+    });
+    rows.forEach(r => tbody.appendChild(r));
 }
 
 // Fetch stock suggestions as user types and display clickable suggestions
@@ -174,6 +195,8 @@ async function evaluateStock(symbol) {
         const temp = document.createElement('tbody');
         temp.innerHTML = rowHtml;
         const rowNode = temp.firstElementChild;
+        rowNode.dataset.company = data["Company Name"] || '';
+        rowNode.dataset.country = data.Country || '';
         rowNode.dataset.roce = parseMetric(data.ROCE, true);
         rowNode.dataset.interestcov = parseMetric(data["Interest Coverage"], false);
         rowNode.dataset.gross_margin = parseMetric(data["Gross Margin"], true);
@@ -447,14 +470,22 @@ window.showResults = function () {
 // Generate HTML row for watchlist table with color-coded metrics
 function buildRow(data) {
     const preferredOrder = [
-        "Symbol", "Company Name", "Country", "Price", "Dividend Yield", "P/E Ratio",
+        "Symbol", "Price", "Dividend Yield", "P/E Ratio",
         "ROCE", "Interest Coverage", "Gross Margin", "Net Margin",
         "Cash Conversion Ratio (FCF)", "Gross Profit / Assets", "Score"
     ];
 
-    let row = `<tr id="row-${data.Symbol}">`;
+    let row = `<tr id="row-${data.Symbol}" data-company="${data["Company Name"] || ''}" data-country="${data.Country || ''}">`;
 
-    preferredOrder.forEach(key => {
+    // Symbol
+    row += `<td>${data.Symbol || 'N/A'}</td>`;
+
+    // Company name with country sub text
+    const company = data["Company Name"] || 'N/A';
+    const country = data.Country || '';
+    row += `<td><div>${company}</div><div class="country-sub">${country}</div></td>`;
+
+    preferredOrder.slice(1).forEach(key => {
         let val = data[key] || "N/A";
         switch (key) {
             case "ROCE": val = colorMetric(val, 15, 5); break;
