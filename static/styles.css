@@ -475,12 +475,17 @@ input[type="number"]:focus,
   margin-top: 24px;
 }
 
-/* Container: donut chart left, save button right */
 #weight-chart-container {
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
+}
+/* Buttons next to donut chart */
+#weight-buttons {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
 }
 #weight-chart {
   display: flex;

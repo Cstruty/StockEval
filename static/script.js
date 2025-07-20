@@ -45,6 +45,14 @@ function updateWeightTotal() {
     updateWeightDonut(total);
 }
 
+/** Clear all weight inputs in the modal */
+function clearWeightInputs() {
+    document.querySelectorAll('#weight-modal input[type="number"]').forEach(inp => {
+        inp.value = '';
+    });
+    updateWeightTotal();
+}
+
 /** Animate and color the donut chart in modal */
 function updateWeightDonut(total) {
     const circle = document.querySelector('#weight-chart circle.progress');

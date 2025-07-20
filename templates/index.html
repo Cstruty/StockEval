@@ -255,14 +255,22 @@
                                 dominant-baseline="middle">87</text>
                         </svg>
                     </div>
-                    <!-- Save button for weights -->
-                    <button onclick="saveWeights()">
-                        <svg viewBox="0 0 24 24" width="12" height="12">
-                            <path
-                                d="M17 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zM12 19c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm2-10H6V5h8v4z" />
-                        </svg>
-                        Save
-                    </button>
+                    <!-- Action buttons -->
+                    <div id="weight-buttons">
+                        <button id="clear-weight-btn" onclick="clearWeightInputs()">
+                            <svg viewBox="0 0 24 24" width="12" height="12">
+                                <path d="M3 6h18v2H3zm2 3h14v2H5zm2 3h10v2H7z" />
+                            </svg>
+                            Clear
+                        </button>
+                        <button onclick="saveWeights()">
+                            <svg viewBox="0 0 24 24" width="12" height="12">
+                                <path
+                                    d="M17 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zM12 19c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm2-10H6V5h8v4z" />
+                            </svg>
+                            Save
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
