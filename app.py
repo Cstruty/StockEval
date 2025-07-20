@@ -43,6 +43,18 @@ def index():
     """Render main watchlist app page."""
     return render_template('index.html')
 
+
+@app.route('/AboutMe')
+def about_me():
+    """Render About Me page."""
+    return render_template('about.html')
+
+
+@app.route('/OtherTools')
+def other_tools():
+    """Render Other Tools page."""
+    return render_template('tools.html')
+
 @app.route('/search_ticker')
 def search_ticker():
     """

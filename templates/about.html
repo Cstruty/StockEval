@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>About Me</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+</head>
+<body>
+    <div id="page-background">
+        <nav>
+            <a href="/">Home</a>
+            <a href="/AboutMe">About Me</a>
+            <a href="/OtherTools">Other Tools</a>
+        </nav>
+        <div class="about-container">
+            <img src="{{ url_for('static', filename='icons/loading.gif') }}" alt="Profile Photo" id="profile-photo">
+            <p id="about-text">This is a space to write about yourself.</p>
+            <div id="resume-link">
+                <a href="#">My Resume</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
