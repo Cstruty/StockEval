@@ -91,6 +91,7 @@ span {
 
 /* ==== Watchlist Table ==== */
 #watchlist {
+  position: relative;
   max-height: 750px;
   overflow-y: auto;
   border: 1px solid #1e1e1e;
@@ -185,6 +186,14 @@ button svg {
   fill: currentColor;
   margin-right: 6px;
   transition: fill 0.3s ease;
+}
+
+#settings-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 4px 8px;
+  z-index: 20;
 }
 
 button:focus-visible {
@@ -290,6 +299,44 @@ input[type="text"]:focus,
   box-sizing: border-box;
 }
 
+#weight-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+#weight-modal-content {
+  background: #ffffff;
+  color: #1e1e1e !important;
+  border-radius: 12px;
+  padding: 25px 30px;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 10px 40px rgba(26, 26, 26, 1);
+  position: relative;
+  font-family: Arial, sans-serif;
+}
+
+#weight-modal-content label {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  color: #1e1e1e;
+}
+
+#weight-modal-content input[type="number"] {
+  color: #1e1e1e;
+  text-align: right;
+  width: 70px;
+}
+
+
 #ai-modal-content {
   background: #ffffff;
   color: #1e1e1e !important;
@@ -360,4 +407,71 @@ input[type="text"]:focus,
   max-width: 400px;
   text-align: center;
   user-select: none;
+}
+
+/* ==== Toast Notification ==== */
+#toast {
+  position: fixed;
+  top: -60px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1e1e1e;
+  color: #ffffff;
+  padding: 10px 20px;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  font-family: Arial, sans-serif;
+  z-index: 5000;
+  transition: top 0.5s ease;
+}
+
+#toast.show {
+  top: 20px;
+}
+
+/* ==== Weight Donut ==== */
+#weight-chart {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+#weight-chart svg {
+  width: 80px;
+  height: 80px;
+  transform: rotate(-90deg);
+}
+
+#weight-chart circle {
+  fill: none;
+  stroke-width: 10;
+}
+
+#weight-chart circle.bg {
+  stroke: #e0e0e0;
+}
+
+#weight-chart circle.progress {
+  stroke: #000;
+  stroke-dasharray: 283;
+  stroke-dashoffset: 283;
+  transition: stroke-dashoffset 0.4s ease;
+}
+
+#weight-chart circle.progress.green {
+  stroke: #28a745;
+}
+
+#weight-chart circle.progress.red {
+  stroke: red;
+}
+
+#weight-chart circle.progress.black {
+  stroke: #000;
+}
+
+#weight-chart text {
+  transform: rotate(90deg);
+  font-size: 18px;
+  fill: #1e1e1e;
 }

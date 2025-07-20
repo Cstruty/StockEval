@@ -1,3 +1,112 @@
+// Default scoring weights
+const scoringWeights = {
+    roce: 30,
+    interestCov: 30,
+    grossMargin: 15,
+    netMargin: 15,
+    ccr: 10,
+    gpAssets: 10
+};
+
+function openWeightModal() {
+    document.getElementById('weight-roce').value = scoringWeights.roce;
+    document.getElementById('weight-interest').value = scoringWeights.interestCov;
+    document.getElementById('weight-gross').value = scoringWeights.grossMargin;
+    document.getElementById('weight-net').value = scoringWeights.netMargin;
+    document.getElementById('weight-ccr').value = scoringWeights.ccr;
+    document.getElementById('weight-gp').value = scoringWeights.gpAssets;
+    document.getElementById('weight-modal').style.display = 'flex';
+    updateWeightTotal();
+}
+
+function closeWeightModal() {
+    document.getElementById('weight-modal').style.display = 'none';
+}
+
+function getWeightTotal() {
+    return (
+        (parseFloat(document.getElementById('weight-roce').value) || 0) +
+        (parseFloat(document.getElementById('weight-interest').value) || 0) +
+        (parseFloat(document.getElementById('weight-gross').value) || 0) +
+        (parseFloat(document.getElementById('weight-net').value) || 0) +
+        (parseFloat(document.getElementById('weight-ccr').value) || 0) +
+        (parseFloat(document.getElementById('weight-gp').value) || 0)
+    );
+}
+
+function updateWeightTotal() {
+    const total = getWeightTotal();
+    updateWeightDonut(total);
+}
+
+function updateWeightDonut(total) {
+    const circle = document.querySelector('#weight-chart circle.progress');
+    const text = document.getElementById('weight-chart-text');
+    if (!circle || !text) return;
+    const radius = circle.r.baseVal.value;
+    const circumference = 2 * Math.PI * radius;
+    circle.style.strokeDasharray = `${circumference}`;
+    const offset = circumference - (total / 100) * circumference;
+    circle.style.strokeDashoffset = offset;
+    text.textContent = total;
+    circle.classList.remove('green','red','black');
+    if (total === 100) circle.classList.add('green');
+    else if (total > 100) circle.classList.add('red');
+    else circle.classList.add('black');
+}
+
+function saveWeights() {
+    const total = getWeightTotal();
+    if (total !== 100) {
+        showToast('Total weight must equal 100');
+        return;
+    }
+    scoringWeights.roce = parseFloat(document.getElementById('weight-roce').value) || 0;
+    scoringWeights.interestCov = parseFloat(document.getElementById('weight-interest').value) || 0;
+    scoringWeights.grossMargin = parseFloat(document.getElementById('weight-gross').value) || 0;
+    scoringWeights.netMargin = parseFloat(document.getElementById('weight-net').value) || 0;
+    scoringWeights.ccr = parseFloat(document.getElementById('weight-ccr').value) || 0;
+    scoringWeights.gpAssets = parseFloat(document.getElementById('weight-gp').value) || 0;
+    closeWeightModal();
+    updateScores();
+    showToast('Scores updated');
+}
+
+function parseMetric(val, isPercent) {
+    if (!val) return 0;
+    val = String(val).replace(/[%x]/g, '');
+    let num = parseFloat(val);
+    if (isNaN(num)) return 0;
+    return isPercent ? num / 100 : num;
+}
+
+function calculateScore(metrics) {
+    let score = 0;
+    score += Math.max(Math.min((metrics.roce / 0.15) * scoringWeights.roce, scoringWeights.roce), 0);
+    score += Math.max(Math.min((metrics.interestCov / 10) * scoringWeights.interestCov, scoringWeights.interestCov), 0);
+    score += Math.max(Math.min((metrics.grossMargin / 0.40) * scoringWeights.grossMargin, scoringWeights.grossMargin), 0);
+    score += Math.max(Math.min((metrics.netMargin / 0.15) * scoringWeights.netMargin, scoringWeights.netMargin), 0);
+    score += Math.max(Math.min((metrics.ccr / 0.90) * scoringWeights.ccr, scoringWeights.ccr), 0);
+    score += Math.max(Math.min((metrics.gpAssets / 0.3) * scoringWeights.gpAssets, scoringWeights.gpAssets), 0);
+    return Math.min(Math.round(score), 100);
+}
+
+function updateScores() {
+    document.querySelectorAll('#watchlist-body tr').forEach(row => {
+        const metrics = {
+            roce: parseFloat(row.dataset.roce || 0),
+            interestCov: parseFloat(row.dataset.interestcov || 0),
+            grossMargin: parseFloat(row.dataset.gross_margin || 0),
+            netMargin: parseFloat(row.dataset.net_margin || 0),
+            ccr: parseFloat(row.dataset.ccr || 0),
+            gpAssets: parseFloat(row.dataset.gp_assets || 0)
+        };
+        const score = calculateScore(metrics);
+        const cell = row.cells[12];
+        if (cell) cell.innerHTML = colorScore(`${score}/100`);
+    });
+}
+
 // Fetch stock suggestions as user types and display clickable suggestions
 async function searchTicker() {
     const query = document.getElementById("search").value;
@@ -54,7 +163,14 @@ async function evaluateStock(symbol) {
         const temp = document.createElement('tbody');
         temp.innerHTML = rowHtml;
         const rowNode = temp.firstElementChild;
+        rowNode.dataset.roce = parseMetric(data.ROCE, true);
+        rowNode.dataset.interestcov = parseMetric(data["Interest Coverage"], false);
+        rowNode.dataset.gross_margin = parseMetric(data["Gross Margin"], true);
+        rowNode.dataset.net_margin = parseMetric(data["Net Margin"], true);
+        rowNode.dataset.ccr = parseMetric(data["Cash Conversion Ratio (FCF)"], true);
+        rowNode.dataset.gp_assets = parseMetric(data["Gross Profit / Assets"], true);
         document.getElementById("watchlist-body").appendChild(rowNode);
+        updateScores();
     } catch (err) {
         console.error("Evaluation failed:", err);
     }
@@ -155,6 +271,29 @@ function importFromExcel(event) {
                 evaluateStock(symbol.trim());
             }
         });
+
+        const weightSheet = workbook.Sheets['Scoring Weight'];
+        if (weightSheet) {
+            const weights = XLSX.utils.sheet_to_json(weightSheet, {header:1});
+            const map = {
+                'ROCE': 'roce',
+                'Interest Coverage': 'interestCov',
+                'Gross Margin': 'grossMargin',
+                'Net Margin': 'netMargin',
+                'Cash Conversion Ratio': 'ccr',
+                'Gross Profit / Assets': 'gpAssets'
+            };
+            weights.forEach((row) => {
+                if (row.length >= 2 && map[row[0]]) {
+                    const val = parseFloat(row[1]);
+                    if (!isNaN(val)) {
+                        scoringWeights[map[row[0]]] = val;
+                    }
+                }
+            });
+            updateScores();
+            updateWeightDonut(getWeightTotal());
+        }
     };
     reader.readAsArrayBuffer(file);
 }
@@ -226,6 +365,19 @@ function exportToExcel() {
         const aiSheet = XLSX.utils.aoa_to_sheet(aiRows);
         XLSX.utils.book_append_sheet(wb, aiSheet, "Qualitative Analysis");
     }
+
+    // Scoring weights sheet
+    const weightRows = [
+        ["Metric", "Weight"],
+        ["ROCE", scoringWeights.roce],
+        ["Interest Coverage", scoringWeights.interestCov],
+        ["Gross Margin", scoringWeights.grossMargin],
+        ["Net Margin", scoringWeights.netMargin],
+        ["Cash Conversion Ratio", scoringWeights.ccr],
+        ["Gross Profit / Assets", scoringWeights.gpAssets]
+    ];
+    const weightSheet = XLSX.utils.aoa_to_sheet(weightRows);
+    XLSX.utils.book_append_sheet(wb, weightSheet, "Scoring Weight");
 
     XLSX.writeFile(wb, "watchlist.xlsx");
 }
@@ -373,3 +525,19 @@ setInterval(() => {
         cycleQuotes();
     }, 1000); // fade out 1s, fade in 0.5s inside showQuote
 }, 10000); // every 10 seconds
+
+function showToast(msg) {
+    const toast = document.getElementById('toast');
+    if (!toast) return;
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(showToast._timeout);
+    showToast._timeout = setTimeout(() => {
+        toast.classList.remove('show');
+    }, 10000);
+}
+
+// update total weight when inputs change
+document.querySelectorAll('#weight-modal input[type="number"]').forEach(inp => {
+    inp.addEventListener('input', updateWeightTotal);
+});

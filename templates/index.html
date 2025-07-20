@@ -47,9 +47,12 @@
 
         <!-- Watchlist / Results view -->
         <div id="results-view" style="display: none;">
-            <h2>My Watchlist</h2>
+            <h2 style="display: inline-block;">My Watchlist</h2>
 
             <div id="watchlist">
+                <button id="settings-btn" onclick="openWeightModal()" title="Adjust scoring weights">
+                    ⚙
+                </button>
                 <table id="watchlist-table">
                     <thead>
                         <tr>
@@ -88,8 +91,38 @@
             </div>
         </div>
 
+        <!-- Scoring weight modal -->
+        <div id="weight-modal">
+            <div id="weight-modal-content">
+                <button class="modal-close" onclick="closeWeightModal()">✖</button>
+                <h3>Adjust Scoring Weights</h3>
+                <div class="weight-inputs">
+                    <label>ROCE <input type="number" id="weight-roce" oninput="updateWeightTotal()"></label>
+                    <label>Interest Coverage <input type="number" id="weight-interest" oninput="updateWeightTotal()"></label>
+                    <label>Gross Margin <input type="number" id="weight-gross" oninput="updateWeightTotal()"></label>
+                    <label>Net Margin <input type="number" id="weight-net" oninput="updateWeightTotal()"></label>
+                    <label>Cash Conversion Ratio <input type="number" id="weight-ccr" oninput="updateWeightTotal()"></label>
+                    <label>Gross Profit / Assets <input type="number" id="weight-gp" oninput="updateWeightTotal()"></label>
+                </div>
+                <div id="weight-chart">
+                    <svg viewBox="0 0 100 100">
+                        <circle class="bg" cx="50" cy="50" r="45"></circle>
+                        <circle class="progress" cx="50" cy="50" r="45"></circle>
+                        <text id="weight-chart-text" x="50" y="55" text-anchor="middle">0</text>
+                    </svg>
+                </div>
+                <button onclick="saveWeights()">
+                    <svg viewBox="0 0 24 24" width="12" height="12">
+                        <path d="M17 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zM12 19c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm2-10H6V5h8v4z"/>
+                    </svg>
+                    Save
+                </button>
+            </div>
+        </div>
+
     </div>
 
+    <div id="toast"></div>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 
