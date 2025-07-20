@@ -134,8 +134,8 @@ def calculate_score(roce, interest_cov, gross_margin, net_margin, ccr, gp_assets
     score = 0
     score += max(min((roce / 0.15) * 30, 30), 0)
     score += max(min((interest_cov / 10) * 30, 30), 0)
-    score += max(min((gross_margin / 0.40) * 15, 15), 0)
-    score += max(min((net_margin / 0.15) * 15, 15), 0)
+    score += max(min((gross_margin / 0.40) * 15, 10), 0)
+    score += max(min((net_margin / 0.15) * 15, 10), 0)
     score += max(min((ccr / 0.90) * 10, 10), 0)
     score += max(min((gp_assets / 0.3) * 10, 10), 0)
     return min(round(score), 100)

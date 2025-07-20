@@ -68,7 +68,15 @@
                             <th>Net Margin</th>
                             <th>Cash Conversion Ratio (FCF)</th>
                             <th>Gross Profit / Assets</th>
-                            <th>Score</th>
+                            <th style="min-width: 100px;">
+                                <div style="display: flex; align-items: center; gap: 12px; justify-content: center; padding-right: 20px">
+                                    Score
+                                    <button id="settings-btn" onclick="openWeightModal()" title="Adjust scoring weights" style="margin: 0; padding: 2px 8px;">
+                                    ⚙
+                                    </button>
+                                </div>
+                            </th>
+
                             <th>
                                 AI Analysis<br>
                                 <button onclick="runAllAI()">Run All</button>
