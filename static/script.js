@@ -1,4 +1,6 @@
-// Default scoring weights
+// ==== SCORING WEIGHTS & MODAL LOGIC ====
+
+// Default scoring weights for all metrics
 const scoringWeights = {
     roce: 30,
     interestCov: 30,
@@ -8,8 +10,8 @@ const scoringWeights = {
     gpAssets: 10
 };
 
+/** Open the "Adjust Scoring Weights" modal and populate inputs */
 function openWeightModal() {
-    console.log('Opening weight modal');
     document.getElementById('weight-roce').value = scoringWeights.roce;
     document.getElementById('weight-interest').value = scoringWeights.interestCov;
     document.getElementById('weight-gross').value = scoringWeights.grossMargin;
@@ -20,11 +22,12 @@ function openWeightModal() {
     updateWeightTotal();
 }
 
+/** Close the scoring weight modal */
 function closeWeightModal() {
-    console.log('Closing weight modal');
     document.getElementById('weight-modal').style.display = 'none';
 }
 
+/** Get total of all weights entered in modal */
 function getWeightTotal() {
     return (
         (parseFloat(document.getElementById('weight-roce').value) || 0) +
@@ -36,11 +39,13 @@ function getWeightTotal() {
     );
 }
 
+/** Updates the donut chart in the scoring modal based on total */
 function updateWeightTotal() {
     const total = getWeightTotal();
     updateWeightDonut(total);
 }
 
+/** Animate and color the donut chart in modal */
 function updateWeightDonut(total) {
     const circle = document.querySelector('#weight-chart circle.progress');
     const text = document.getElementById('weight-chart-text');
@@ -51,20 +56,18 @@ function updateWeightDonut(total) {
     const offset = circumference - (total / 100) * circumference;
     circle.style.strokeDashoffset = offset;
     text.textContent = total;
-    circle.classList.remove('green','red','black');
-    text.classList.remove('green','red','black');
+    circle.classList.remove('green', 'red', 'black');
+    text.classList.remove('green', 'red', 'black');
     if (total === 100) {
-        circle.classList.add('green');
-        text.classList.add('green');
+        circle.classList.add('green'); text.classList.add('green');
     } else if (total > 100) {
-        circle.classList.add('red');
-        text.classList.add('red');
+        circle.classList.add('red'); text.classList.add('red');
     } else {
-        circle.classList.add('black');
-        text.classList.add('black');
+        circle.classList.add('black'); text.classList.add('black');
     }
 }
 
+/** Save custom weights if valid and update scores */
 function saveWeights() {
     const total = getWeightTotal();
     if (total !== 100) {
@@ -77,21 +80,23 @@ function saveWeights() {
     scoringWeights.netMargin = parseFloat(document.getElementById('weight-net').value) || 0;
     scoringWeights.ccr = parseFloat(document.getElementById('weight-ccr').value) || 0;
     scoringWeights.gpAssets = parseFloat(document.getElementById('weight-gp').value) || 0;
-    console.log('Weights saved', scoringWeights);
     closeWeightModal();
     updateScores();
     showToast('Scores updated');
 }
 
+// ==== SCORING & RENDERING ====
+
+// Convert metric value (handle %, x, $ etc)
 function parseMetric(val, isPercent) {
     if (!val) return 0;
-    // Remove percentage signs, multiplier x, dollar signs and commas
     val = String(val).replace(/[%,x$]/g, '').replace(/,/g, '');
     let num = parseFloat(val);
     if (isNaN(num)) return 0;
     return isPercent ? num / 100 : num;
 }
 
+/** Main financial scoring algorithm based on metrics and weights */
 function calculateScore(metrics) {
     let score = 0;
     score += Math.max(Math.min((metrics.roce / 0.15) * scoringWeights.roce, scoringWeights.roce), 0);
@@ -103,6 +108,7 @@ function calculateScore(metrics) {
     return Math.min(Math.round(score), 100);
 }
 
+/** Update all scores in the watchlist table */
 function updateScores() {
     document.querySelectorAll('#watchlist-body tr').forEach(row => {
         const metrics = {
@@ -120,13 +126,13 @@ function updateScores() {
     });
 }
 
+/** Sort table rows based on column and direction */
 function sortTable(column, asc) {
     const tbody = document.getElementById('watchlist-body');
     const rows = Array.from(tbody.querySelectorAll('tr'));
     rows.sort((a, b) => {
         let av = a.dataset[column];
         let bv = b.dataset[column];
-
         if (column === 'company' || column === 'symbol') {
             av = (av || '').toLowerCase();
             bv = (bv || '').toLowerCase();
@@ -134,17 +140,16 @@ function sortTable(column, asc) {
             if (av > bv) return asc ? 1 : -1;
             return 0;
         }
-
-        av = parseFloat(av);
-        bv = parseFloat(bv);
-        if (isNaN(av)) av = 0;
-        if (isNaN(bv)) bv = 0;
+        av = parseFloat(av); bv = parseFloat(bv);
+        if (isNaN(av)) av = 0; if (isNaN(bv)) bv = 0;
         return asc ? av - bv : bv - av;
     });
     rows.forEach(r => tbody.appendChild(r));
 }
 
-// Fetch stock suggestions as user types and display clickable suggestions
+// ==== SEARCH & INPUTS ====
+
+// Live search for tickers and show suggestion dropdown
 async function searchTicker() {
     const query = document.getElementById("search").value;
     const suggestionsDiv = document.getElementById("suggestions");
@@ -169,25 +174,25 @@ async function searchTicker() {
         suggestionsDiv.appendChild(item);
     });
 }
+
+// Raw ticker input (from hidden box)
 function evaluateRawTicker() {
-  const input = document.getElementById('raw-ticker-input');
-  const ticker = input.value.trim().toUpperCase();
-  if (!ticker) {
-    alert('Please enter a ticker symbol.');
-    return;
-  }
-  console.log('Raw ticker entered', ticker);
-  // Clear raw ticker input field after submitting
-  input.value = '';
-  showResults();
-  evaluateStock(ticker);
+    const input = document.getElementById('raw-ticker-input');
+    const ticker = input.value.trim().toUpperCase();
+    if (!ticker) {
+        alert('Please enter a ticker symbol.');
+        return;
+    }
+    input.value = '';
+    showResults();
+    evaluateStock(ticker);
 }
 
+// ==== TABLE: ADD/REMOVE/EVALUATE ====
 
-// Fetch detailed evaluation for a stock and add row if not duplicate
+// Fetch data for ticker and add a new row (if not duplicate)
 async function evaluateStock(symbol) {
     if (!symbol) return;
-    console.log('Evaluating', symbol);
     try {
         const res = await fetch(`/evaluate/${symbol}`);
         const data = await res.json();
@@ -200,6 +205,7 @@ async function evaluateStock(symbol) {
         const temp = document.createElement('tbody');
         temp.innerHTML = rowHtml;
         const rowNode = temp.firstElementChild;
+        // Store metrics for sorting/scoring
         rowNode.dataset.symbol = data.Symbol || '';
         rowNode.dataset.company = data["Company Name"] || '';
         rowNode.dataset.country = data.Country || '';
@@ -220,9 +226,16 @@ async function evaluateStock(symbol) {
     }
 }
 
-// Run AI qualitative analysis for a single stock row, update button accordingly
+/** Remove a stock row by ticker symbol */
+function removeRow(symbol) {
+    const row = document.getElementById(`row-${symbol}`);
+    if (row) row.remove();
+}
+
+// ==== AI ANALYSIS ====
+
+// Run AI qualitative analysis for a single row
 async function runAIForRow(symbol, btn) {
-    console.log('Running AI analysis for', symbol);
     btn.disabled = true;
     btn.innerHTML = `<img src="static/icons/loading.gif" alt="Loading" style="width:16px; height:16px;">`;
     try {
@@ -246,15 +259,13 @@ async function runAIForRow(symbol, btn) {
         if (row) row.dataset.ai = 1;
     } catch (err) {
         alert(`Error running AI for ${symbol}`);
-        console.error(err);
         btn.innerText = "Retry";
         btn.disabled = false;
     }
 }
 
-// Run AI qualitative analysis for all stocks and update buttons
+/** Run AI qualitative analysis for all watchlist stocks */
 async function runAllAI() {
-    console.log('Running AI analysis for all tickers');
     const rows = Array.from(document.querySelectorAll("#watchlist-body tr"));
     const symbols = rows.map(row => row.id.replace("row-", ""));
     if (symbols.length === 0) {
@@ -278,9 +289,7 @@ async function runAllAI() {
             return;
         }
         const resultMap = {};
-        data.forEach(item => {
-            resultMap[item.Symbol] = item.Qualitative;
-        });
+        data.forEach(item => { resultMap[item.Symbol] = item.Qualitative; });
         rows.forEach(row => {
             const symbol = row.id.replace("row-", "");
             const btn = row.querySelector(".ai-button");
@@ -299,15 +308,15 @@ async function runAllAI() {
         });
     } catch (err) {
         alert("Error running AI analysis.");
-        console.error(err);
     }
 }
 
-// Import stocks from Excel file and add them if not present
+// ==== IMPORT/EXPORT ====
+
+// Import stocks and scoring weights from Excel file
 function importFromExcel(event) {
     const file = event.target.files[0];
     if (!file) return;
-    console.log('Importing from Excel');
     showResults();
     const reader = new FileReader();
     reader.onload = function (e) {
@@ -323,9 +332,10 @@ function importFromExcel(event) {
             }
         });
 
+        // Import custom weights if present
         const weightSheet = workbook.Sheets['Scoring Weight'];
         if (weightSheet) {
-            const weights = XLSX.utils.sheet_to_json(weightSheet, {header:1});
+            const weights = XLSX.utils.sheet_to_json(weightSheet, { header: 1 });
             const map = {
                 'ROCE': 'roce',
                 'Interest Coverage': 'interestCov',
@@ -337,9 +347,7 @@ function importFromExcel(event) {
             weights.forEach((row) => {
                 if (row.length >= 2 && map[row[0]]) {
                     const val = parseFloat(row[1]);
-                    if (!isNaN(val)) {
-                        scoringWeights[map[row[0]]] = val;
-                    }
+                    if (!isNaN(val)) scoringWeights[map[row[0]]] = val;
                 }
             });
             updateScores();
@@ -349,75 +357,51 @@ function importFromExcel(event) {
     reader.readAsArrayBuffer(file);
 }
 
-// Export watchlist table and AI qualitative analysis to Excel
+/** Export table and AI analysis as multi-sheet Excel */
 function exportToExcel() {
     const originalTable = document.getElementById("watchlist-table");
     const clonedTable = originalTable.cloneNode(true);
 
-    // Remove last "Delete" column from header and body
+    // Remove last "Delete" column and AI column
     const headerRow = clonedTable.querySelector("thead tr");
-    if (headerRow) {
-        headerRow.removeChild(headerRow.lastElementChild);
-    }
-
-    // Remove the "Qualitative Analysis" column (assumed second last)
-    // Find header cells to identify the correct index to remove
+    if (headerRow) headerRow.removeChild(headerRow.lastElementChild);
     const headers = Array.from(headerRow.cells);
     let aiColIndex = headers.findIndex(th => th.textContent.trim().toLowerCase() === "qualitative analysis");
-    if (aiColIndex === -1) {
-        // fallback: assume it's second last column before "Delete"
-        aiColIndex = headers.length - 1; // If delete column was last and removed, last column now is AI analysis
-    }
-
-    // Remove AI analysis column from header row
-    if (headerRow.cells[aiColIndex]) {
-        headerRow.removeChild(headerRow.cells[aiColIndex]);
-    }
-
-    // Remove AI analysis column from all body rows
+    if (aiColIndex === -1) aiColIndex = headers.length - 1;
+    if (headerRow.cells[aiColIndex]) headerRow.removeChild(headerRow.cells[aiColIndex]);
     clonedTable.querySelectorAll("tbody tr").forEach(row => {
-        if (row.cells[aiColIndex]) {
-            row.removeChild(row.cells[aiColIndex]);
-        }
-        // Also remove last "Delete" column (already done earlier, but just in case)
-        if (row.lastElementChild) {
-            row.removeChild(row.lastElementChild);
-        }
+        if (row.cells[aiColIndex]) row.removeChild(row.cells[aiColIndex]);
+        if (row.lastElementChild) row.removeChild(row.lastElementChild);
     });
 
     const wb = XLSX.utils.book_new();
     const watchlistSheet = XLSX.utils.table_to_sheet(clonedTable);
     XLSX.utils.book_append_sheet(wb, watchlistSheet, "Watchlist");
 
-    // Prepare AI analysis data separately
+    // AI analysis sheet
     const aiRows = [["Ticker", "Qualitative Analysis"]];
     document.querySelectorAll("#watchlist-body tr").forEach(row => {
         const symbol = row.id.replace("row-", "");
         const btn = row.querySelector(".ai-button");
         let analysis = btn?.dataset?.analysis;
         if (analysis) {
-            // Clean HTML tags and convert breaks to newlines
-            analysis = analysis
-                .replace(/<br\s*\/?>/gi, '\n')
+            analysis = analysis.replace(/<br\s*\/?>/gi, '\n')
                 .replace(/<\/p>\s*<p>/gi, '\n')
                 .replace(/<[^>]+>/g, '')
                 .trim()
                 .replace(/\n+/g, '\n');
             const lines = analysis.split('\n');
             aiRows.push([symbol, lines[0]]);
-            for (let i = 1; i < lines.length; i++) {
-                aiRows.push(["", lines[i]]);
-            }
-            aiRows.push(["", ""]); // spacing row
+            for (let i = 1; i < lines.length; i++) aiRows.push(["", lines[i]]);
+            aiRows.push(["", ""]);
         }
     });
-
     if (aiRows.length > 1) {
         const aiSheet = XLSX.utils.aoa_to_sheet(aiRows);
         XLSX.utils.book_append_sheet(wb, aiSheet, "Qualitative Analysis");
     }
 
-    // Scoring weights sheet
+    // Scoring weights
     const weightRows = [
         ["Metric", "Weight"],
         ["ROCE", scoringWeights.roce],
@@ -431,46 +415,40 @@ function exportToExcel() {
     XLSX.utils.book_append_sheet(wb, weightSheet, "Scoring Weight");
 
     XLSX.writeFile(wb, "watchlist.xlsx");
-    console.log('Exported watchlist to Excel');
 }
 
+// ==== MODAL HANDLING ====
 
 // Show modal popup with title and content
 function showModal(title, content) {
-    console.log('Showing modal', title);
     const modal = document.getElementById("ai-modal");
     const container = document.getElementById("modal-content");
     container.innerHTML = `<h3>${title}</h3><p>${content}</p>`;
     modal.style.display = "flex";
 }
-
-// Close the modal popup
 function closeModal() {
-    console.log('Closing AI modal');
     document.getElementById("ai-modal").style.display = "none";
 }
 
-// Close modal if clicking outside content
+// Generic "click outside to close" logic for any modal
 function enableClickOutsideToClose(modalId, contentId, closeFn) {
     const modal = document.getElementById(modalId);
     const content = document.getElementById(contentId);
     if (!modal || !content) return;
-
     modal.addEventListener("click", function (e) {
-        if (!content.contains(e.target)) {
-            closeFn(); // e.g. closeModal() or your custom close
-        }
+        if (!content.contains(e.target)) closeFn();
     });
 }
 
-// Transition from initial view to results view, show export button
+// ==== UI TRANSITIONS & TOAST ====
+
+// Transition to table/results view
 window.showResults = function () {
     const initialView = document.getElementById('initial-view');
     const resultsView = document.getElementById('results-view');
     const exportBtn = document.getElementById('export-btn');
     const quoteContainer = document.getElementById('quote-container');
     const pageBackground = document.getElementById("page-background");
-
     if (initialView) {
         initialView.classList.remove('expanded');
         initialView.classList.add('shrunk');
@@ -481,24 +459,20 @@ window.showResults = function () {
     if (resultsView) resultsView.style.display = 'block';
 };
 
-// Generate HTML row for watchlist table with color-coded metrics
+/** Build a table row (HTML) for a new stock */
 function buildRow(data) {
     const preferredOrder = [
         "Symbol", "Price", "Dividend Yield", "P/E Ratio",
         "ROCE", "Interest Coverage", "Gross Margin", "Net Margin",
         "Cash Conversion Ratio (FCF)", "Gross Profit / Assets", "Score"
     ];
-
     let row = `<tr id="row-${data.Symbol}" data-company="${data["Company Name"] || ''}" data-country="${data.Country || ''}">`;
-
     // Symbol
     row += `<td>${data.Symbol || 'N/A'}</td>`;
-
-    // Company name with country sub text
+    // Company and country
     const company = data["Company Name"] || 'N/A';
     const country = data.Country || '';
     row += `<td><div>${company}</div><div class="country-sub">${country}</div></td>`;
-
     preferredOrder.slice(1).forEach(key => {
         let val = data[key] || "N/A";
         switch (key) {
@@ -513,24 +487,13 @@ function buildRow(data) {
         }
         row += `<td>${val}</td>`;
     });
-
     row += `<td><button class="ai-button" onclick="runAIForRow('${data.Symbol}', this)">Run</button></td>`;
     row += `<td><button onclick="removeRow('${data.Symbol}')">❌</button></td>`;
     row += "</tr>";
     return row;
 }
 
-
-// Remove a stock row from the watchlist table by symbol
-function removeRow(symbol) {
-    const row = document.getElementById(`row-${symbol}`);
-    if (row) {
-        row.remove();
-        console.log('Removed row', symbol);
-    }
-}
-
-// Color code metric value based on thresholds
+/** Color code metrics based on thresholds */
 function colorMetric(value, good, okay) {
     if (!value || value === "N/A") return value;
     let number = parseFloat(value.replace(/[%x]/g, ''));
@@ -541,13 +504,17 @@ function colorMetric(value, good, okay) {
     return `<span style="color: ${color}">${value}</span>`;
 }
 
-// Color code score with thresholds
+/** Color code score with thresholds */
 function colorScore(value) {
     let number = parseFloat(value.replace("/100", ""));
     if (isNaN(number)) return value;
     let color = number >= 80 ? "#28a745" : number >= 50 ? "orange" : "red";
     return `<span style="color: ${color}">${value}</span>`;
 }
+
+// ==== QUOTES ====
+
+// Inspirational quotes list
 const quotes = [
     `“Be fearful when others are greedy and greedy when others are fearful.” – Warren Buffett`,
     `“The intelligent investor is a realist who sells to optimists and buys from pessimists.” – Benjamin Graham`,
@@ -561,20 +528,19 @@ const quotes = [
     `“He who lives by the crystal ball will eat shattered glass.” – Ray Dalio`
 ];
 
-// Shuffle function - Fisher-Yates
+// Shuffle array in place (Fisher-Yates)
 function shuffle(array) {
     for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [array[i], array[j]] = [array[j], array[i]];
     }
 }
-
-// Shuffle quotes at start
 shuffle(quotes);
 
 let currentQuoteIndex = 0;
 const quoteContainer = document.getElementById('quote-container');
 
+/** Show a quote with fade effect */
 function showQuote(index) {
     quoteContainer.style.opacity = 0;
     setTimeout(() => {
@@ -582,28 +548,29 @@ function showQuote(index) {
         quoteContainer.style.opacity = 1;
     }, 500);
 }
-
+/** Cycle quotes every 10 seconds */
 function cycleQuotes() {
     showQuote(currentQuoteIndex);
     currentQuoteIndex = (currentQuoteIndex + 1) % quotes.length;
 }
-//Init
-enableClickOutsideToClose("ai-modal", "modal-content", closeModal);
-enableClickOutsideToClose("weight-modal", "weight-modal-content", closeWeightModal);
-
+// Start quote cycle and fade in/out
 cycleQuotes();
 setInterval(() => {
     quoteContainer.style.opacity = 0;
     setTimeout(() => {
         cycleQuotes();
-    }, 1000); // fade out 1s, fade in 0.5s inside showQuote
-}, 10000); // every 10 seconds
+    }, 1000);
+}, 10000);
 
+// ==== TOAST NOTIFICATIONS ====
+
+// Hide notification toast
 function hideToast() {
     const toast = document.getElementById('toast');
     if (toast) toast.classList.remove('show');
 }
 
+// Show a notification message at the top
 function showToast(msg) {
     const toast = document.getElementById('toast');
     const msgSpan = document.getElementById('toast-message');
@@ -614,7 +581,13 @@ function showToast(msg) {
     showToast._timeout = setTimeout(hideToast, 10000);
 }
 
-// update total weight when inputs change
+// ==== EVENT HANDLERS ====
+
+// Make number inputs in scoring modal update the donut
 document.querySelectorAll('#weight-modal input[type="number"]').forEach(inp => {
     inp.addEventListener('input', updateWeightTotal);
 });
+
+// Click-outside-to-close for modals
+enableClickOutsideToClose("ai-modal", "modal-content", closeModal);
+enableClickOutsideToClose("weight-modal", "weight-modal-content", closeWeightModal);

@@ -1,32 +1,40 @@
+<!-- Score with settings button -->
 <!DOCTYPE html>
 <html>
 
 <head>
+    <!-- SheetJS for Excel export/import -->
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
     <title>Stock Watchlist</title>
+    <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
 </head>
 
 <body>
     <div id="page-background">
 
-        <!-- Initial centered view -->
+        <!-- Initial centered view: Shows search + import before watchlist is loaded -->
         <div id="initial-view" class="centered-view expanded">
             <h1>Stock Watchlist</h1>
 
+            <!-- Ticker search and import controls -->
             <div class="search-container">
                 <div class="input-wrapper">
+                    <!-- Ticker search box -->
                     <input id="search" type="text" style="width: 210px" oninput="searchTicker()"
                         placeholder="Search by name or symbol" autocomplete="off" />
 
+                    <!-- Dropdown for search suggestions -->
                     <div id="suggestions"></div>
-
                 </div>
+                <!-- Raw ticker input (hidden/minimal UI) -->
                 <input id="raw-ticker-input" type="text" style="width: 5px" placeholder="LNR.TO"
                     onkeydown="if(event.key === 'Enter') evaluateRawTicker()" autocomplete="off" />
+                <!-- Hidden file input for Excel import -->
                 <input type="file" id="excel-import" accept=".xlsx" style="display:none"
                     onchange="importFromExcel(event)" />
 
+                <!-- Import button (opens file picker) -->
                 <button onclick="document.getElementById('excel-import').click()" style="margin-top: 10px;">
                     <svg viewBox="0 0 24 24" width="12" height="12">
                         <path d="M8 11h-6v10h20v-10h-6v-2h8v14h-24v-14h8v2zm-1-4l5-6 5 6h-4v11h-2v-11h-4z" />
@@ -34,6 +42,7 @@
                     Import
                 </button>
 
+                <!-- Export button (appears when data loaded) -->
                 <button id="export-btn" onclick="exportToExcel()" style="margin-top: 10px; display: none;">
                     <svg viewBox="0 0 24 24" width="12" height="12">
                         <path d="M8 11h-6v10h20v-10h-6v-2h8v14h-24v-14h8v2zm5 2h4l-5 6-5-6h4v-12h2v12z" />
@@ -42,10 +51,11 @@
                 </button>
             </div>
 
+            <!-- Dynamic quote preview (e.g., after search) -->
             <div id="quote-container"></div>
         </div>
 
-        <!-- Watchlist / Results view -->
+        <!-- Watchlist view (table of stocks and results) -->
         <div id="results-view" style="display: none;">
             <h2 style="display: inline-block;">My Watchlist</h2>
 
@@ -53,9 +63,9 @@
                 <table id="watchlist-table">
                     <thead>
                         <tr>
+                            <!-- Column headers with tooltips and sort controls -->
                             <th title="Ticker symbol">
                                 <div class="th-label">
-
                                     Symbol
                                     <span class="sort-arrows">
                                         <span onclick="sortTable('symbol', true)">▲</span>
@@ -75,7 +85,7 @@
                                     </span>
                                 </div>
                             </th>
-
+                            <!-- Price column -->
                             <th title="Current stock price">
                                 <div class="th-label">
                                     Price
@@ -85,6 +95,7 @@
                                     </span>
                                 </div>
                             </th>
+                            <!-- Dividend yield column -->
                             <th title="Annual dividends as a percent of price">
                                 <div class="th-label">
                                     Dividend Yield
@@ -94,9 +105,9 @@
                                     </span>
                                 </div>
                             </th>
+                            <!-- P/E Ratio -->
                             <th title="Price to earnings ratio">
                                 <div class="th-label">
-
                                     P/E Ratio
                                     <span class="sort-arrows">
                                         <span onclick="sortTable('pe_ratio', false)">▲</span>
@@ -104,10 +115,10 @@
                                     </span>
                                 </div>
                             </th>
+                            <!-- ROCE (Return on Capital Employed) -->
                             <th
                                 title="-Return on Capital Employed  &#10-ROCE above 15% may indicate better profitability">
                                 <div class="th-label">
-
                                     ROCE
                                     <span class="sort-arrows">
                                         <span onclick="sortTable('roce', false)">▲</span>
@@ -115,6 +126,7 @@
                                     </span>
                                 </div>
                             </th>
+                            <!-- Interest Coverage -->
                             <th
                                 title="-Measures the ability to cover interest  &#10-A ratio of 10x suggests a more controlled financial position">
                                 <div class="th-label">
@@ -125,10 +137,10 @@
                                     </span>
                                 </div>
                             </th>
+                            <!-- Gross Margin -->
                             <th
                                 title="-Gross profit as a percent of revenue &#10-A margin above 30% may indicate a stronger competitive postion">
                                 <div class="th-label">
-
                                     Gross Margin
                                     <span class="sort-arrows">
                                         <span onclick="sortTable('gross_margin', false)">▲</span>
@@ -136,10 +148,10 @@
                                     </span>
                                 </div>
                             </th>
+                            <!-- Net Margin -->
                             <th
                                 title="-Portion of revenue that exceeds all expenses &#10-A net margin above 15% suggests a greater ability of generating net income">
                                 <div class="th-label">
-
                                     Net Margin
                                     <span class="sort-arrows">
                                         <span onclick="sortTable('net_margin', false)">▲</span>
@@ -147,10 +159,10 @@
                                     </span>
                                 </div>
                             </th>
+                            <!-- Cash Conversion Ratio (FCF) -->
                             <th
                                 title="-How efficiently a company is converting its income into free cash flo w&#10-A higher FCF can suggest dividend increases, buyback programs">
                                 <div class="th-label">
-
                                     Cash Conversion Ratio (FCF)
                                     <span class="sort-arrows">
                                         <span onclick="sortTable('ccr', false)">▲</span>
@@ -158,10 +170,10 @@
                                     </span>
                                 </div>
                             </th>
+                            <!-- Gross Profit / Assets -->
                             <th
                                 title="-Gross profit relative to total assets &#10;-Shows how efficiently a company uses its assets to generate profit">
                                 <div class="th-label">
-
                                     Gross Profit / Assets
                                     <span class="sort-arrows">
                                         <span onclick="sortTable('gp_assets', false)">▲</span>
@@ -169,11 +181,11 @@
                                     </span>
                                 </div>
                             </th>
+                            <!-- Score column with settings button for weight modal -->
                             <th style="min-width: 100px;" title="Composite financial score 0-100">
-                                <div class="th-flex"
+                                <div class="th-label"
                                     style="display: flex; flex-direction: row; align-items: center; justify-content: center;">
-                                    <div
-                                        style=" flex-direction: column;">
+                                    <div style=" flex-direction: column;">
                                         Score
                                         <button id="settings-btn" onclick="openWeightModal()"
                                             title="Adjust scoring weights" style="margin-top: 6px;">
@@ -187,22 +199,25 @@
                                 </div>
                             </th>
 
-
+                            <!-- AI qualitative analysis column -->
                             <th title="Qualitative insights generated by AI">
                                 AI Analysis
                                 <button onclick="runAllAI()">Run All</button>
                             </th>
+                            <!-- Delete row column -->
                             <th>Delete</th>
                         </tr>
                     </thead>
+                    <!-- Dynamic table body for stock rows -->
                     <tbody id="watchlist-body"></tbody>
                 </table>
             </div>
 
+            <!-- Results or alerts after table -->
             <div id="result" style="margin-top: 20px;"></div>
         </div>
 
-        <!-- Modal container -->
+        <!-- Modal for AI-generated analysis -->
         <div id="ai-modal" class="modal-overlay">
             <div id="ai-modal-content" class="modal-content">
                 <button class="modal-close" onclick="closeModal()">✖</button>
@@ -210,13 +225,14 @@
             </div>
         </div>
 
-        <!-- Scoring weight modal -->
+        <!-- Scoring weight adjustment modal -->
         <div id="weight-modal" class="modal-overlay">
             <div id="weight-modal-content" class="modal-content">
                 <div id="weight-header-content">
                     <button class="modal-close" onclick="closeWeightModal()">✖</button>
                     <h3>Adjust Scoring Weights</h3>
                 </div>
+                <!-- Inputs for custom score weighting -->
                 <div class="weight-inputs">
                     <label>ROCE <input type="number" id="weight-roce" oninput="updateWeightTotal()"></label>
                     <label>Interest Coverage <input type="number" id="weight-interest"
@@ -228,6 +244,7 @@
                     <label>Gross Profit / Assets <input type="number" id="weight-gp"
                             oninput="updateWeightTotal()"></label>
                 </div>
+                <!-- Donut chart for visualizing weights -->
                 <div id="weight-chart-container">
                     <div id="weight-chart">
                         <div class="weight-label">Weight</div>
@@ -238,6 +255,7 @@
                                 dominant-baseline="middle">87</text>
                         </svg>
                     </div>
+                    <!-- Save button for weights -->
                     <button onclick="saveWeights()">
                         <svg viewBox="0 0 24 24" width="12" height="12">
                             <path
@@ -246,16 +264,15 @@
                         Save
                     </button>
                 </div>
-
-
             </div>
-
         </div>
 
+        <!-- Toast for notifications/errors -->
         <div id="toast">
             <span id="toast-message"></span>
             <button id="toast-close" onclick="hideToast()">✖</button>
         </div>
+        <!-- Main app JS -->
         <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 

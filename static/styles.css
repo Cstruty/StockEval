@@ -4,14 +4,15 @@ body {
   margin: 0;
   padding: 0;
   height: 100%;
+  min-height: 100vh;
   overflow-x: hidden;
   box-sizing: border-box;
   font-family: Arial, sans-serif;
   position: relative;
   z-index: 1;
-  min-height: 100vh;
 }
 
+/* Set all text color to white for uniform dark theme */
 input,
 table,
 th,
@@ -37,17 +38,9 @@ span {
 }
 
 @keyframes moveDiagonalGradient {
-  0% {
-    background-position: 0% 0%;
-  }
-
-  50% {
-    background-position: 100% 100%;
-  }
-
-  100% {
-    background-position: 0% 0%;
-  }
+  0% { background-position: 0% 0%; }
+  50% { background-position: 100% 100%; }
+  100% { background-position: 0% 0%; }
 }
 
 /* ==== Layout Containers ==== */
@@ -59,6 +52,7 @@ span {
   box-sizing: border-box;
 }
 
+/* Centered splash layout for initial screen */
 .centered-view.expanded {
   position: absolute;
   top: 40%;
@@ -71,6 +65,7 @@ span {
   transition: all 0.5s ease;
 }
 
+/* Shrunk layout after table is loaded */
 .centered-view.shrunk {
   height: auto;
   align-items: flex-start;
@@ -82,10 +77,64 @@ span {
   font-size: 3em;
   margin-bottom: 20px;
 }
-
 .centered-view.shrunk h1 {
   font-size: 1.5em;
   margin-bottom: 10px;
+}
+
+/* ==== Search and Import Section ==== */
+.search-container {
+  position: relative;
+  width: 100%;
+  max-width: 550px;
+  min-width: 420px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.input-wrapper {
+  position: relative;
+  flex: 1;
+  padding: 0;
+  margin: 0;
+}
+
+#search {
+  width: 100%;
+  margin: 0;
+}
+
+/* Search suggestions dropdown styling */
+#suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  max-height: 200px;
+  overflow-y: auto;
+  background: #2a2a2a;
+  border: 1px solid #444;
+  border-top: none;
+  border-radius: 0 0 6px 6px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+  z-index: 999;
+  font-size: 14px;
+  opacity: 0.95;
+}
+
+.suggestion-item {
+  padding: 10px 14px;
+  cursor: pointer;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  transition: background-color 0.2s ease;
+}
+.suggestion-item:hover {
+  background-color: #3a3a3a;
+}
+
+.search-container button {
+  transform: translateY(-5px);
 }
 
 /* ==== Watchlist Table ==== */
@@ -104,6 +153,7 @@ span {
   font-family: Arial, sans-serif;
 }
 
+/* Sticky table headers for scrollable table */
 #watchlist-table thead th {
   position: sticky;
   top: 0;
@@ -114,28 +164,64 @@ span {
   z-index: 10;
 }
 
+/* Table row backgrounds and hover effect */
 tbody tr {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(255,255,255,0.1);
   transition: background-color 0.3s ease;
 }
-
 tbody tr:nth-child(even) {
-  background-color: rgba(255, 255, 255, 0.05);
+  background-color: rgba(255,255,255,0.05);
 }
-
 tbody tr:hover {
-  background-color: rgba(26, 26, 26, 1);
+  background-color: rgba(26,26,26,1);
 }
 
 td {
   padding: 10px 15px;
   text-align: center;
-  border-right: 1px solid rgba(255, 255, 255, 0.15);
+  border-right: 1px solid rgba(255,255,255,0.15);
   vertical-align: middle;
 }
-
 td:last-child {
   border-right: none;
+}
+
+/* ==== Sortable Table Headers and Labels ==== */
+.th-label {
+  display: flex;
+  align-items: center;    /* Vertically center label & arrows */
+  justify-content: center; /* Horizontally center */
+  width: 100%;
+  min-height: 28px;
+  margin-left: 10px;
+}
+/* Only show sort arrows on hover */
+.sort-arrows {
+  visibility: hidden;
+  display: inline-flex;
+  flex-direction: column;
+  margin-left: 4px;
+  font-size: 0.75em;
+  line-height: 0.75em;
+  gap: 2px;
+  cursor: pointer;
+  margin-right: 8px;
+}
+th:hover .sort-arrows {
+  visibility: visible;
+}
+.sort-arrows span {
+  padding: 0 1px;
+  user-select: none;
+}
+.sort-arrows span:hover {
+  color: #ccc;
+}
+
+/* ==== Table Sub-labels (Country etc) ==== */
+.country-sub {
+  font-size: 0.8em;
+  opacity: 0.8;
 }
 
 /* ==== Buttons ==== */
@@ -164,19 +250,13 @@ td button {
   border-radius: 4px;
 }
 
-button:hover:not(:disabled),
-td button:hover:not(:disabled) {
-  background-color: #1e1e1e;
-  color: white;
-  border-color: #1e1e1e;
-}
-
-button:disabled {
-  color: #aaa;
-  border-color: #ccc;
-  cursor: not-allowed;
-  background: white;
-  box-shadow: none;
+/* Slightly smaller settings button */
+#settings-btn {
+  padding: 6px 20px;
+  font-size: 0.85em;
+  line-height: 1;
+  border-radius: 6px;
+  z-index: 20;
 }
 
 button svg {
@@ -187,21 +267,25 @@ button svg {
   transition: fill 0.3s ease;
 }
 
-#settings-btn {
-  padding: 6px 20px;    /* smaller padding */
-  font-size: 0.85em;    /* slightly smaller text */
-  line-height: 1;
-  border-radius: 6px;   /* optional: a bit of rounding */
-  z-index: 20;
-
+/* Button hover, focus, and disabled states */
+button:hover:not(:disabled),
+td button:hover:not(:disabled) {
+  background-color: #1e1e1e;
+  color: white;
+  border-color: #1e1e1e;
 }
-
-
+button:disabled {
+  color: #aaa;
+  border-color: #ccc;
+  cursor: not-allowed;
+  background: white;
+  box-shadow: none;
+}
 button:focus-visible {
-  box-shadow: 0 0 0 3px rgba(26, 26, 26, 1);
+  box-shadow: 0 0 0 3px rgba(26,26,26,1);
 }
 
-/* ==== Inputs ==== */
+/* ==== Inputs (text/number) ==== */
 input[type="text"],
 input[type="number"],
 #search {
@@ -223,92 +307,34 @@ input[type="number"],
   -moz-appearance: none;
   appearance: none;
 }
-
 input[type="text"]:focus,
 input[type="number"]:focus,
 #search:focus {
   border-color: #1e1e1e;
-  box-shadow: 0 0 0 3px rgba(26, 26, 26, 1);
+  box-shadow: 0 0 0 3px rgba(26,26,26,1);
   background: white;
   color: #1e1e1e;
 }
 
-/* ==== Search Suggestion Dropdown ==== */
-.search-container {
-  position: relative;
-  width: 100%;
-  max-width: 550px; 
-  min-width: 420px; 
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-
-.search-container button {
-  transform: translateY(-5px);
-}
-
-.input-wrapper {
-  position: relative;
-  flex: 1;
-  padding: 0;
-  margin: 0;
-}
-
-#search {
-  width: 100%;
-  margin: 0;
-}
-
-#suggestions {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  width: 100%;
-  max-height: 200px;
-  overflow-y: auto;
-  background: #2a2a2a;
-  border: 1px solid #444;
-  border-top: none;
-  border-radius: 0 0 6px 6px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-  z-index: 999;
-  font-size: 14px;
-  opacity: 0.95;
-}
-
-.suggestion-item {
-  padding: 10px 14px;
-  cursor: pointer;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-  transition: background-color 0.2s ease;
-}
-
-.suggestion-item:hover {
-  background-color: #3a3a3a;
-}
-
-/* ==== Modal ==== */
+/* ==== Modals (AI, Weight, Overlay) ==== */
 .modal-overlay {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0,0,0,0.6);
   z-index: 1000;
   justify-content: center;
   align-items: center;
   padding: 20px;
   box-sizing: border-box;
 }
-
 .modal-content {
   background: #ffffff;
   color: #1e1e1e !important;
   border-radius: 12px;
   padding: 25px 30px;
   width: 90%;
-  box-shadow: 0 10px 40px rgba(26, 26, 26, 1);
+  box-shadow: 0 10px 40px rgba(26,26,26,1);
   position: relative;
   font-family: Arial, sans-serif;
 }
@@ -317,11 +343,21 @@ input[type="number"]:focus,
   max-width: 400px;
   padding-bottom: 10px;
 }
-
 #ai-modal-content {
   max-width: 600px;
   max-height: 80vh;
   overflow-y: auto;
+}
+
+#weight-header-content {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  color: #1e1e1e;
+}
+#weight-header-content h3 {
+  margin-top: 0px;
 }
 
 #weight-modal-content label {
@@ -330,7 +366,6 @@ input[type="number"]:focus,
   margin-bottom: 8px;
   color: #1e1e1e;
 }
-
 #weight-modal-content input[type="number"] {
   padding: 6px 10px;
   text-align: right;
@@ -338,24 +373,13 @@ input[type="number"]:focus,
   flex: 0 0 auto;
   -moz-appearance: textfield;
 }
-
 #weight-modal-content input[type="number"]::-webkit-outer-spin-button,
 #weight-modal-content input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
 
-
-
-#ai-modal-content::-webkit-scrollbar {
-  width: 8px;
-}
-
-#ai-modal-content::-webkit-scrollbar-thumb {
-  background-color: #1e1e1e;
-  border-radius: 4px;
-}
-
+/* Modal close button (X) */
 .modal-close {
   position: absolute;
   top: 15px;
@@ -368,15 +392,17 @@ input[type="number"]:focus,
   cursor: pointer;
   transition: color 0.2s ease;
 }
-
 .modal-close:hover {
   color: #001f3f;
 }
 
-#modal-content h3 {
-  margin-top: 0;
-  font-size: 1.5rem;
-  font-weight: bold;
+/* Modal scrollbars */
+#ai-modal-content::-webkit-scrollbar {
+  width: 8px;
+}
+#ai-modal-content::-webkit-scrollbar-thumb {
+  background-color: #1e1e1e;
+  border-radius: 4px;
 }
 
 #modal-content,
@@ -384,7 +410,11 @@ input[type="number"]:focus,
 #modal-content p {
   color: #1e1e1e !important;
 }
-
+#modal-content h3 {
+  margin-top: 0;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
 #modal-content p {
   font-size: 1rem;
   line-height: 1.5;
@@ -415,7 +445,7 @@ input[type="number"]:focus,
   color: #ffffff;
   padding: 14px 24px;
   border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
   font-family: Arial, sans-serif;
   z-index: 5000;
   transition: top 0.5s ease;
@@ -423,11 +453,9 @@ input[type="number"]:focus,
   gap: 12px;
   align-items: center;
 }
-
 #toast.show {
   top: 20px;
 }
-
 #toast button {
   background: none;
   border: none;
@@ -438,36 +466,21 @@ input[type="number"]:focus,
   line-height: 1;
 }
 
-/* ==== Weight Donut ==== */
-
+/* ==== Weight Donut (in weight modal) ==== */
 #weight-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  margin-top: 24px; 
+  margin-top: 24px;
 }
 
-/* ==== Weight Donut ==== */
-
+/* Container: donut chart left, save button right */
 #weight-chart-container {
-  display: flex;
-  flex-direction: row;
-  align-items: center; 
-  justify-content: space-between;
-}
-#weight-header-content {
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  color: #1e1e1e;
-}
-#weight-chart svg {
-  display: block;
-}
-#weight-header-content h3{
- margin-top: 0px;
 }
 #weight-chart {
   display: flex;
@@ -476,7 +489,6 @@ input[type="number"]:focus,
   justify-content: center;
   margin-left: -13px;
 }
-
 .weight-label {
   font-size: 1em;
   color: #1e1e1e;
@@ -484,103 +496,42 @@ input[type="number"]:focus,
   line-height: 1;
   padding-bottom: 10px;
 }
-
 #weight-chart svg {
   width: 80px;
   height: 80px;
+  display: block;
 }
-
+/* Donut segments: background and progress */
 #weight-chart circle {
   fill: none;
   stroke-width: 10;
 }
-
 #weight-chart circle.bg {
   stroke: #e0e0e0;
 }
-
-
 #weight-chart circle.progress {
   stroke: #000; /* default if not using green/red/black */
   stroke-dasharray: 157; /* 2 * pi * r for r=25 */
   stroke-dashoffset: 157;
   transition: stroke-dashoffset 0.4s ease;
 }
-
 #weight-chart circle.progress.green {
   stroke: #28a745;
 }
-
 #weight-chart circle.progress.red {
   stroke: red;
 }
-
 #weight-chart circle.progress.black {
   stroke: #000;
 }
-
+/* Donut center text */
 #weight-chart text {
   font-size: 18px;
   fill: #1e1e1e;
   dominant-baseline: middle;
   text-anchor: middle;
 }
+#weight-chart text.green { fill: #28a745; }
+#weight-chart text.red { fill: red; }
+#weight-chart text.black { fill: #000; }
 
-#weight-chart text.green {
-  fill: #28a745;
-}
-
-#weight-chart text.red {
-  fill: red;
-}
-
-#weight-chart text.black {
-  fill: #000;
-}
-
-.country-sub {
-  font-size: 0.8em;
-  opacity: 0.8;
-}
-
-.sort-arrows {
-  visibility: hidden;
-  display: inline-flex;
-  flex-direction: column;
-  margin-left: 4px;
-  font-size: 0.75em;
-  line-height: 0.75em;
-}
-
-.sort-arrows span {
-  cursor: pointer;
-  user-select: none;
-}
-
-.sort-arrows span:hover {
-  color: #ccc;
-}
-
-th:hover .sort-arrows {
-  visibility: visible;
-}
-.th-label {
-  display: flex;
-  align-items: center;    /* Vertically center the label & arrows */
-  justify-content: center; /* Horizontally center the group in the cell */
-  width: 100%;            /* Ensures the group fills the cell */
-  min-height: 28px;       /* (Optional) Sets a min height for alignment */
-  margin-left: 10px;
-}
-.sort-arrows {
-  display: flex;         /* Keep both arrows on the same row */
-  gap: 2px;              /* Space between arrows */
-  font-size: 1em;
-  cursor: pointer;
-  margin-right: 8px; /* Add this for extra space after arrows */
-}
-.sort-arrows span {
-  /* Optional: styles for arrows */
-  padding: 0 1px;
-  user-select: none;
-}
