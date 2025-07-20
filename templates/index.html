@@ -53,7 +53,13 @@
                 <table id="watchlist-table">
                     <thead>
                         <tr>
-                            <th title="Ticker symbol">Symbol</th>
+                            <th title="Ticker symbol">
+                                Symbol
+                                <span class="sort-arrows">
+                                    <span onclick="sortTable('symbol', true)">▲</span>
+                                    <span onclick="sortTable('symbol', false)">▼</span>
+                                </span>
+                            </th>
                             <th title="Company name and country">
                                 Company
                                 <span class="sort-arrows">
@@ -62,15 +68,69 @@
                                 </span><br>
                                 <small>Country</small>
                             </th>
-                            <th title="Current stock price">Price</th>
-                            <th title="Annual dividends as a percent of price">Dividend Yield</th>
-                            <th title="Price to earnings ratio">P/E Ratio</th>
-                            <th title="Return on Capital Employed">ROCE</th>
-                            <th title="Measures the ability to cover interest; 10x suggests a more controlled financial position">Interest Coverage</th>
-                            <th title="Gross profit as a percent of revenue">Gross Margin</th>
-                            <th title="Net income as a percent of revenue">Net Margin</th>
-                            <th title="Free cash flow divided by net income">Cash Conversion Ratio (FCF)</th>
-                            <th title="Gross profit relative to total assets">Gross Profit / Assets</th>
+                            <th title="Current stock price">
+                                Price
+                                <span class="sort-arrows">
+                                    <span onclick="sortTable('price', false)">▲</span>
+                                    <span onclick="sortTable('price', true)">▼</span>
+                                </span>
+                            </th>
+                            <th title="Annual dividends as a percent of price">
+                                Dividend Yield
+                                <span class="sort-arrows">
+                                    <span onclick="sortTable('dividend_yield', false)">▲</span>
+                                    <span onclick="sortTable('dividend_yield', true)">▼</span>
+                                </span>
+                            </th>
+                            <th title="Price to earnings ratio">
+                                P/E Ratio
+                                <span class="sort-arrows">
+                                    <span onclick="sortTable('pe_ratio', false)">▲</span>
+                                    <span onclick="sortTable('pe_ratio', true)">▼</span>
+                                </span>
+                            </th>
+                            <th title="Return on Capital Employed">
+                                ROCE
+                                <span class="sort-arrows">
+                                    <span onclick="sortTable('roce', false)">▲</span>
+                                    <span onclick="sortTable('roce', true)">▼</span>
+                                </span>
+                            </th>
+                            <th title="Measures the ability to cover interest; 10x suggests a more controlled financial position">
+                                Interest Coverage
+                                <span class="sort-arrows">
+                                    <span onclick="sortTable('interestcov', false)">▲</span>
+                                    <span onclick="sortTable('interestcov', true)">▼</span>
+                                </span>
+                            </th>
+                            <th title="Gross profit as a percent of revenue">
+                                Gross Margin
+                                <span class="sort-arrows">
+                                    <span onclick="sortTable('gross_margin', false)">▲</span>
+                                    <span onclick="sortTable('gross_margin', true)">▼</span>
+                                </span>
+                            </th>
+                            <th title="Net income as a percent of revenue">
+                                Net Margin
+                                <span class="sort-arrows">
+                                    <span onclick="sortTable('net_margin', false)">▲</span>
+                                    <span onclick="sortTable('net_margin', true)">▼</span>
+                                </span>
+                            </th>
+                            <th title="Free cash flow divided by net income">
+                                Cash Conversion Ratio (FCF)
+                                <span class="sort-arrows">
+                                    <span onclick="sortTable('ccr', false)">▲</span>
+                                    <span onclick="sortTable('ccr', true)">▼</span>
+                                </span>
+                            </th>
+                            <th title="Gross profit relative to total assets">
+                                Gross Profit / Assets
+                                <span class="sort-arrows">
+                                    <span onclick="sortTable('gp_assets', false)">▲</span>
+                                    <span onclick="sortTable('gp_assets', true)">▼</span>
+                                </span>
+                            </th>
                             <th style="min-width: 100px;" title="Composite financial score 0-100">
                                 <div style="display: flex; align-items: center; gap: 8px; justify-content: center; padding-right: 20px">
                                     Score
@@ -85,7 +145,11 @@
                             </th>
 
                             <th title="Qualitative insights generated by AI">
-                                AI Analysis<br>
+                                AI Analysis
+                                <span class="sort-arrows">
+                                    <span onclick="sortTable('ai', false)">▲</span>
+                                    <span onclick="sortTable('ai', true)">▼</span>
+                                </span><br>
                                 <button onclick="runAllAI()">Run All</button>
                             </th>
                             <th title="Remove row">Delete</th>

@@ -123,18 +123,22 @@ function sortTable(column, asc) {
     const tbody = document.getElementById('watchlist-body');
     const rows = Array.from(tbody.querySelectorAll('tr'));
     rows.sort((a, b) => {
-        if (column === 'company') {
-            const av = (a.dataset.company || '').toLowerCase();
-            const bv = (b.dataset.company || '').toLowerCase();
+        let av = a.dataset[column];
+        let bv = b.dataset[column];
+
+        if (column === 'company' || column === 'symbol') {
+            av = (av || '').toLowerCase();
+            bv = (bv || '').toLowerCase();
             if (av < bv) return asc ? -1 : 1;
             if (av > bv) return asc ? 1 : -1;
             return 0;
-        } else if (column === 'score') {
-            const av = parseFloat(a.dataset.score || 0);
-            const bv = parseFloat(b.dataset.score || 0);
-            return asc ? av - bv : bv - av;
         }
-        return 0;
+
+        av = parseFloat(av);
+        bv = parseFloat(bv);
+        if (isNaN(av)) av = 0;
+        if (isNaN(bv)) bv = 0;
+        return asc ? av - bv : bv - av;
     });
     rows.forEach(r => tbody.appendChild(r));
 }
@@ -195,14 +199,19 @@ async function evaluateStock(symbol) {
         const temp = document.createElement('tbody');
         temp.innerHTML = rowHtml;
         const rowNode = temp.firstElementChild;
+        rowNode.dataset.symbol = data.Symbol || '';
         rowNode.dataset.company = data["Company Name"] || '';
         rowNode.dataset.country = data.Country || '';
+        rowNode.dataset.price = parseMetric(data.Price, false);
+        rowNode.dataset.dividend_yield = parseMetric(data["Dividend Yield"], true);
+        rowNode.dataset.pe_ratio = parseMetric(data["P/E Ratio"], false);
         rowNode.dataset.roce = parseMetric(data.ROCE, true);
         rowNode.dataset.interestcov = parseMetric(data["Interest Coverage"], false);
         rowNode.dataset.gross_margin = parseMetric(data["Gross Margin"], true);
         rowNode.dataset.net_margin = parseMetric(data["Net Margin"], true);
         rowNode.dataset.ccr = parseMetric(data["Cash Conversion Ratio (FCF)"], true);
         rowNode.dataset.gp_assets = parseMetric(data["Gross Profit / Assets"], true);
+        rowNode.dataset.ai = 0;
         document.getElementById("watchlist-body").appendChild(rowNode);
         updateScores();
     } catch (err) {
@@ -232,6 +241,8 @@ async function runAIForRow(symbol, btn) {
         btn.disabled = false;
         btn.dataset.analysis = cleanText;
         btn.onclick = () => showModal(`${symbol} AI Analysis`, cleanText);
+        const row = document.getElementById(`row-${symbol}`);
+        if (row) row.dataset.ai = 1;
     } catch (err) {
         alert(`Error running AI for ${symbol}`);
         console.error(err);
@@ -278,9 +289,11 @@ async function runAllAI() {
                 const cleanText = resultMap[symbol].replace(/<br\s*\/?>/gi, "<br>");
                 btn.dataset.analysis = cleanText;
                 btn.onclick = () => showModal(`${symbol} AI Analysis`, cleanText);
+                row.dataset.ai = 1;
             } else {
                 btn.innerText = "N/A";
                 btn.disabled = true;
+                row.dataset.ai = 0;
             }
         });
     } catch (err) {
