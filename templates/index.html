@@ -89,16 +89,16 @@
         </div>
 
         <!-- Modal container -->
-        <div id="ai-modal">
-            <div id="ai-modal-content">
+        <div id="ai-modal" class="modal-overlay">
+            <div id="ai-modal-content" class="modal-content">
                 <button class="modal-close" onclick="closeModal()">✖</button>
                 <div id="modal-content"></div>
             </div>
         </div>
 
         <!-- Scoring weight modal -->
-        <div id="weight-modal">
-            <div id="weight-modal-content">
+        <div id="weight-modal" class="modal-overlay">
+            <div id="weight-modal-content" class="modal-content">
                 <div id="weight-header-content">
                     <button class="modal-close" onclick="closeWeightModal()">✖</button>
                     <h3>Adjust Scoring Weights</h3>
@@ -124,11 +124,12 @@
                             >87</text>
                         </svg>
                     </div>
-                        <button onclick="saveWeights()">
-                            <svg viewBox="0 0 24 24" width="12" height="12">
-                                <path d="M17 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zM12 19c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm2-10H6V5h8v4z"/>
-                            </svg>
-                            Save
+                    <button onclick="saveWeights()">
+                        <svg viewBox="0 0 24 24" width="12" height="12">
+                            <path d="M17 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zM12 19c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm2-10H6V5h8v4z"/>
+                        </svg>
+                        Save
+                    </button>
                 </div>
 
                 

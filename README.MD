@@ -21,23 +21,23 @@ Based on these metrics, it calculates an overall score (0–100) for each stock 
 ---
 
 ## Installation
-Go to the official Python website:
-https://www.python.org/downloads/
-
-Download Python and (macOS)
--Open a terminal
+Install dependencies with pip:
 ```bash
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+pip install -r requirements.txt
+```
+
+### Running the App
+Start the Flask server:
 
 ```bash
-brew install python 
-Verify python is install
-python3 --version
+python app.py
+```
 
-Download yfinance and pandas
-Open the terminal
-```bash
-pip install yfinance pandas
+The console shows search queries and evaluations for troubleshooting.
+
+### Adjusting Scoring Weights
+Use the settings button on the web interface to open the weight modal. Adjust the
+weights so that the total equals 100 and click **Save** to update scores.
 ---
 ## Updating Ticker List
 The application now downloads the latest list of U.S. and Canadian tickers at
