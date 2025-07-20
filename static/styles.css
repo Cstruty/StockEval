@@ -308,7 +308,6 @@ input[type="number"]:focus,
   z-index: 1000;
   justify-content: center;
   align-items: center;
-  padding: 20px;
   box-sizing: border-box;
 }
 
@@ -463,6 +462,9 @@ input[type="number"]:focus,
   justify-content: space-between;
   color: #1e1e1e;
 }
+#weight-chart svg {
+  display: block;
+}
 #weight-header-content h3{
  margin-top: 0px;
 }
@@ -495,6 +497,7 @@ input[type="number"]:focus,
 #weight-chart circle.bg {
   stroke: #e0e0e0;
 }
+
 
 #weight-chart circle.progress {
   stroke: #000; /* default if not using green/red/black */
