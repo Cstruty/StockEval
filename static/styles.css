@@ -201,6 +201,7 @@ button:focus-visible {
 
 /* ==== Inputs ==== */
 input[type="text"],
+input[type="number"],
 #search {
   background: white;
   border: 2px solid #1e1e1e;
@@ -222,6 +223,7 @@ input[type="text"],
 }
 
 input[type="text"]:focus,
+input[type="number"]:focus,
 #search:focus {
   border-color: #1e1e1e;
   box-shadow: 0 0 0 3px rgba(26, 26, 26, 1);
@@ -330,24 +332,10 @@ input[type="text"]:focus,
 }
 
 #weight-modal-content input[type="number"] {
-  background: white;
-  border: 2px solid #1e1e1e;
-  color: #1e1e1e;
   padding: 6px 10px;
-  font-weight: 600;
-  font-size: 14px;
-  border-radius: 6px;
-  outline: none;
-  transition: all 0.3s ease;
-  box-sizing: border-box;
   text-align: right;
   width: 70px;
-  -webkit-appearance: none;
   -moz-appearance: textfield;
-}
-
-#weight-modal-content input[type="number"]:focus {
-  box-shadow: 0 0 0 3px rgba(26, 26, 26, 1);
 }
 
 #weight-modal-content input[type="number"]::-webkit-outer-spin-button,
