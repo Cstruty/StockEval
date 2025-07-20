@@ -13,7 +13,6 @@ body {
 }
 
 input,
-button,
 table,
 th,
 td,
@@ -430,16 +429,42 @@ input[type="text"]:focus,
 }
 
 /* ==== Weight Donut ==== */
+/* ==== Weight Donut Row Layout ==== */
+#weight-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-top: 24px; /* adjust as needed for spacing above */
+}
+
+/* ==== Weight Donut ==== */
+#weight-chart-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center; /* or center if you want the donut centered */
+  justify-content: space-between;
+}
+
 #weight-chart {
   display: flex;
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
-  margin-bottom: 10px;
+  margin-left: -13px;
+}
+
+.weight-label {
+  font-size: 1em;
+  color: #1e1e1e;
+  font-weight: bold;
+  line-height: 1;
+  padding-bottom: 10px;
 }
 
 #weight-chart svg {
   width: 80px;
   height: 80px;
-  transform: rotate(-90deg);
 }
 
 #weight-chart circle {
@@ -452,9 +477,9 @@ input[type="text"]:focus,
 }
 
 #weight-chart circle.progress {
-  stroke: #000;
-  stroke-dasharray: 283;
-  stroke-dashoffset: 283;
+  stroke: #000; /* default if not using green/red/black */
+  stroke-dasharray: 157; /* 2 * pi * r for r=25 */
+  stroke-dashoffset: 157;
   transition: stroke-dashoffset 0.4s ease;
 }
 
@@ -471,9 +496,10 @@ input[type="text"]:focus,
 }
 
 #weight-chart text {
-  transform: rotate(90deg);
   font-size: 18px;
   fill: #1e1e1e;
+  dominant-baseline: middle;
+  text-anchor: middle;
 }
 
 #weight-chart text.green {
@@ -486,4 +512,14 @@ input[type="text"]:focus,
 
 #weight-chart text.black {
   fill: #000;
+}
+
+/* Optional: Style for the Save button, if you want */
+#weight-row button {
+  min-width: 60px;
+  padding: 6px 16px;
+  font-size: 1em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
