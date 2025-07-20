@@ -99,8 +99,10 @@
         <!-- Scoring weight modal -->
         <div id="weight-modal">
             <div id="weight-modal-content">
-                <button class="modal-close" onclick="closeWeightModal()">✖</button>
-                <h3>Adjust Scoring Weights</h3>
+                <div id="weight-header-content">
+                    <button class="modal-close" onclick="closeWeightModal()">✖</button>
+                    <h3>Adjust Scoring Weights</h3>
+                </div>
                 <div class="weight-inputs">
                     <label>ROCE <input type="number" id="weight-roce" oninput="updateWeightTotal()"></label>
                     <label>Interest Coverage <input type="number" id="weight-interest" oninput="updateWeightTotal()"></label>

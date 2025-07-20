@@ -335,6 +335,7 @@ input[type="number"]:focus,
   padding: 6px 10px;
   text-align: right;
   width: 70px;
+  flex: 0 0 auto;
   -moz-appearance: textfield;
 }
 
@@ -438,23 +439,33 @@ input[type="number"]:focus,
 }
 
 /* ==== Weight Donut ==== */
-/* ==== Weight Donut Row Layout ==== */
+
 #weight-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  margin-top: 24px; /* adjust as needed for spacing above */
+  margin-top: 24px; 
 }
 
 /* ==== Weight Donut ==== */
+
 #weight-chart-container {
   display: flex;
   flex-direction: row;
-  align-items: center; /* or center if you want the donut centered */
+  align-items: center; 
   justify-content: space-between;
 }
-
+#weight-header-content {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  color: #1e1e1e;
+}
+#weight-header-content h3{
+ margin-top: 0px;
+}
 #weight-chart {
   display: flex;
   flex-direction: column;
@@ -521,14 +532,4 @@ input[type="number"]:focus,
 
 #weight-chart text.black {
   fill: #000;
-}
-
-/* Optional: Style for the Save button, if you want */
-#weight-row button {
-  min-width: 60px;
-  padding: 6px 16px;
-  font-size: 1em;
-  display: flex;
-  align-items: center;
-  gap: 6px;
 }
