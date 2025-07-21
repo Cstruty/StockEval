@@ -641,3 +641,51 @@ body.about-page #page-background {
   margin-bottom: 20px;
 }
 
+/* ==== Mobile Layout Adjustments ==== */
+@media (max-width: 600px) {
+  nav {
+    flex-direction: column;
+    gap: 15px;
+  }
+  #initial-view,
+  #results-view {
+    padding: 0 10px;
+  }
+  .search-container {
+    flex-direction: column;
+    min-width: 0;
+  }
+  .search-container button {
+    transform: none;
+  }
+  #watchlist-table th,
+  #watchlist-table td {
+    padding: 4px 6px;
+    font-size: 12px;
+  }
+  .photo-row {
+    flex-direction: column;
+  }
+  #skiing-photo,
+  #profile-photo,
+  #fishing-photo {
+    width: 90vw;
+    height: auto;
+  }
+  .resume-viewer iframe {
+    width: 90vw !important;
+    min-width: 90vw !important;
+    height: 600px !important;
+    min-height: 600px !important;
+  }
+  #tools-container {
+    flex-direction: column;
+    padding: 20px;
+  }
+  .tools-column + .tools-column {
+    border-left: none;
+    border-top: 2px solid #fff;
+    margin-top: 20px;
+  }
+}
+
