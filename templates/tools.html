@@ -1,24 +1,73 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Other Tools</title>
+    <!-- ==== Inline Styles for Links and Nav (consider moving to styles.css) ==== -->
+    <style>
+        a {
+            color: white;
+            text-decoration: underline;
+        }
+        a:visited {
+            color: #e0e0e0; 
+        }
+        nav a {
+            color: white;
+        }
+        #tools-container h2 {}
+    </style>
+    <!-- ==== Main App Styles ==== -->
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
 </head>
+
 <body>
+    <!-- ==== Background Container ==== -->
     <div id="page-background">
+
+        <!-- ==== Main Navigation ==== -->
         <nav>
             <a href="/">Home</a>
-            <a href="/AboutMe">About Me</a>
             <a href="/OtherTools">Other Tools</a>
+            <a href="/AboutMe">About Me</a>
         </nav>
+
+        <!-- ==== Main Tools Container ==== -->
         <div id="tools-container">
+
+            <!-- ==== Brokers Column ==== -->
             <div class="tools-column">
                 <h2>Brokers</h2>
+                <a href="https://www.interactivebrokers.ca/" target="_blank">Interactive Broker</a>
+                <br> -Good for US stocks
+                <br> -Only $3 commissions
+                <br> -Most extensive broker when it comes to giving you information on the stock you're looking at.
+                <br>
+                <a href="https://www.wealthsimple.com/en-ca" target="_blank">Wealthsimple</a>
+                <br>-Good for everything else 
+                <br>-No commission fee on Canadian stocks and ETFs
+                <br>-Otherwise doesn't offer much in terms of stocks but between the two you'll have everything covered.
             </div>
+
+            <!-- ==== Other Tools Column ==== -->
             <div class="tools-column">
                 <h2>Other Tools</h2>
+                <a href="https://finviz.com/screener.ashx?v=111" target="_blank">Finviz</a>
+                <br>-For finding new stocks to buy 
+                <br>-Good filters to use are: Return on Investment, Insider Ownership, Debt to Equity, Current Ratio, Earnings & FCF Growth and Profitability Margins
+                <br>
+                <a href="https://www.tradingview.com/?utm_source=google_ads&utm_medium=cpc&utm_campaign=PPCBRAND_GOOGLE_GLOBAL_EN_SALES_BRAND&utm_id=22433085976&utm_term=tradingview&utm_content=745255148625&matchtype=e&gad_source=1&gad_campaignid=22433085976&gbraid=0AAAAABUK9i3efOYht3-QicUu3yq-GTuoy&gclid=CjwKCAjwp_LDBhBCEiwAK7Fnkl9rjZR7prK1yyFXbGYN0ghopqP8oBe-zBosLHczt9A3OuFjXLFCOBoC5AYQAvD_BwE" 
+                   target="_blank">Trading View</a>
+                <br>Shows similar metrics and data to Interactive Broker but I find Trading View has a better user interface and shows the most relevant information first
+                <br>
+                <a href="https://www.blossomsocial.com/" target="_blank">Blossom Social</a>
+                <br>Basically social media but for stock traders. If there's a trader you like to follow, most likely they'll have an account here 
             </div>
+
         </div>
+        <!-- ==== End Tools Container ==== -->
     </div>
+    <!-- ==== End Page Background ==== -->
 </body>
+
 </html>

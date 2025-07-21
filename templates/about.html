@@ -1,23 +1,79 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>About Me</title>
+    <!-- ==== Inline Styles for Links and Nav (can be moved to main CSS) ==== -->
+    <style>
+        a {
+            color: white;
+            text-decoration: underline;
+        }
+
+        a:visited {
+            color: #e0e0e0;
+        }
+
+        nav a {
+            color: white;
+        }
+
+        #tools-container h2 {}
+    </style>
+    <!-- ==== Main App Styles ==== -->
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
 </head>
-<body>
+
+<body class="about-page">
+    <!-- ==== Full-Page Background (matches app style) ==== -->
     <div id="page-background">
+
+        <!-- ==== Main Navigation ==== -->
         <nav>
             <a href="/">Home</a>
-            <a href="/AboutMe">About Me</a>
             <a href="/OtherTools">Other Tools</a>
+            <a href="/AboutMe">About Me</a>
         </nav>
+
+        <!-- ==== About Section Container ==== -->
         <div class="about-container">
-            <img src="{{ url_for('static', filename='icons/loading.gif') }}" alt="Profile Photo" id="profile-photo">
-            <p id="about-text">This is a space to write about yourself.</p>
-            <div id="resume-link">
-                <a href="#">My Resume</a>
+
+            <!-- ==== Page Title ==== -->
+            <h1>About Me</h1>
+
+            <!-- ==== Row of Personal Photos ==== -->
+            <div class="photo-row">
+                <img src="{{ url_for('static', filename='icons/skiing.jpg') }}" alt="Skiing Photo" id="skiing-photo">
+                <img src="{{ url_for('static', filename='icons/graduation.jpg') }}" alt="Profile Photo" id="profile-photo">
+                <img src="{{ url_for('static', filename='icons/fishing.jpg') }}" alt="Fishing Photo" id="fishing-photo">
             </div>
+
+            <!-- ==== Short Personal Introduction ==== -->
+            <p id="about-text">
+                Hello, My name is Collin Struthers. I am computer Engineer from the university of Guelph.
+                My hobbies include skiing, fishing, golf, stocks (obviously), music, movies and video games. I hope you
+                enjoy my website
+                it was inspire by my favourite stock youtuber 
+                <a href="https://www.youtube.com/@TheCashFlowCompounder" target="_blank">The Cash Flow Computer</a>.
+                If you have any suggestions on how I can improve it, please email me at
+                <a href="collinstruthers@gmail.com" target="_blank">collinstruthers@gmail.com</a>
+            </p>
+
+            <!-- ==== Resume PDF Viewer ==== -->
+            <div class="resume-viewer">
+                <iframe src="{{ url_for('static', filename='resume.pdf') }}"
+                        width="100%" height="900px"
+                        style="border: none; min-height: 600px;">
+                    <!-- Fallback for browsers that can't embed PDFs -->
+                    This browser does not support PDFs. Please download the PDF to view it:
+                    <a href="{{ url_for('static', filename='resume.pdf') }}">Download PDF</a>
+                </iframe>
+            </div>
+
         </div>
+        <!-- ==== End About Container ==== -->
+
     </div>
+    <!-- ==== End Page Background ==== -->
 </body>
 </html>
