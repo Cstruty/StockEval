@@ -558,6 +558,37 @@ input[type="number"]:focus,
 #weight-chart text.red { fill: red; }
 #weight-chart text.black { fill: #000; }
 
+/* Small donut used for score column */
+.score-donut {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.score-donut svg {
+  width: 40px;
+  height: 40px;
+  display: block;
+}
+.score-donut circle {
+  fill: none;
+  stroke-width: 6;
+}
+.score-donut circle.bg {
+  stroke: #e0e0e0;
+}
+.score-donut circle.progress {
+  stroke: #000;
+  stroke-dasharray: 113;
+  stroke-dashoffset: 113;
+  transition: stroke-dashoffset 0.4s ease;
+}
+.score-donut text {
+  font-size: 12px;
+  fill: #1e1e1e;
+  dominant-baseline: middle;
+  text-anchor: middle;
+}
+
 /* ==== About Page ==== */
 .about-container {
   display: flex;

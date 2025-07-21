@@ -129,7 +129,14 @@ function updateScores() {
         };
         const score = calculateScore(metrics);
         const cell = row.cells[11];
-        if (cell) cell.innerHTML = colorScore(`${score}/100`);
+        if (cell) {
+            const donut = cell.querySelector('.score-donut');
+            if (donut) {
+                updateScoreDonut(donut, score);
+            } else {
+                cell.innerHTML = createScoreDonut(score);
+            }
+        }
         row.dataset.score = score;
     });
 }
@@ -491,7 +498,10 @@ function buildRow(data) {
             case "Cash Conversion Ratio (FCF)": val = colorMetric(val, 90, 70); break;
             case "Gross Profit / Assets": val = colorMetric(val, 30, 10); break;
             case "Dividend Yield": val = colorMetric(val, 3, 1); break;
-            case "Score": val = colorScore(val); break;
+            case "Score":
+                const num = parseFloat(String(val).replace('/100', '')) || 0;
+                val = createScoreDonut(num);
+                break;
         }
         row += `<td>${val}</td>`;
     });
@@ -518,6 +528,36 @@ function colorScore(value) {
     if (isNaN(number)) return value;
     let color = number >= 80 ? "#28a745" : number >= 50 ? "orange" : "red";
     return `<span style="color: ${color}">${value}</span>`;
+}
+
+/** Create SVG donut for a given score */
+function createScoreDonut(score) {
+    return (
+        `<div class="score-donut" data-score="${score}">` +
+        `<svg viewBox="0 0 40 40">` +
+        `<circle class="bg" cx="20" cy="20" r="18" />` +
+        `<circle class="progress" cx="20" cy="20" r="18" />` +
+        `<text x="20" y="20" text-anchor="middle" dominant-baseline="middle">${score}</text>` +
+        `</svg>` +
+        `</div>`
+    );
+}
+
+/** Animate and color a score donut */
+function updateScoreDonut(wrapper, score) {
+    const circle = wrapper.querySelector('circle.progress');
+    const text = wrapper.querySelector('text');
+    if (!circle || !text) return;
+    const radius = circle.r.baseVal.value;
+    const circumference = 2 * Math.PI * radius;
+    circle.style.strokeDasharray = `${circumference}`;
+    const offset = circumference - (score / 100) * circumference;
+    circle.style.strokeDashoffset = offset;
+    const color = score >= 80 ? '#28a745' : score >= 50 ? 'orange' : 'red';
+    circle.style.stroke = color;
+    text.style.fill = color;
+    text.textContent = score;
+    wrapper.dataset.score = score;
 }
 
 // ==== QUOTES ====
