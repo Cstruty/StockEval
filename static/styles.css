@@ -199,12 +199,25 @@ span {
 tbody tr {
   background-color: rgba(255,255,255,0.1);
   transition: background-color 0.3s ease;
+  position: relative;
 }
 tbody tr:nth-child(even) {
   background-color: rgba(255,255,255,0.05);
 }
 tbody tr:hover {
   background-color: rgba(26,26,26,1);
+}
+
+tbody tr::after {
+  content: "\274C";
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 28px;
+  color: red;
+  opacity: var(--delete-opacity, 0);
+  pointer-events: none;
 }
 
 td {
@@ -705,6 +718,14 @@ body.about-page #page-background {
     text-align: left;
     border: none;
     padding: 4px 6px;
+    position: relative;
+  }
+  #watchlist-table td::before {
+    content: attr(data-label);
+    font-size: 0.75em;
+    font-weight: bold;
+    opacity: 0.8;
+    display: block;
   }
   /* Custom layout for each cell */
   #watchlist-table td:nth-child(1) { grid-row: 1; grid-column: 1; }
@@ -720,7 +741,6 @@ body.about-page #page-background {
 
   #watchlist-table td:nth-child(4) { grid-row: 4; grid-column: 1; }
   #watchlist-table td:nth-child(10) { grid-row: 4; grid-column: 2; }
-  #watchlist-table td:nth-child(14) { grid-row: 4; grid-column: 3; }
 
   #watchlist-table td:nth-child(5) { grid-row: 5; grid-column: 1; }
   #watchlist-table td:nth-child(11) { grid-row: 5; grid-column: 2; }
