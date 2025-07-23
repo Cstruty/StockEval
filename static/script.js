@@ -534,10 +534,10 @@ function colorScore(value) {
 function createScoreDonut(score) {
     return (
         `<div class="score-donut" data-score="${score}">` +
-        `<svg viewBox="0 0 40 40">` +
-        `<circle class="bg" cx="20" cy="20" r="18" />` +
-        `<circle class="progress" cx="20" cy="20" r="18" />` +
-        `<text x="20" y="20" text-anchor="middle" dominant-baseline="middle">${score}</text>` +
+        `<svg viewBox="0 0 40 40" style="overflow: visible">` +
+        `<circle class="bg" cx="15" cy="20" r="14" />` +
+        `<circle class="progress" cx="15" cy="20" r="14" />` +
+        `<text x="15" y="20" text-anchor="middle" dominant-baseline="middle">${score}</text>` +
         `</svg>` +
         `</div>`
     );
