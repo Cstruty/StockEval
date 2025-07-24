@@ -235,6 +235,7 @@ async function evaluateStock(symbol) {
         rowNode.dataset.gp_assets = parseMetric(data["Gross Profit / Assets"], true);
         rowNode.dataset.ai = 0;
         document.getElementById("watchlist-body").appendChild(rowNode);
+        enableSwipeDelete(rowNode);
         updateScores();
     } catch (err) {
         console.error("Evaluation failed:", err);
@@ -377,16 +378,14 @@ function exportToExcel() {
     const originalTable = document.getElementById("watchlist-table");
     const clonedTable = originalTable.cloneNode(true);
 
-    // Remove last "Delete" column and AI column
+    // Remove AI column before export
     const headerRow = clonedTable.querySelector("thead tr");
-    if (headerRow) headerRow.removeChild(headerRow.lastElementChild);
     const headers = Array.from(headerRow.cells);
     let aiColIndex = headers.findIndex(th => th.textContent.trim().toLowerCase() === "qualitative analysis");
     if (aiColIndex === -1) aiColIndex = headers.length - 1;
     if (headerRow.cells[aiColIndex]) headerRow.removeChild(headerRow.cells[aiColIndex]);
     clonedTable.querySelectorAll("tbody tr").forEach(row => {
         if (row.cells[aiColIndex]) row.removeChild(row.cells[aiColIndex]);
-        if (row.lastElementChild) row.removeChild(row.lastElementChild);
     });
 
     const wb = XLSX.utils.book_new();
@@ -483,11 +482,11 @@ function buildRow(data) {
     ];
     let row = `<tr id="row-${data.Symbol}" data-company="${data["Company Name"] || ''}" data-country="${data.Country || ''}">`;
     // Symbol
-    row += `<td>${data.Symbol || 'N/A'}</td>`;
+    row += `<td data-label="Symbol">${data.Symbol || 'N/A'}</td>`;
     // Company and country
     const company = data["Company Name"] || 'N/A';
     const country = data.Country || '';
-    row += `<td><div>${company}</div><div class="country-sub">${country}</div></td>`;
+    row += `<td data-label="Company"><div>${company}</div><div class="country-sub">${country}</div></td>`;
     preferredOrder.slice(1).forEach(key => {
         let val = data[key] || "N/A";
         switch (key) {
@@ -503,10 +502,10 @@ function buildRow(data) {
                 val = createScoreDonut(num);
                 break;
         }
-        row += `<td>${val}</td>`;
+        const label = key === 'Cash Conversion Ratio (FCF)' ? 'CCR' : key;
+        row += `<td data-label="${label}">${val}</td>`;
     });
-    row += `<td><button class="ai-button" onclick="runAIForRow('${data.Symbol}', this)">Run</button></td>`;
-    row += `<td><button onclick="removeRow('${data.Symbol}')">❌</button></td>`;
+    row += `<td data-label="AI Analysis"><button class="ai-button" onclick="runAIForRow('${data.Symbol}', this)">Run</button></td>`;
     row += "</tr>";
     return row;
 }
@@ -558,6 +557,50 @@ function updateScoreDonut(wrapper, score) {
     text.style.fill = color;
     text.textContent = score;
     wrapper.dataset.score = score;
+}
+
+/**
+ * Enable swipe-to-delete behavior on a table row.
+ * Swiping left gradually reveals a big red ❌. If the swipe
+ * distance exceeds the threshold, the row is removed.
+ */
+function enableSwipeDelete(row) {
+    let startX = 0;
+    let currentX = 0;
+    let dragging = false;
+
+    function onPointerDown(e) {
+        startX = e.clientX || e.touches?.[0]?.clientX || 0;
+        dragging = true;
+        row.style.transition = 'none';
+    }
+
+    function onPointerMove(e) {
+        if (!dragging) return;
+        currentX = e.clientX || e.touches?.[0]?.clientX || 0;
+        const dx = Math.min(0, currentX - startX);
+        row.style.transform = `translateX(${dx}px)`;
+        row.style.setProperty('--delete-opacity', Math.min(Math.abs(dx) / 80, 1));
+    }
+
+    function endSwipe() {
+        if (!dragging) return;
+        dragging = false;
+        const dx = currentX - startX;
+        row.style.transition = 'transform 0.2s';
+        if (dx < -100) {
+            removeRow(row.id.replace('row-', ''));
+        } else {
+            row.style.transform = '';
+            row.style.setProperty('--delete-opacity', 0);
+        }
+    }
+
+    row.addEventListener('pointerdown', onPointerDown);
+    row.addEventListener('pointermove', onPointerMove);
+    row.addEventListener('pointerup', endSwipe);
+    row.addEventListener('pointercancel', endSwipe);
+    row.addEventListener('pointerleave', endSwipe);
 }
 
 // ==== QUOTES ====
