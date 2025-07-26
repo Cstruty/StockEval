@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- SheetJS for Excel export/import -->
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    <!-- Lottie for animated add/delete button -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.7.4/lottie.min.js"></script>
     <title>Stock Watchlist</title>
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='icons/website-icon.png') }}">
     <!-- Custom CSS -->
@@ -250,35 +252,35 @@
                 <!-- Inputs for custom score weighting -->
                 <div class="weight-inputs">
                     <div class="weight-item" data-key="roce" id="row-roce">
-                        <button class="weight-toggle" onclick="toggleWeight('roce')">❌</button>
+                        <button class="weight-toggle" onclick="toggleWeight('roce')"></button>
                         <label><span class="metric-name">ROCE</span> <input type="number" id="weight-roce" oninput="updateWeightTotal()"></label>
                     </div>
                     <div class="weight-item" data-key="interestCov" id="row-interestCov">
-                        <button class="weight-toggle" onclick="toggleWeight('interestCov')">❌</button>
+                        <button class="weight-toggle" onclick="toggleWeight('interestCov')"></button>
                         <label><span class="metric-name">Interest Coverage</span> <input type="number" id="weight-interest" oninput="updateWeightTotal()"></label>
                     </div>
                     <div class="weight-item" data-key="grossMargin" id="row-grossMargin">
-                        <button class="weight-toggle" onclick="toggleWeight('grossMargin')">❌</button>
+                        <button class="weight-toggle" onclick="toggleWeight('grossMargin')"></button>
                         <label><span class="metric-name">Gross Margin</span> <input type="number" id="weight-gross" oninput="updateWeightTotal()"></label>
                     </div>
                     <div class="weight-item" data-key="netMargin" id="row-netMargin">
-                        <button class="weight-toggle" onclick="toggleWeight('netMargin')">❌</button>
+                        <button class="weight-toggle" onclick="toggleWeight('netMargin')"></button>
                         <label><span class="metric-name">Net Margin</span> <input type="number" id="weight-net" oninput="updateWeightTotal()"></label>
                     </div>
                     <div class="weight-item" data-key="ccr" id="row-ccr">
-                        <button class="weight-toggle" onclick="toggleWeight('ccr')">❌</button>
+                        <button class="weight-toggle" onclick="toggleWeight('ccr')"></button>
                         <label><span class="metric-name">Cash Conversion Ratio</span> <input type="number" id="weight-ccr" oninput="updateWeightTotal()"></label>
                     </div>
                     <div class="weight-item" data-key="gpAssets" id="row-gpAssets">
-                        <button class="weight-toggle" onclick="toggleWeight('gpAssets')">❌</button>
+                        <button class="weight-toggle" onclick="toggleWeight('gpAssets')"></button>
                         <label><span class="metric-name">Gross Profit / Assets</span> <input type="number" id="weight-gp" oninput="updateWeightTotal()"></label>
                     </div>
                     <div class="weight-item" data-key="peRatio" id="row-peRatio">
-                        <button class="weight-toggle" onclick="toggleWeight('peRatio')">❌</button>
+                        <button class="weight-toggle" onclick="toggleWeight('peRatio')"></button>
                         <label><span class="metric-name">P/E Ratio</span> <input type="number" id="weight-pe" oninput="updateWeightTotal()"></label>
                     </div>
                     <div class="weight-item" data-key="dividendYield" id="row-dividendYield">
-                        <button class="weight-toggle" onclick="toggleWeight('dividendYield')">❌</button>
+                        <button class="weight-toggle" onclick="toggleWeight('dividendYield')"></button>
                         <label><span class="metric-name">Dividend Yield</span> <input type="number" id="weight-div" oninput="updateWeightTotal()"></label>
                     </div>
                 </div>
