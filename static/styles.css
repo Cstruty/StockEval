@@ -405,6 +405,22 @@ input[type="number"]:focus,
   margin-bottom: 8px;
   color: #1e1e1e;
 }
+
+.weight-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.weight-item .metric-name.deleted {
+  text-decoration: line-through;
+}
+.weight-toggle {
+  margin-right: 6px;
+}
+.weight-item.deleted .metric-name {
+  text-decoration: line-through;
+}
 #weight-modal-content input[type="number"] {
   padding: 6px 10px;
   text-align: right;
