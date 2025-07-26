@@ -6,18 +6,28 @@ const scoringWeights = {
     interestCov: 30,
     grossMargin: 10,
     netMargin: 10,
-    ccr: 10,
-    gpAssets: 10
+    ccr: 5,
+    gpAssets: 5,
+    peRatio: 5,
+    dividendYield: 5
 };
 
 /** Open the "Adjust Scoring Weights" modal and populate inputs */
 function openWeightModal() {
-    document.getElementById('weight-roce').value = scoringWeights.roce;
-    document.getElementById('weight-interest').value = scoringWeights.interestCov;
-    document.getElementById('weight-gross').value = scoringWeights.grossMargin;
-    document.getElementById('weight-net').value = scoringWeights.netMargin;
-    document.getElementById('weight-ccr').value = scoringWeights.ccr;
-    document.getElementById('weight-gp').value = scoringWeights.gpAssets;
+    const map = {
+        'weight-roce': scoringWeights.roce,
+        'weight-interest': scoringWeights.interestCov,
+        'weight-gross': scoringWeights.grossMargin,
+        'weight-net': scoringWeights.netMargin,
+        'weight-ccr': scoringWeights.ccr,
+        'weight-gp': scoringWeights.gpAssets,
+        'weight-pe': scoringWeights.peRatio,
+        'weight-div': scoringWeights.dividendYield
+    };
+    Object.keys(map).forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = map[id];
+    });
     document.getElementById('weight-modal').style.display = 'flex';
     updateWeightTotal();
 }
@@ -29,14 +39,12 @@ function closeWeightModal() {
 
 /** Get total of all weights entered in modal */
 function getWeightTotal() {
-    return (
-        (parseFloat(document.getElementById('weight-roce').value) || 0) +
-        (parseFloat(document.getElementById('weight-interest').value) || 0) +
-        (parseFloat(document.getElementById('weight-gross').value) || 0) +
-        (parseFloat(document.getElementById('weight-net').value) || 0) +
-        (parseFloat(document.getElementById('weight-ccr').value) || 0) +
-        (parseFloat(document.getElementById('weight-gp').value) || 0)
-    );
+    const ids = ['weight-roce','weight-interest','weight-gross','weight-net','weight-ccr','weight-gp','weight-pe','weight-div'];
+    return ids.reduce((sum, id) => {
+        const el = document.getElementById(id);
+        if (!el) return sum;
+        return sum + (parseFloat(el.value) || 0);
+    }, 0);
 }
 
 /** Updates the donut chart in the scoring modal based on total */
@@ -50,6 +58,28 @@ function clearWeightInputs() {
     document.querySelectorAll('#weight-modal input[type="number"]').forEach(inp => {
         inp.value = '';
     });
+    updateWeightTotal();
+}
+
+/** Toggle delete/add state for a weight row */
+function toggleWeight(key) {
+    const row = document.getElementById(`row-${key}`);
+    if (!row) return;
+    const input = row.querySelector('input');
+    const nameSpan = row.querySelector('.metric-name');
+    const btn = row.querySelector('.weight-toggle');
+    if (row.classList.contains('deleted')) {
+        row.classList.remove('deleted');
+        if (nameSpan) nameSpan.classList.remove('deleted');
+        btn.textContent = '❌';
+        input.value = row.dataset.prev || 0;
+    } else {
+        row.classList.add('deleted');
+        if (nameSpan) nameSpan.classList.add('deleted');
+        row.dataset.prev = input.value;
+        input.value = 0;
+        btn.textContent = '+';
+    }
     updateWeightTotal();
 }
 
@@ -82,12 +112,17 @@ function saveWeights() {
         showToast('Total weight must equal 100');
         return;
     }
-    scoringWeights.roce = parseFloat(document.getElementById('weight-roce').value) || 0;
-    scoringWeights.interestCov = parseFloat(document.getElementById('weight-interest').value) || 0;
-    scoringWeights.grossMargin = parseFloat(document.getElementById('weight-gross').value) || 0;
-    scoringWeights.netMargin = parseFloat(document.getElementById('weight-net').value) || 0;
-    scoringWeights.ccr = parseFloat(document.getElementById('weight-ccr').value) || 0;
-    scoringWeights.gpAssets = parseFloat(document.getElementById('weight-gp').value) || 0;
+    const rows = document.querySelectorAll('.weight-item');
+    rows.forEach(row => {
+        const key = row.dataset.key;
+        const input = row.querySelector('input');
+        if (row.classList.contains('deleted')) {
+            delete scoringWeights[key];
+            row.remove();
+        } else {
+            scoringWeights[key] = parseFloat(input.value) || 0;
+        }
+    });
     closeWeightModal();
     updateScores();
     showToast('Scores updated');
@@ -113,6 +148,10 @@ function calculateScore(metrics) {
     score += Math.max(Math.min((metrics.netMargin / 0.15) * scoringWeights.netMargin, scoringWeights.netMargin), 0);
     score += Math.max(Math.min((metrics.ccr / 0.90) * scoringWeights.ccr, scoringWeights.ccr), 0);
     score += Math.max(Math.min((metrics.gpAssets / 0.3) * scoringWeights.gpAssets, scoringWeights.gpAssets), 0);
+    if (scoringWeights.peRatio)
+        score += Math.max(Math.min((20 / (metrics.peRatio || 1)) * scoringWeights.peRatio, scoringWeights.peRatio), 0);
+    if (scoringWeights.dividendYield)
+        score += Math.max(Math.min((metrics.dividendYield / 0.03) * scoringWeights.dividendYield, scoringWeights.dividendYield), 0);
     return Math.min(Math.round(score), 100);
 }
 
@@ -125,7 +164,9 @@ function updateScores() {
             grossMargin: parseFloat(row.dataset.gross_margin || 0),
             netMargin: parseFloat(row.dataset.net_margin || 0),
             ccr: parseFloat(row.dataset.ccr || 0),
-            gpAssets: parseFloat(row.dataset.gp_assets || 0)
+            gpAssets: parseFloat(row.dataset.gp_assets || 0),
+            peRatio: parseFloat(row.dataset.pe_ratio || 0),
+            dividendYield: parseFloat(row.dataset.dividend_yield || 0)
         };
         const score = calculateScore(metrics);
         const cell = row.cells[11];
@@ -357,7 +398,9 @@ function importFromExcel(event) {
                 'Gross Margin': 'grossMargin',
                 'Net Margin': 'netMargin',
                 'Cash Conversion Ratio': 'ccr',
-                'Gross Profit / Assets': 'gpAssets'
+                'Gross Profit / Assets': 'gpAssets',
+                'P/E Ratio': 'peRatio',
+                'Dividend Yield': 'dividendYield'
             };
             weights.forEach((row) => {
                 if (row.length >= 2 && map[row[0]]) {
@@ -424,7 +467,9 @@ function exportToExcel() {
         ["Gross Margin", scoringWeights.grossMargin],
         ["Net Margin", scoringWeights.netMargin],
         ["Cash Conversion Ratio", scoringWeights.ccr],
-        ["Gross Profit / Assets", scoringWeights.gpAssets]
+        ["Gross Profit / Assets", scoringWeights.gpAssets],
+        ["P/E Ratio", scoringWeights.peRatio],
+        ["Dividend Yield", scoringWeights.dividendYield]
     ];
     const weightSheet = XLSX.utils.aoa_to_sheet(weightRows);
     XLSX.utils.book_append_sheet(wb, weightSheet, "Scoring Weight");

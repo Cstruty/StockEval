@@ -144,7 +144,7 @@ def calc_gross_profit_to_assets(ticker_obj):
 
 # ==== Scoring and Formatting ====
 
-def calculate_score(roce, interest_cov, gross_margin, net_margin, ccr, gp_assets):
+def calculate_score(roce, interest_cov, gross_margin, net_margin, ccr, gp_assets, pe_ratio, div_yield):
     """
     Composite scoring logic using weighted metrics.
     Caps each sub-score at max value.
@@ -152,10 +152,12 @@ def calculate_score(roce, interest_cov, gross_margin, net_margin, ccr, gp_assets
     score = 0
     score += max(min((roce / 0.15) * 30, 30), 0)
     score += max(min((interest_cov / 10) * 30, 30), 0)
-    score += max(min((gross_margin / 0.40) * 15, 10), 0)
-    score += max(min((net_margin / 0.15) * 15, 10), 0)
-    score += max(min((ccr / 0.90) * 10, 10), 0)
-    score += max(min((gp_assets / 0.3) * 10, 10), 0)
+    score += max(min((gross_margin / 0.40) * 10, 10), 0)
+    score += max(min((net_margin / 0.15) * 10, 10), 0)
+    score += max(min((ccr / 0.90) * 5, 5), 0)
+    score += max(min((gp_assets / 0.3) * 5, 5), 0)
+    score += max(min((20 / pe_ratio) * 5 if pe_ratio else 0, 5), 0)
+    score += max(min((div_yield / 0.03) * 5, 5), 0)
     return min(round(score), 100)
 
 def color_metric(val, good, okay):
@@ -284,8 +286,8 @@ def evaluate_single_ticker(ticker, run_ai=False):
         info = stock.info
         name = info.get("longName", "N/A")
         price = info.get("currentPrice", 0)
-        div_yield = info.get("dividendYield")
-        div_yield = f"{div_yield:.2f}%" if div_yield else "N/A"
+        div_yield_raw = info.get("dividendYield") or 0
+        div_yield = f"{div_yield_raw:.2f}%" if div_yield_raw else "N/A"
 
         pe_ratio = calc_pe_ratio(stock)
         roce = calc_roce(stock)
@@ -295,14 +297,16 @@ def evaluate_single_ticker(ticker, run_ai=False):
         ccr = calc_cash_conversion_ratio_ttm(stock)
         gp_assets = calc_gross_profit_to_assets(stock)
 
-        score_val = calculate_score(roce, interest_cov, gross_margin, net_margin, ccr, gp_assets)
+        score_val = calculate_score(roce, interest_cov, gross_margin, net_margin, ccr, gp_assets, pe_ratio, div_yield_raw)
 
         summary = f"""ROCE: {roce:.2%}
 Interest Coverage: {interest_cov:.2f}x
 Gross Margin: {gross_margin:.2%}
 Net Margin: {net_margin:.2%}
 Cash Conversion Ratio: {ccr:.2%}
-Gross Profit to Assets: {gp_assets:.2%}"""
+Gross Profit to Assets: {gp_assets:.2%}
+P/E Ratio: {pe_ratio:.2f}
+Dividend Yield: {div_yield_raw:.2%}"""
 
         qual = ""
         if run_ai:
@@ -346,8 +350,8 @@ def screen_stocks(tickers, run_ai=True):
             info = stock.info
             name = info.get("longName", "N/A")
             price = info.get("currentPrice", 0)
-            div_yield = info.get("dividendYield")
-            div_yield = f"{round(div_yield, 5)}%" if div_yield else "N/A"
+            div_yield_raw = info.get("dividendYield") or 0
+            div_yield = f"{round(div_yield_raw, 5)}%" if div_yield_raw else "N/A"
 
             pe_ratio = calc_pe_ratio(stock)
             roce = calc_roce(stock)
@@ -359,14 +363,16 @@ def screen_stocks(tickers, run_ai=True):
 
             print(f"{ticker}: Price=${price:.2f}, DivYld={div_yield}, P/E={pe_ratio:.2f}, ROCE={roce:.2%}, IntCov={interest_cov:.2f}, GM={gross_margin:.2%}, NM={net_margin:.2%}, CCR={ccr:.2%}, GP/Assets={gp_assets:.2%}")
 
-            score_val = round(calculate_score(roce, interest_cov, gross_margin, net_margin, ccr, gp_assets), 2)
+            score_val = round(calculate_score(roce, interest_cov, gross_margin, net_margin, ccr, gp_assets, pe_ratio, div_yield_raw), 2)
 
             summary = f"""ROCE: {roce:.2%}
 Interest Coverage: {interest_cov:.2f}x
 Gross Margin: {gross_margin:.2%}
 Net Margin: {net_margin:.2%}
 Cash Conversion Ratio: {ccr:.2%}
-Gross Profit to Assets: {gp_assets:.2%}"""
+Gross Profit to Assets: {gp_assets:.2%}
+P/E Ratio: {pe_ratio:.2f}
+Dividend Yield: {div_yield_raw:.2%}"""
 
             qual = "Qualitative analysis not run."
             if run_ai:

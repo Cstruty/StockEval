@@ -249,15 +249,38 @@
                 </div>
                 <!-- Inputs for custom score weighting -->
                 <div class="weight-inputs">
-                    <label>ROCE <input type="number" id="weight-roce" oninput="updateWeightTotal()"></label>
-                    <label>Interest Coverage <input type="number" id="weight-interest"
-                            oninput="updateWeightTotal()"></label>
-                    <label>Gross Margin <input type="number" id="weight-gross" oninput="updateWeightTotal()"></label>
-                    <label>Net Margin <input type="number" id="weight-net" oninput="updateWeightTotal()"></label>
-                    <label>Cash Conversion Ratio <input type="number" id="weight-ccr"
-                            oninput="updateWeightTotal()"></label>
-                    <label>Gross Profit / Assets <input type="number" id="weight-gp"
-                            oninput="updateWeightTotal()"></label>
+                    <div class="weight-item" data-key="roce" id="row-roce">
+                        <button class="weight-toggle" onclick="toggleWeight('roce')">❌</button>
+                        <label><span class="metric-name">ROCE</span> <input type="number" id="weight-roce" oninput="updateWeightTotal()"></label>
+                    </div>
+                    <div class="weight-item" data-key="interestCov" id="row-interestCov">
+                        <button class="weight-toggle" onclick="toggleWeight('interestCov')">❌</button>
+                        <label><span class="metric-name">Interest Coverage</span> <input type="number" id="weight-interest" oninput="updateWeightTotal()"></label>
+                    </div>
+                    <div class="weight-item" data-key="grossMargin" id="row-grossMargin">
+                        <button class="weight-toggle" onclick="toggleWeight('grossMargin')">❌</button>
+                        <label><span class="metric-name">Gross Margin</span> <input type="number" id="weight-gross" oninput="updateWeightTotal()"></label>
+                    </div>
+                    <div class="weight-item" data-key="netMargin" id="row-netMargin">
+                        <button class="weight-toggle" onclick="toggleWeight('netMargin')">❌</button>
+                        <label><span class="metric-name">Net Margin</span> <input type="number" id="weight-net" oninput="updateWeightTotal()"></label>
+                    </div>
+                    <div class="weight-item" data-key="ccr" id="row-ccr">
+                        <button class="weight-toggle" onclick="toggleWeight('ccr')">❌</button>
+                        <label><span class="metric-name">Cash Conversion Ratio</span> <input type="number" id="weight-ccr" oninput="updateWeightTotal()"></label>
+                    </div>
+                    <div class="weight-item" data-key="gpAssets" id="row-gpAssets">
+                        <button class="weight-toggle" onclick="toggleWeight('gpAssets')">❌</button>
+                        <label><span class="metric-name">Gross Profit / Assets</span> <input type="number" id="weight-gp" oninput="updateWeightTotal()"></label>
+                    </div>
+                    <div class="weight-item" data-key="peRatio" id="row-peRatio">
+                        <button class="weight-toggle" onclick="toggleWeight('peRatio')">❌</button>
+                        <label><span class="metric-name">P/E Ratio</span> <input type="number" id="weight-pe" oninput="updateWeightTotal()"></label>
+                    </div>
+                    <div class="weight-item" data-key="dividendYield" id="row-dividendYield">
+                        <button class="weight-toggle" onclick="toggleWeight('dividendYield')">❌</button>
+                        <label><span class="metric-name">Dividend Yield</span> <input type="number" id="weight-div" oninput="updateWeightTotal()"></label>
+                    </div>
                 </div>
                 <!-- Donut chart for visualizing weights -->
                 <div id="weight-chart-container">
