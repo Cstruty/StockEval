@@ -68,23 +68,20 @@ function toggleWeight(key) {
     const input = row.querySelector('input');
     const nameSpan = row.querySelector('.metric-name');
     const btn = row.querySelector('.weight-toggle');
-    btn.classList.remove('rotate-cw', 'rotate-ccw');
-    void btn.offsetWidth; // restart animation
+    const anim = btn ? btn._lottie : null;
     if (row.classList.contains('deleted')) {
-        btn.classList.add('rotate-ccw');
         row.classList.remove('deleted');
         if (nameSpan) {
             nameSpan.classList.add('reverse');
             nameSpan.classList.remove('deleted');
             setTimeout(() => nameSpan.classList.remove('reverse'), 300);
         }
-        setTimeout(() => { btn.textContent = '❌'; }, 150);
+        if (anim) { anim.setDirection(1); anim.play(); }
         input.value = row.dataset.prev || 0;
     } else {
-        btn.classList.add('rotate-cw');
         row.classList.add('deleted');
         if (nameSpan) nameSpan.classList.add('deleted');
-        setTimeout(() => { btn.textContent = '+'; }, 150);
+        if (anim) { anim.setDirection(-1); anim.play(); }
         row.dataset.prev = input.value;
         input.value = 0;
     }
@@ -727,3 +724,18 @@ document.querySelectorAll('#weight-modal input[type="number"]').forEach(inp => {
 // Click-outside-to-close for modals
 enableClickOutsideToClose("ai-modal", "modal-content", closeModal);
 enableClickOutsideToClose("weight-modal", "weight-modal-content", closeWeightModal);
+
+// Initialize lottie animations for weight toggle buttons
+document.querySelectorAll('.weight-toggle').forEach(btn => {
+    const anim = lottie.loadAnimation({
+        container: btn,
+        renderer: 'svg',
+        loop: false,
+        autoplay: false,
+        path: 'static/icons/add-delete.json'
+    });
+    btn._lottie = anim;
+    anim.addEventListener('DOMLoaded', () => {
+        anim.goToAndStop(anim.totalFrames, true); // show delete state
+    });
+});
