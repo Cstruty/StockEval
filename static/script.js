@@ -112,15 +112,30 @@ function saveWeights() {
         showToast('Total weight must equal 100');
         return;
     }
+    const columnMap = {
+        roce: 'roce',
+        interestCov: 'interestcov',
+        grossMargin: 'gross_margin',
+        netMargin: 'net_margin',
+        ccr: 'ccr',
+        gpAssets: 'gp_assets',
+        peRatio: 'pe_ratio',
+        dividendYield: 'dividend_yield'
+    };
     const rows = document.querySelectorAll('.weight-item');
     rows.forEach(row => {
         const key = row.dataset.key;
         const input = row.querySelector('input');
         if (row.classList.contains('deleted')) {
-            delete scoringWeights[key];
-            row.remove();
+            scoringWeights[key] = 0;
         } else {
             scoringWeights[key] = parseFloat(input.value) || 0;
+        }
+        const cls = columnMap[key];
+        if (cls) {
+            document.querySelectorAll(`.col-${cls}`).forEach(el => {
+                el.style.display = row.classList.contains('deleted') ? 'none' : '';
+            });
         }
     });
     closeWeightModal();
@@ -533,6 +548,18 @@ function buildRow(data) {
         "ROCE", "Interest Coverage", "Gross Margin", "Net Margin",
         "Cash Conversion Ratio (FCF)", "Gross Profit / Assets", "Score"
     ];
+    const classMap = {
+        "Price": "price",
+        "Dividend Yield": "dividend_yield",
+        "P/E Ratio": "pe_ratio",
+        "ROCE": "roce",
+        "Interest Coverage": "interestcov",
+        "Gross Margin": "gross_margin",
+        "Net Margin": "net_margin",
+        "Cash Conversion Ratio (FCF)": "ccr",
+        "Gross Profit / Assets": "gp_assets",
+        "Score": "score"
+    };
     let row = `<tr id="row-${data.Symbol}" data-company="${data["Company Name"] || ''}" data-country="${data.Country || ''}">`;
     // Symbol
     row += `<td>${data.Symbol || 'N/A'}</td>`;
@@ -555,7 +582,8 @@ function buildRow(data) {
                 val = createScoreDonut(num);
                 break;
         }
-        row += `<td>${val}</td>`;
+        const cls = classMap[key] || key.toLowerCase().replace(/\s+|\//g, '_');
+        row += `<td class="col-${cls}">${val}</td>`;
     });
     row += `<td><button class="ai-button" onclick="runAIForRow('${data.Symbol}', this)">Run</button></td>`;
     row += `<td><button onclick="removeRow('${data.Symbol}')">❌</button></td>`;
