@@ -412,11 +412,22 @@ input[type="number"]:focus,
   align-items: center;
   margin-bottom: 8px;
 }
+.weight-item label {
+  flex: 1 1 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #1e1e1e !important;
+}
+.weight-item .metric-name {
+  color: #1e1e1e !important;
+}
 .weight-item .metric-name.deleted {
   text-decoration: line-through;
 }
 .weight-toggle {
-  margin-right: 6px;
+  margin-right: 8px;
+  flex: 0 0 auto;
 }
 .weight-item.deleted .metric-name {
   text-decoration: line-through;

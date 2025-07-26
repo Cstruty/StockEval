@@ -142,16 +142,23 @@ function parseMetric(val, isPercent) {
 /** Main financial scoring algorithm based on metrics and weights */
 function calculateScore(metrics) {
     let score = 0;
-    score += Math.max(Math.min((metrics.roce / 0.15) * scoringWeights.roce, scoringWeights.roce), 0);
-    score += Math.max(Math.min((metrics.interestCov / 10) * scoringWeights.interestCov, scoringWeights.interestCov), 0);
-    score += Math.max(Math.min((metrics.grossMargin / 0.40) * scoringWeights.grossMargin, scoringWeights.grossMargin), 0);
-    score += Math.max(Math.min((metrics.netMargin / 0.15) * scoringWeights.netMargin, scoringWeights.netMargin), 0);
-    score += Math.max(Math.min((metrics.ccr / 0.90) * scoringWeights.ccr, scoringWeights.ccr), 0);
-    score += Math.max(Math.min((metrics.gpAssets / 0.3) * scoringWeights.gpAssets, scoringWeights.gpAssets), 0);
-    if (scoringWeights.peRatio)
-        score += Math.max(Math.min((20 / (metrics.peRatio || 1)) * scoringWeights.peRatio, scoringWeights.peRatio), 0);
-    if (scoringWeights.dividendYield)
-        score += Math.max(Math.min((metrics.dividendYield / 0.03) * scoringWeights.dividendYield, scoringWeights.dividendYield), 0);
+    const wRoce = scoringWeights.roce || 0;
+    const wInt = scoringWeights.interestCov || 0;
+    const wGross = scoringWeights.grossMargin || 0;
+    const wNet = scoringWeights.netMargin || 0;
+    const wCcr = scoringWeights.ccr || 0;
+    const wGp = scoringWeights.gpAssets || 0;
+    const wPe = scoringWeights.peRatio || 0;
+    const wDiv = scoringWeights.dividendYield || 0;
+
+    if (wRoce) score += Math.max(Math.min((metrics.roce / 0.15) * wRoce, wRoce), 0);
+    if (wInt) score += Math.max(Math.min((metrics.interestCov / 10) * wInt, wInt), 0);
+    if (wGross) score += Math.max(Math.min((metrics.grossMargin / 0.40) * wGross, wGross), 0);
+    if (wNet) score += Math.max(Math.min((metrics.netMargin / 0.15) * wNet, wNet), 0);
+    if (wCcr) score += Math.max(Math.min((metrics.ccr / 0.90) * wCcr, wCcr), 0);
+    if (wGp) score += Math.max(Math.min((metrics.gpAssets / 0.3) * wGp, wGp), 0);
+    if (wPe) score += Math.max(Math.min((20 / (metrics.peRatio || 1)) * wPe, wPe), 0);
+    if (wDiv) score += Math.max(Math.min((metrics.dividendYield / 0.03) * wDiv, wDiv), 0);
     return Math.min(Math.round(score), 100);
 }
 
