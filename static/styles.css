@@ -455,6 +455,11 @@ input[type="number"]:focus,
   cursor: pointer;
   transition: transform 0.3s ease;
 }
+.weight-toggle .lottie {
+  width: 20px;
+  height: 20px;
+  pointer-events: none;
+}
 
 .weight-toggle.rotate-cw {
   animation: rotateCW 0.3s linear;

@@ -12,6 +12,9 @@ const scoringWeights = {
     dividendYield: 5
 };
 
+// Lottie animations for add/delete buttons keyed by metric
+const weightAnimations = {};
+
 /** Open the "Adjust Scoring Weights" modal and populate inputs */
 function openWeightModal() {
     const map = {
@@ -68,6 +71,7 @@ function toggleWeight(key) {
     const input = row.querySelector('input');
     const nameSpan = row.querySelector('.metric-name');
     const btn = row.querySelector('.weight-toggle');
+    const anim = weightAnimations[key];
     btn.classList.remove('rotate-cw', 'rotate-ccw');
     void btn.offsetWidth; // restart animation
     if (row.classList.contains('deleted')) {
@@ -78,17 +82,40 @@ function toggleWeight(key) {
             nameSpan.classList.remove('deleted');
             setTimeout(() => nameSpan.classList.remove('reverse'), 300);
         }
-        setTimeout(() => { btn.textContent = '❌'; }, 150);
+        if (anim) { anim.setDirection(1); anim.play(); }
         input.value = row.dataset.prev || 0;
     } else {
         btn.classList.add('rotate-cw');
         row.classList.add('deleted');
         if (nameSpan) nameSpan.classList.add('deleted');
-        setTimeout(() => { btn.textContent = '+'; }, 150);
+        if (anim) { anim.setDirection(-1); anim.play(); }
         row.dataset.prev = input.value;
         input.value = 0;
     }
     updateWeightTotal();
+}
+
+/** Initialize Lottie animations for weight toggle buttons */
+function initWeightAnimations() {
+    document.querySelectorAll('.weight-toggle').forEach(btn => {
+        const row = btn.closest('.weight-item');
+        const key = row ? row.dataset.key : null;
+        const container = btn.querySelector('.lottie');
+        const path = btn.dataset.lottie;
+        if (!key || !container || !path || typeof lottie === 'undefined') return;
+        const anim = lottie.loadAnimation({
+            container: container,
+            renderer: 'svg',
+            loop: false,
+            autoplay: false,
+            path: path
+        });
+        anim.addEventListener('DOMLoaded', () => {
+            const total = anim.getDuration(true);
+            anim.goToAndStop(total, true); // start on delete icon
+        });
+        weightAnimations[key] = anim;
+    });
 }
 
 /** Animate and color the donut chart in modal */
@@ -727,3 +754,6 @@ document.querySelectorAll('#weight-modal input[type="number"]').forEach(inp => {
 // Click-outside-to-close for modals
 enableClickOutsideToClose("ai-modal", "modal-content", closeModal);
 enableClickOutsideToClose("weight-modal", "weight-modal-content", closeWeightModal);
+
+// Initialize Lottie animations when script loads
+initWeightAnimations();
