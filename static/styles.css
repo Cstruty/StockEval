@@ -445,8 +445,8 @@ input[type="number"]:focus,
 .weight-toggle {
   margin-right: 8px;
   flex: 0 0 auto;
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -456,8 +456,8 @@ input[type="number"]:focus,
   transition: transform 0.3s ease;
 }
 .weight-toggle .lottie {
-  width: 28px;
-  height: 28px;
+  width: 36px;
+  height: 36px;
   pointer-events: none;
 }
 
