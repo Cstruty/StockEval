@@ -405,6 +405,97 @@ input[type="number"]:focus,
   margin-bottom: 8px;
   color: #1e1e1e;
 }
+
+.weight-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.weight-item label {
+  flex: 1 1 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #1e1e1e !important;
+}
+.weight-item .metric-name {
+  color: #1e1e1e !important;
+  position: relative;
+}
+.weight-item .metric-name::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 2px;
+  background: #ff0000;
+  transform-origin: left;
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+.weight-item .metric-name.deleted::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+.weight-item .metric-name.reverse::after {
+  transform-origin: right;
+}
+.weight-toggle {
+  margin-right: 8px;
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+.weight-toggle .bar {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 14px;
+  height: 2px;
+  background: #1e1e1e;
+  transform-origin: center;
+  transition: transform 0.3s ease;
+}
+.weight-toggle.delete .bar:first-child {
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+.weight-toggle.delete .bar:last-child {
+  transform: translate(-50%, -50%) rotate(-45deg);
+}
+.weight-toggle.add .bar:first-child {
+  transform: translate(-50%, -50%) rotate(0deg);
+}
+.weight-toggle.add .bar:last-child {
+  transform: translate(-50%, -50%) rotate(90deg);
+}
+
+.weight-toggle.rotate-cw {
+  animation: rotateCW 0.3s linear;
+}
+
+.weight-toggle.rotate-ccw {
+  animation: rotateCCW 0.3s linear;
+}
+
+@keyframes rotateCW {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes rotateCCW {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(-360deg); }
+}
 #weight-modal-content input[type="number"] {
   padding: 6px 10px;
   text-align: right;

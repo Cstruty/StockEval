@@ -6,18 +6,28 @@ const scoringWeights = {
     interestCov: 30,
     grossMargin: 10,
     netMargin: 10,
-    ccr: 10,
-    gpAssets: 10
+    ccr: 5,
+    gpAssets: 5,
+    peRatio: 5,
+    dividendYield: 5
 };
 
 /** Open the "Adjust Scoring Weights" modal and populate inputs */
 function openWeightModal() {
-    document.getElementById('weight-roce').value = scoringWeights.roce;
-    document.getElementById('weight-interest').value = scoringWeights.interestCov;
-    document.getElementById('weight-gross').value = scoringWeights.grossMargin;
-    document.getElementById('weight-net').value = scoringWeights.netMargin;
-    document.getElementById('weight-ccr').value = scoringWeights.ccr;
-    document.getElementById('weight-gp').value = scoringWeights.gpAssets;
+    const map = {
+        'weight-roce': scoringWeights.roce,
+        'weight-interest': scoringWeights.interestCov,
+        'weight-gross': scoringWeights.grossMargin,
+        'weight-net': scoringWeights.netMargin,
+        'weight-ccr': scoringWeights.ccr,
+        'weight-gp': scoringWeights.gpAssets,
+        'weight-pe': scoringWeights.peRatio,
+        'weight-div': scoringWeights.dividendYield
+    };
+    Object.keys(map).forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = map[id];
+    });
     document.getElementById('weight-modal').style.display = 'flex';
     updateWeightTotal();
 }
@@ -29,14 +39,12 @@ function closeWeightModal() {
 
 /** Get total of all weights entered in modal */
 function getWeightTotal() {
-    return (
-        (parseFloat(document.getElementById('weight-roce').value) || 0) +
-        (parseFloat(document.getElementById('weight-interest').value) || 0) +
-        (parseFloat(document.getElementById('weight-gross').value) || 0) +
-        (parseFloat(document.getElementById('weight-net').value) || 0) +
-        (parseFloat(document.getElementById('weight-ccr').value) || 0) +
-        (parseFloat(document.getElementById('weight-gp').value) || 0)
-    );
+    const ids = ['weight-roce','weight-interest','weight-gross','weight-net','weight-ccr','weight-gp','weight-pe','weight-div'];
+    return ids.reduce((sum, id) => {
+        const el = document.getElementById(id);
+        if (!el) return sum;
+        return sum + (parseFloat(el.value) || 0);
+    }, 0);
 }
 
 /** Updates the donut chart in the scoring modal based on total */
@@ -50,6 +58,38 @@ function clearWeightInputs() {
     document.querySelectorAll('#weight-modal input[type="number"]').forEach(inp => {
         inp.value = '';
     });
+    updateWeightTotal();
+}
+
+/** Toggle delete/add state for a weight row */
+function toggleWeight(key) {
+    const row = document.getElementById(`row-${key}`);
+    if (!row) return;
+    const input = row.querySelector('input');
+    const nameSpan = row.querySelector('.metric-name');
+    const btn = row.querySelector('.weight-toggle');
+    btn.classList.remove('rotate-cw', 'rotate-ccw');
+    void btn.offsetWidth; // restart animation
+    if (row.classList.contains('deleted')) {
+        btn.classList.add('rotate-ccw');
+        btn.classList.remove('add');
+        btn.classList.add('delete');
+        row.classList.remove('deleted');
+        if (nameSpan) {
+            nameSpan.classList.add('reverse');
+            nameSpan.classList.remove('deleted');
+            setTimeout(() => nameSpan.classList.remove('reverse'), 300);
+        }
+        input.value = row.dataset.prev || 0;
+    } else {
+        btn.classList.add('rotate-cw');
+        btn.classList.remove('delete');
+        btn.classList.add('add');
+        row.classList.add('deleted');
+        if (nameSpan) nameSpan.classList.add('deleted');
+        row.dataset.prev = input.value;
+        input.value = 0;
+    }
     updateWeightTotal();
 }
 
@@ -82,12 +122,32 @@ function saveWeights() {
         showToast('Total weight must equal 100');
         return;
     }
-    scoringWeights.roce = parseFloat(document.getElementById('weight-roce').value) || 0;
-    scoringWeights.interestCov = parseFloat(document.getElementById('weight-interest').value) || 0;
-    scoringWeights.grossMargin = parseFloat(document.getElementById('weight-gross').value) || 0;
-    scoringWeights.netMargin = parseFloat(document.getElementById('weight-net').value) || 0;
-    scoringWeights.ccr = parseFloat(document.getElementById('weight-ccr').value) || 0;
-    scoringWeights.gpAssets = parseFloat(document.getElementById('weight-gp').value) || 0;
+    const columnMap = {
+        roce: 'roce',
+        interestCov: 'interestcov',
+        grossMargin: 'gross_margin',
+        netMargin: 'net_margin',
+        ccr: 'ccr',
+        gpAssets: 'gp_assets',
+        peRatio: 'pe_ratio',
+        dividendYield: 'dividend_yield'
+    };
+    const rows = document.querySelectorAll('.weight-item');
+    rows.forEach(row => {
+        const key = row.dataset.key;
+        const input = row.querySelector('input');
+        if (row.classList.contains('deleted')) {
+            scoringWeights[key] = 0;
+        } else {
+            scoringWeights[key] = parseFloat(input.value) || 0;
+        }
+        const cls = columnMap[key];
+        if (cls) {
+            document.querySelectorAll(`.col-${cls}`).forEach(el => {
+                el.style.display = row.classList.contains('deleted') ? 'none' : '';
+            });
+        }
+    });
     closeWeightModal();
     updateScores();
     showToast('Scores updated');
@@ -107,12 +167,23 @@ function parseMetric(val, isPercent) {
 /** Main financial scoring algorithm based on metrics and weights */
 function calculateScore(metrics) {
     let score = 0;
-    score += Math.max(Math.min((metrics.roce / 0.15) * scoringWeights.roce, scoringWeights.roce), 0);
-    score += Math.max(Math.min((metrics.interestCov / 10) * scoringWeights.interestCov, scoringWeights.interestCov), 0);
-    score += Math.max(Math.min((metrics.grossMargin / 0.40) * scoringWeights.grossMargin, scoringWeights.grossMargin), 0);
-    score += Math.max(Math.min((metrics.netMargin / 0.15) * scoringWeights.netMargin, scoringWeights.netMargin), 0);
-    score += Math.max(Math.min((metrics.ccr / 0.90) * scoringWeights.ccr, scoringWeights.ccr), 0);
-    score += Math.max(Math.min((metrics.gpAssets / 0.3) * scoringWeights.gpAssets, scoringWeights.gpAssets), 0);
+    const wRoce = scoringWeights.roce || 0;
+    const wInt = scoringWeights.interestCov || 0;
+    const wGross = scoringWeights.grossMargin || 0;
+    const wNet = scoringWeights.netMargin || 0;
+    const wCcr = scoringWeights.ccr || 0;
+    const wGp = scoringWeights.gpAssets || 0;
+    const wPe = scoringWeights.peRatio || 0;
+    const wDiv = scoringWeights.dividendYield || 0;
+
+    if (wRoce) score += Math.max(Math.min((metrics.roce / 0.15) * wRoce, wRoce), 0);
+    if (wInt) score += Math.max(Math.min((metrics.interestCov / 10) * wInt, wInt), 0);
+    if (wGross) score += Math.max(Math.min((metrics.grossMargin / 0.40) * wGross, wGross), 0);
+    if (wNet) score += Math.max(Math.min((metrics.netMargin / 0.15) * wNet, wNet), 0);
+    if (wCcr) score += Math.max(Math.min((metrics.ccr / 0.90) * wCcr, wCcr), 0);
+    if (wGp) score += Math.max(Math.min((metrics.gpAssets / 0.3) * wGp, wGp), 0);
+    if (wPe) score += Math.max(Math.min((20 / (metrics.peRatio || 1)) * wPe, wPe), 0);
+    if (wDiv) score += Math.max(Math.min((metrics.dividendYield / 0.03) * wDiv, wDiv), 0);
     return Math.min(Math.round(score), 100);
 }
 
@@ -125,7 +196,9 @@ function updateScores() {
             grossMargin: parseFloat(row.dataset.gross_margin || 0),
             netMargin: parseFloat(row.dataset.net_margin || 0),
             ccr: parseFloat(row.dataset.ccr || 0),
-            gpAssets: parseFloat(row.dataset.gp_assets || 0)
+            gpAssets: parseFloat(row.dataset.gp_assets || 0),
+            peRatio: parseFloat(row.dataset.pe_ratio || 0),
+            dividendYield: parseFloat(row.dataset.dividend_yield || 0)
         };
         const score = calculateScore(metrics);
         const cell = row.cells[11];
@@ -357,7 +430,9 @@ function importFromExcel(event) {
                 'Gross Margin': 'grossMargin',
                 'Net Margin': 'netMargin',
                 'Cash Conversion Ratio': 'ccr',
-                'Gross Profit / Assets': 'gpAssets'
+                'Gross Profit / Assets': 'gpAssets',
+                'P/E Ratio': 'peRatio',
+                'Dividend Yield': 'dividendYield'
             };
             weights.forEach((row) => {
                 if (row.length >= 2 && map[row[0]]) {
@@ -424,7 +499,9 @@ function exportToExcel() {
         ["Gross Margin", scoringWeights.grossMargin],
         ["Net Margin", scoringWeights.netMargin],
         ["Cash Conversion Ratio", scoringWeights.ccr],
-        ["Gross Profit / Assets", scoringWeights.gpAssets]
+        ["Gross Profit / Assets", scoringWeights.gpAssets],
+        ["P/E Ratio", scoringWeights.peRatio],
+        ["Dividend Yield", scoringWeights.dividendYield]
     ];
     const weightSheet = XLSX.utils.aoa_to_sheet(weightRows);
     XLSX.utils.book_append_sheet(wb, weightSheet, "Scoring Weight");
@@ -481,6 +558,18 @@ function buildRow(data) {
         "ROCE", "Interest Coverage", "Gross Margin", "Net Margin",
         "Cash Conversion Ratio (FCF)", "Gross Profit / Assets", "Score"
     ];
+    const classMap = {
+        "Price": "price",
+        "Dividend Yield": "dividend_yield",
+        "P/E Ratio": "pe_ratio",
+        "ROCE": "roce",
+        "Interest Coverage": "interestcov",
+        "Gross Margin": "gross_margin",
+        "Net Margin": "net_margin",
+        "Cash Conversion Ratio (FCF)": "ccr",
+        "Gross Profit / Assets": "gp_assets",
+        "Score": "score"
+    };
     let row = `<tr id="row-${data.Symbol}" data-company="${data["Company Name"] || ''}" data-country="${data.Country || ''}">`;
     // Symbol
     row += `<td>${data.Symbol || 'N/A'}</td>`;
@@ -503,7 +592,8 @@ function buildRow(data) {
                 val = createScoreDonut(num);
                 break;
         }
-        row += `<td>${val}</td>`;
+        const cls = classMap[key] || key.toLowerCase().replace(/\s+|\//g, '_');
+        row += `<td class="col-${cls}">${val}</td>`;
     });
     row += `<td><button class="ai-button" onclick="runAIForRow('${data.Symbol}', this)">Run</button></td>`;
     row += `<td><button onclick="removeRow('${data.Symbol}')">❌</button></td>`;
