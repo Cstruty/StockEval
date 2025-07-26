@@ -421,16 +421,57 @@ input[type="number"]:focus,
 }
 .weight-item .metric-name {
   color: #1e1e1e !important;
+  position: relative;
 }
-.weight-item .metric-name.deleted {
-  text-decoration: line-through;
+.weight-item .metric-name::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 2px;
+  background: #ff0000;
+  transform-origin: left;
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+.weight-item .metric-name.deleted::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+.weight-item .metric-name.reverse::after {
+  transform-origin: right;
 }
 .weight-toggle {
   margin-right: 8px;
   flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: transform 0.3s ease;
 }
-.weight-item.deleted .metric-name {
-  text-decoration: line-through;
+
+.weight-toggle.rotate-cw {
+  animation: rotateCW 0.3s linear;
+}
+
+.weight-toggle.rotate-ccw {
+  animation: rotateCCW 0.3s linear;
+}
+
+@keyframes rotateCW {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes rotateCCW {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(-360deg); }
 }
 #weight-modal-content input[type="number"] {
   padding: 6px 10px;
