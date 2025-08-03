@@ -347,8 +347,8 @@ button svg {
 }
 
 /* Button hover, focus, and disabled states */
-button:hover:not(:disabled),
-td button:hover:not(:disabled) {
+button:hover:not(:disabled):not(.delete-button):not(.ai-button):not(.weight-toggle),
+td button:hover:not(:disabled):not(.delete-button):not(.ai-button):not(.weight-toggle) {
   background-color: #1e1e1e;
   color: white;
   border-color: #1e1e1e;
