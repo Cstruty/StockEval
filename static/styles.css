@@ -890,8 +890,16 @@ body.about-page #page-background {
     display: flex;
     justify-content: center;
   }
+  #watchlist-table td.col-score {
+    flex-direction: column;
+    align-items: center;
+  }
+  #watchlist-table td.col-score::before {
+    text-align: center;
+    width: 100%;
+  }
   #watchlist-table td.ai-cell {
-    margin-top: 8px;
+    margin-top: 16px;
   }
   #watchlist-table th,
   #watchlist-table td {
