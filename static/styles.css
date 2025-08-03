@@ -408,9 +408,9 @@ input[type="number"]:focus,
 
 .weight-item {
   display: flex;
-  justify-content: space-between;
   align-items: center;
   margin-bottom: 8px;
+  gap: 8px;
 }
 .weight-item label {
   flex: 1 1 auto;
@@ -443,35 +443,15 @@ input[type="number"]:focus,
   transform-origin: right;
 }
 .weight-toggle {
-  margin-right: 8px;
   flex: 0 0 auto;
   width: 24px;
   height: 24px;
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
   border: 1px solid #ccc;
   border-radius: 4px;
   cursor: pointer;
-  transition: transform 0.3s ease;
-}
-
-.weight-toggle.rotate-cw {
-  animation: rotateCW 0.3s linear;
-}
-
-.weight-toggle.rotate-ccw {
-  animation: rotateCCW 0.3s linear;
-}
-
-@keyframes rotateCW {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-@keyframes rotateCCW {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(-360deg); }
 }
 #weight-modal-content input[type="number"] {
   padding: 6px 10px;

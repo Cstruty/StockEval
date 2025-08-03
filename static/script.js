@@ -68,10 +68,7 @@ function toggleWeight(key) {
     const input = row.querySelector('input');
     const nameSpan = row.querySelector('.metric-name');
     const btn = row.querySelector('.weight-toggle');
-    btn.classList.remove('rotate-cw', 'rotate-ccw');
-    void btn.offsetWidth; // restart animation
     if (row.classList.contains('deleted')) {
-        btn.classList.add('rotate-ccw');
         row.classList.remove('deleted');
         if (nameSpan) {
             nameSpan.classList.add('reverse');
@@ -81,7 +78,6 @@ function toggleWeight(key) {
         setTimeout(() => { btn.textContent = '❌'; }, 150);
         input.value = row.dataset.prev || 0;
     } else {
-        btn.classList.add('rotate-cw');
         row.classList.add('deleted');
         if (nameSpan) nameSpan.classList.add('deleted');
         setTimeout(() => { btn.textContent = '+'; }, 150);
