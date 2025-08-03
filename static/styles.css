@@ -8,8 +8,6 @@ body {
   overflow-x: hidden;
   box-sizing: border-box;
   font-family: Arial, sans-serif;
-  position: relative;
-  z-index: 1;
 }
 
 /* ==== Navigation Bar ==== */
@@ -63,6 +61,7 @@ span {
   width: 100vw;
   height: 100vh;
   z-index: -1;
+  pointer-events: none;
   background: linear-gradient(135deg, #1e1e1e, #646464, #1e1e1e);
   background-size: 300% 300%;
   animation: moveDiagonalGradient 40s ease infinite;
