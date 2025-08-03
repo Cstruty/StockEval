@@ -12,29 +12,57 @@ const scoringWeights = {
     dividendYield: 5
 };
 
+// Track last non-deleted weights for each metric
+const lastWeights = { ...scoringWeights };
+// Track metrics explicitly removed via the toggle button
+const deletedMetrics = new Set();
+
+/** Reset modal fields and row states to match current weights */
+function resetWeightModal() {
+    const config = [
+        { key: 'roce', input: 'weight-roce' },
+        { key: 'interestCov', input: 'weight-interest' },
+        { key: 'grossMargin', input: 'weight-gross' },
+        { key: 'netMargin', input: 'weight-net' },
+        { key: 'ccr', input: 'weight-ccr' },
+        { key: 'gpAssets', input: 'weight-gp' },
+        { key: 'peRatio', input: 'weight-pe' },
+        { key: 'dividendYield', input: 'weight-div' }
+    ];
+    config.forEach(({ key, input }) => {
+        const row = document.getElementById(`row-${key}`);
+        const inputEl = document.getElementById(input);
+        const btn = row ? row.querySelector('.weight-toggle') : null;
+        const nameSpan = row ? row.querySelector('.metric-name') : null;
+        const weight = scoringWeights[key] || 0;
+        const deleted = deletedMetrics.has(key);
+        if (inputEl) inputEl.value = weight;
+        if (row && btn) {
+            row.dataset.prev = lastWeights[key] || 0;
+            if (deleted) {
+                row.classList.add('deleted');
+                if (nameSpan) nameSpan.classList.add('deleted');
+                btn.innerHTML = '<span class="green-plus">+</span>';
+            } else {
+                row.classList.remove('deleted');
+                if (nameSpan) nameSpan.classList.remove('deleted');
+                btn.innerHTML = '<span class="x-icon">❌</span>';
+            }
+        }
+    });
+    updateWeightTotal();
+}
+
 /** Open the "Adjust Scoring Weights" modal and populate inputs */
 function openWeightModal() {
-    const map = {
-        'weight-roce': scoringWeights.roce,
-        'weight-interest': scoringWeights.interestCov,
-        'weight-gross': scoringWeights.grossMargin,
-        'weight-net': scoringWeights.netMargin,
-        'weight-ccr': scoringWeights.ccr,
-        'weight-gp': scoringWeights.gpAssets,
-        'weight-pe': scoringWeights.peRatio,
-        'weight-div': scoringWeights.dividendYield
-    };
-    Object.keys(map).forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.value = map[id];
-    });
+    resetWeightModal();
     document.getElementById('weight-modal').style.display = 'flex';
-    updateWeightTotal();
 }
 
 /** Close the scoring weight modal */
 function closeWeightModal() {
     document.getElementById('weight-modal').style.display = 'none';
+    resetWeightModal();
 }
 
 /** Get total of all weights entered in modal */
@@ -77,12 +105,13 @@ function toggleWeight(key) {
         }
         setTimeout(() => { btn.innerHTML = '<span class="x-icon">❌</span>'; }, 150);
 
-        input.value = row.dataset.prev || 0;
+        input.value = row.dataset.prev || lastWeights[key] || 0;
     } else {
         row.classList.add('deleted');
         if (nameSpan) nameSpan.classList.add('deleted');
         setTimeout(() => { btn.innerHTML = '<span class="green-plus">+</span>'; }, 150);
         row.dataset.prev = input.value;
+        lastWeights[key] = input.value;
         input.value = 0;
     }
     updateWeightTotal();
@@ -128,24 +157,47 @@ function saveWeights() {
         dividendYield: 'dividend_yield'
     };
     const rows = document.querySelectorAll('.weight-item');
+    deletedMetrics.clear();
     rows.forEach(row => {
         const key = row.dataset.key;
         const input = row.querySelector('input');
         if (row.classList.contains('deleted')) {
+            deletedMetrics.add(key);
             scoringWeights[key] = 0;
         } else {
             scoringWeights[key] = parseFloat(input.value) || 0;
+            lastWeights[key] = scoringWeights[key];
         }
         const cls = columnMap[key];
         if (cls) {
             document.querySelectorAll(`.col-${cls}`).forEach(el => {
-                el.style.display = row.classList.contains('deleted') ? 'none' : '';
+                el.style.display = deletedMetrics.has(key) ? 'none' : '';
             });
         }
     });
     closeWeightModal();
     updateScores();
     showToast('Scores updated');
+}
+
+/** Hide or show metric columns in a row based on current weights */
+function applyColumnVisibility(row) {
+    const columnMap = {
+        roce: 'roce',
+        interestCov: 'interestcov',
+        grossMargin: 'gross_margin',
+        netMargin: 'net_margin',
+        ccr: 'ccr',
+        gpAssets: 'gp_assets',
+        peRatio: 'pe_ratio',
+        dividendYield: 'dividend_yield'
+    };
+    Object.entries(columnMap).forEach(([key, cls]) => {
+        const cell = row.querySelector(`.col-${cls}`);
+        if (cell) {
+            cell.style.display = deletedMetrics.has(key) ? 'none' : '';
+        }
+    });
 }
 
 // ==== SCORING & RENDERING ====
@@ -302,6 +354,7 @@ async function evaluateStock(symbol) {
         rowNode.dataset.ccr = parseMetric(data["Cash Conversion Ratio (FCF)"], true);
         rowNode.dataset.gp_assets = parseMetric(data["Gross Profit / Assets"], true);
         rowNode.dataset.ai = 0;
+        applyColumnVisibility(rowNode);
         document.getElementById("watchlist-body").appendChild(rowNode);
         updateScores();
     } catch (err) {
