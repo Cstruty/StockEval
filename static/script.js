@@ -635,12 +635,16 @@ window.showResults = function () {
     const exportBtn = document.getElementById('export-btn');
     const quoteContainer = document.getElementById('quote-container');
     const pageBackground = document.getElementById("page-background");
+    const mobileActions = document.querySelector('.mobile-action-buttons');
     if (initialView) {
         initialView.classList.remove('expanded');
         initialView.classList.add('shrunk');
         if (exportBtn) exportBtn.style.display = 'inline-flex';
         if (quoteContainer) quoteContainer.style.display = 'none';
         if (pageBackground) pageBackground.style.animation = 'none';
+        if (mobileActions && window.matchMedia('(max-width: 600px)').matches) {
+            mobileActions.style.display = 'flex';
+        }
     }
     if (resultsView) resultsView.style.display = 'block';
 };
