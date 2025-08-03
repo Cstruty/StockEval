@@ -104,14 +104,22 @@ def calc_cash_conversion_ratio_ttm(ticker_obj):
     Calculate Cash Conversion Ratio (TTM): Operating Cash Flow / Net Income
     """
     try:
-        cashflow = ticker_obj.cashflow
-        financials = ticker_obj.financials
-        if cashflow is None or financials is None:
+        cf_q = ticker_obj.quarterly_cashflow
+        fin_q = ticker_obj.quarterly_financials
+        if cf_q is None or fin_q is None or cf_q.empty or fin_q.empty:
             return 0
-        cfo = cashflow.loc['Operating Cash Flow'].iloc[0] if 'Operating Cash Flow' in cashflow.index else 0
-        ni = financials.loc['Net Income'].iloc[0] if 'Net Income' in financials.index else 0
+        cfo = (
+            cf_q.loc['Operating Cash Flow'].iloc[:4].sum()
+            if 'Operating Cash Flow' in cf_q.index
+            else 0
+        )
+        ni = (
+            fin_q.loc['Net Income'].iloc[:4].sum()
+            if 'Net Income' in fin_q.index
+            else 0
+        )
         return cfo / ni if ni else 0
-    except:
+    except Exception:
         return 0
 
 def calc_pe_ratio(ticker_obj):

@@ -506,6 +506,11 @@ function exportToExcel() {
     const originalTable = document.getElementById("watchlist-table");
     const clonedTable = originalTable.cloneNode(true);
 
+    // Remove sort arrows and settings button
+    clonedTable.querySelectorAll('.sort-arrows').forEach(el => el.remove());
+    const settingsBtn = clonedTable.querySelector('#settings-btn');
+    if (settingsBtn) settingsBtn.remove();
+
     // Remove last "Delete" column and AI column
     const headerRow = clonedTable.querySelector("thead tr");
     if (headerRow) headerRow.removeChild(headerRow.lastElementChild);
