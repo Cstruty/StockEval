@@ -12,29 +12,63 @@ const scoringWeights = {
     dividendYield: 5
 };
 
+// Mapping of weight keys to table column classes
+const columnMap = {
+    roce: 'roce',
+    interestCov: 'interestcov',
+    grossMargin: 'gross_margin',
+    netMargin: 'net_margin',
+    ccr: 'ccr',
+    gpAssets: 'gp_assets',
+    peRatio: 'pe_ratio',
+    dividendYield: 'dividend_yield'
+};
+
+/** Reset modal fields and row states to match current weights */
+function resetWeightModal() {
+    const config = [
+        { key: 'roce', input: 'weight-roce' },
+        { key: 'interestCov', input: 'weight-interest' },
+        { key: 'grossMargin', input: 'weight-gross' },
+        { key: 'netMargin', input: 'weight-net' },
+        { key: 'ccr', input: 'weight-ccr' },
+        { key: 'gpAssets', input: 'weight-gp' },
+        { key: 'peRatio', input: 'weight-pe' },
+        { key: 'dividendYield', input: 'weight-div' }
+    ];
+    config.forEach(({ key, input }) => {
+        const row = document.getElementById(`row-${key}`);
+        const inputEl = document.getElementById(input);
+        const btn = row ? row.querySelector('.weight-toggle') : null;
+        const nameSpan = row ? row.querySelector('.metric-name') : null;
+        const weight = scoringWeights[key] || 0;
+        if (inputEl) inputEl.value = weight;
+        if (row && btn) {
+            if (weight === 0) {
+                row.classList.add('deleted');
+                if (nameSpan) nameSpan.classList.add('deleted');
+                btn.innerHTML = '<span class="green-plus">+</span>';
+            } else {
+                row.classList.remove('deleted');
+                if (nameSpan) nameSpan.classList.remove('deleted');
+                btn.innerHTML = '<span class="x-icon">❌</span>';
+            }
+            row.dataset.prev = weight;
+        }
+    });
+    updateWeightTotal();
+}
+
 /** Open the "Adjust Scoring Weights" modal and populate inputs */
 function openWeightModal() {
-    const map = {
-        'weight-roce': scoringWeights.roce,
-        'weight-interest': scoringWeights.interestCov,
-        'weight-gross': scoringWeights.grossMargin,
-        'weight-net': scoringWeights.netMargin,
-        'weight-ccr': scoringWeights.ccr,
-        'weight-gp': scoringWeights.gpAssets,
-        'weight-pe': scoringWeights.peRatio,
-        'weight-div': scoringWeights.dividendYield
-    };
-    Object.keys(map).forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.value = map[id];
-    });
+    resetWeightModal();
     document.getElementById('weight-modal').style.display = 'flex';
-    updateWeightTotal();
 }
 
 /** Close the scoring weight modal */
 function closeWeightModal() {
     document.getElementById('weight-modal').style.display = 'none';
+    resetWeightModal();
 }
 
 /** Get total of all weights entered in modal */
@@ -117,16 +151,6 @@ function saveWeights() {
         showToast('Total weight must equal 100');
         return;
     }
-    const columnMap = {
-        roce: 'roce',
-        interestCov: 'interestcov',
-        grossMargin: 'gross_margin',
-        netMargin: 'net_margin',
-        ccr: 'ccr',
-        gpAssets: 'gp_assets',
-        peRatio: 'pe_ratio',
-        dividendYield: 'dividend_yield'
-    };
     const rows = document.querySelectorAll('.weight-item');
     rows.forEach(row => {
         const key = row.dataset.key;
@@ -273,6 +297,16 @@ function evaluateRawTicker() {
 
 // ==== TABLE: ADD/REMOVE/EVALUATE ====
 
+/** Hide metric columns on a row when their weights are zero */
+function applyWeightVisibility(row) {
+    Object.entries(columnMap).forEach(([key, cls]) => {
+        if (!scoringWeights[key]) {
+            const cell = row.querySelector(`.col-${cls}`);
+            if (cell) cell.style.display = 'none';
+        }
+    });
+}
+
 // Fetch data for ticker and add a new row (if not duplicate)
 async function evaluateStock(symbol) {
     if (!symbol) return;
@@ -302,6 +336,7 @@ async function evaluateStock(symbol) {
         rowNode.dataset.ccr = parseMetric(data["Cash Conversion Ratio (FCF)"], true);
         rowNode.dataset.gp_assets = parseMetric(data["Gross Profit / Assets"], true);
         rowNode.dataset.ai = 0;
+        applyWeightVisibility(rowNode);
         document.getElementById("watchlist-body").appendChild(rowNode);
         updateScores();
     } catch (err) {
