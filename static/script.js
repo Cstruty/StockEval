@@ -12,6 +12,11 @@ const scoringWeights = {
     dividendYield: 5
 };
 
+// Track last non-deleted weights for each metric
+const lastWeights = { ...scoringWeights };
+// Track metrics explicitly removed via the toggle button
+const deletedMetrics = new Set();
+
 /** Reset modal fields and row states to match current weights */
 function resetWeightModal() {
     const config = [
@@ -30,9 +35,11 @@ function resetWeightModal() {
         const btn = row ? row.querySelector('.weight-toggle') : null;
         const nameSpan = row ? row.querySelector('.metric-name') : null;
         const weight = scoringWeights[key] || 0;
+        const deleted = deletedMetrics.has(key);
         if (inputEl) inputEl.value = weight;
         if (row && btn) {
-            if (weight === 0) {
+            row.dataset.prev = lastWeights[key] || 0;
+            if (deleted) {
                 row.classList.add('deleted');
                 if (nameSpan) nameSpan.classList.add('deleted');
                 btn.innerHTML = '<span class="green-plus">+</span>';
@@ -41,7 +48,6 @@ function resetWeightModal() {
                 if (nameSpan) nameSpan.classList.remove('deleted');
                 btn.innerHTML = '<span class="x-icon">❌</span>';
             }
-            row.dataset.prev = weight;
         }
     });
     updateWeightTotal();
@@ -99,12 +105,13 @@ function toggleWeight(key) {
         }
         setTimeout(() => { btn.innerHTML = '<span class="x-icon">❌</span>'; }, 150);
 
-        input.value = row.dataset.prev || 0;
+        input.value = row.dataset.prev || lastWeights[key] || 0;
     } else {
         row.classList.add('deleted');
         if (nameSpan) nameSpan.classList.add('deleted');
         setTimeout(() => { btn.innerHTML = '<span class="green-plus">+</span>'; }, 150);
         row.dataset.prev = input.value;
+        lastWeights[key] = input.value;
         input.value = 0;
     }
     updateWeightTotal();
@@ -150,18 +157,21 @@ function saveWeights() {
         dividendYield: 'dividend_yield'
     };
     const rows = document.querySelectorAll('.weight-item');
+    deletedMetrics.clear();
     rows.forEach(row => {
         const key = row.dataset.key;
         const input = row.querySelector('input');
         if (row.classList.contains('deleted')) {
+            deletedMetrics.add(key);
             scoringWeights[key] = 0;
         } else {
             scoringWeights[key] = parseFloat(input.value) || 0;
+            lastWeights[key] = scoringWeights[key];
         }
         const cls = columnMap[key];
         if (cls) {
             document.querySelectorAll(`.col-${cls}`).forEach(el => {
-                el.style.display = row.classList.contains('deleted') ? 'none' : '';
+                el.style.display = deletedMetrics.has(key) ? 'none' : '';
             });
         }
     });
@@ -185,7 +195,7 @@ function applyColumnVisibility(row) {
     Object.entries(columnMap).forEach(([key, cls]) => {
         const cell = row.querySelector(`.col-${cls}`);
         if (cell) {
-            cell.style.display = (scoringWeights[key] || 0) ? '' : 'none';
+            cell.style.display = deletedMetrics.has(key) ? 'none' : '';
         }
     });
 }
