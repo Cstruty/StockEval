@@ -320,7 +320,7 @@ function removeRow(symbol) {
 // Run AI qualitative analysis for a single row
 async function runAIForRow(symbol, btn) {
     btn.disabled = true;
-    btn.innerHTML = `<img src="static/icons/loading.gif" alt="Loading" style="width:16px; height:16px;">`;
+    btn.innerHTML = `<img src="static/icons/loading.gif" alt="Loading" style="width:25px; height:25px;">`;
     try {
         const res = await fetch("/run_qualitative", {
             method: "POST",
@@ -334,7 +334,13 @@ async function runAIForRow(symbol, btn) {
             return;
         }
         const cleanText = data[0].Qualitative.replace(/<br\s*\/?>/gi, "<br>");
-        btn.innerText = "View";
+        btn.innerHTML = `
+            <svg viewBox="0 0 24 24" width="50" height="50" fill="white" xmlns="http://www.w3.org/2000/svg">
+            <path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42L17.59 5H14V3z"/>
+            <path d="M5 5h5V3H5c-1.1 0-2 .9-2 2v5h2V5z"/>
+            <path d="M19 19h-5v2h5c1.1 0 2-.9 2-2v-5h-2v5z"/>
+            <path d="M5 19v-5H3v5c0 1.1.9 2 2 2h5v-2H5z"/>
+            </svg>`;
         btn.disabled = false;
         btn.dataset.analysis = cleanText;
         btn.onclick = () => showModal(`${symbol} AI Analysis`, cleanText);
@@ -590,15 +596,13 @@ function buildRow(data) {
         const cls = classMap[key] || key.toLowerCase().replace(/\s+|\//g, '_');
         row += `<td data-label="${key}" class="col-${cls}">${val}</td>`;
     });
-    row += `<td class="ai-cell"><button class="ai-button" onclick="runAIForRow('${data.Symbol}', this)">
-            <svg viewBox="0 0 24 24" width="16" height="16"><polygon points="8,5 8,19 19,12" fill="white"/></svg>
-        </button></td>`;
-    row += `<td class="delete-cell"><button class="delete-button" onclick="removeRow('${data.Symbol}')">
-            <svg viewBox="0 0 24 24" width="16" height="16" stroke="white" stroke-width="2" fill="none">
-                <line x1="18" y1="6" x2="6" y2="18" />
-                <line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
-        </button></td>`;
+    row += `<td class="ai-cell">
+        <button class="ai-button" onclick="runAIForRow('${data.Symbol}', this)">
+            ▶
+        </button>
+    </td>`;
+
+    row += `<td class="delete-cell"><button class="delete-button" onclick="removeRow('${data.Symbol}')">❌</button></td>`;
     row += "</tr>";
     return row;
 }

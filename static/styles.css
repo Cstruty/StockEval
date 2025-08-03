@@ -292,6 +292,8 @@ td button {
 /* Icon-only buttons for run/delete actions */
 .ai-button,
 .delete-button {
+  width: 60px;
+  font-size: 20px;
   background: none;
   border: none;
   padding: 0;
@@ -300,7 +302,11 @@ td button {
   justify-content: center;
   color: white;
 }
-
+.ai-button svg {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+}
 .ai-button:hover:not(:disabled),
 .delete-button:hover:not(:disabled) {
   background: none;
@@ -317,8 +323,8 @@ td button {
 .ai-button svg,
 .ai-button img,
 .delete-button svg {
-  width: 16px;
-  height: 16px;
+  width: 30px;
+  height: 30px;
   display: block;
   margin-right: 0;
 }
@@ -477,16 +483,16 @@ input[type="number"]:focus,
   transform-origin: right;
 }
 .weight-toggle {
+  font-size: 20px;
+  background: none;
   flex: 0 0 auto;
   width: 24px;
   height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-top: -8px;
+  border: none;
+  margin-top: -12px;
 }
 #weight-modal-content input[type="number"] {
   padding: 6px 10px;
@@ -504,12 +510,12 @@ input[type="number"]:focus,
 .x-icon {
   display: inline-block;
   margin-top: -1px; 
-  font-size: 16px;
+  font-size: 20px;
   line-height: 1;
 }
 .green-plus {
   color: green;
-  font-size: 32px; 
+  font-size: 40px; 
   font-weight: bold;
   line-height: 1;
 }
