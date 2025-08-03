@@ -588,10 +588,17 @@ function buildRow(data) {
                 break;
         }
         const cls = classMap[key] || key.toLowerCase().replace(/\s+|\//g, '_');
-        row += `<td class="col-${cls}">${val}</td>`;
+        row += `<td data-label="${key}" class="col-${cls}">${val}</td>`;
     });
-    row += `<td><button class="ai-button" onclick="runAIForRow('${data.Symbol}', this)">Run</button></td>`;
-    row += `<td><button onclick="removeRow('${data.Symbol}')">❌</button></td>`;
+    row += `<td class="ai-cell"><button class="ai-button" onclick="runAIForRow('${data.Symbol}', this)">
+            <svg viewBox="0 0 24 24" width="16" height="16"><polygon points="8,5 8,19 19,12" fill="white"/></svg>
+        </button></td>`;
+    row += `<td class="delete-cell"><button class="delete-button" onclick="removeRow('${data.Symbol}')">
+            <svg viewBox="0 0 24 24" width="16" height="16" stroke="white" stroke-width="2" fill="none">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+        </button></td>`;
     row += "</tr>";
     return row;
 }

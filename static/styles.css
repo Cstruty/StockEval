@@ -289,6 +289,40 @@ td button {
   border-radius: 4px;
 }
 
+/* Icon-only buttons for run/delete actions */
+.ai-button,
+.delete-button {
+  background: none;
+  border: none;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.ai-button:hover:not(:disabled),
+.delete-button:hover:not(:disabled) {
+  background: none;
+  border: none;
+}
+
+.ai-button:disabled,
+.delete-button:disabled {
+  background: none;
+  border: none;
+  color: #aaa;
+}
+
+.ai-button svg,
+.ai-button img,
+.delete-button svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+  margin-right: 0;
+}
+
 /* Slightly smaller settings button */
 #settings-btn {
   padding: 6px 20px;
@@ -777,6 +811,16 @@ body.about-page #page-background {
     border: none;
     padding: 4px 6px;
   }
+  #watchlist-table td[data-label] {
+    padding-top: 12px;
+  }
+  #watchlist-table td[data-label]::before {
+    content: attr(data-label);
+    display: block;
+    font-size: 10px;
+    opacity: 0.7;
+    margin-bottom: 2px;
+  }
   /* Custom layout for each cell */
   #watchlist-table td:nth-child(1) { grid-row: 1; grid-column: 1; }
   #watchlist-table td:nth-child(6) { grid-row: 1; grid-column: 2; }
@@ -798,6 +842,14 @@ body.about-page #page-background {
 
   /* Hide Net Margin column */
   #watchlist-table td:nth-child(9) { display: none; }
+  #watchlist-table tr { position: relative; }
+  #watchlist-table td.delete-cell {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    grid-row: auto;
+    grid-column: auto;
+  }
   #initial-view,
   #results-view {
     padding: 0 10px;
