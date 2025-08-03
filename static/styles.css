@@ -452,6 +452,7 @@ input[type="number"]:focus,
   border: 1px solid #ccc;
   border-radius: 4px;
   cursor: pointer;
+  margin-top: -8px;
 }
 #weight-modal-content input[type="number"] {
   padding: 6px 10px;
@@ -465,6 +466,20 @@ input[type="number"]:focus,
   -webkit-appearance: none;
   margin: 0;
 }
+
+.x-icon {
+  display: inline-block;
+  margin-top: -1px; 
+  font-size: 16px;
+  line-height: 1;
+}
+.green-plus {
+  color: green;
+  font-size: 32px; 
+  font-weight: bold;
+  line-height: 1;
+}
+
 
 /* Modal close button (X) */
 .modal-close {

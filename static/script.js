@@ -75,12 +75,13 @@ function toggleWeight(key) {
             nameSpan.classList.remove('deleted');
             setTimeout(() => nameSpan.classList.remove('reverse'), 300);
         }
-        setTimeout(() => { btn.textContent = '❌'; }, 150);
+        setTimeout(() => { btn.innerHTML = '<span class="x-icon">❌</span>'; }, 150);
+
         input.value = row.dataset.prev || 0;
     } else {
         row.classList.add('deleted');
         if (nameSpan) nameSpan.classList.add('deleted');
-        setTimeout(() => { btn.textContent = '+'; }, 150);
+        setTimeout(() => { btn.innerHTML = '<span class="green-plus">+</span>'; }, 150);
         row.dataset.prev = input.value;
         input.value = 0;
     }
