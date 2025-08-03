@@ -163,6 +163,10 @@ span {
 .suggestion-item:hover {
   background-color: #3a3a3a;
 }
+.suggestion-item:focus {
+  background-color: #3a3a3a;
+  outline: none;
+}
 
 .search-container button {
   transform: translateY(-5px);
@@ -798,7 +802,7 @@ body.about-page #page-background {
 
 /* ==== Mobile Layout Adjustments ==== */
 @media (max-width: 600px) {
-  nav { position: fixed; bottom: 0; left: 0; width: 100%; background: #1e1e1e; border-top: 1px solid #444; justify-content: space-around; padding: 10px 0; gap: 0; }
+  nav { position: fixed; bottom: 0; left: 0; width: 100%; background: #1e1e1e; border-top: 1px solid #444; justify-content: space-around; padding: 10px 0; gap: 0; opacity: 1; }
   body { padding-bottom: 60px; }
   nav a { display: flex; flex-direction: column; align-items: center; font-size: 12px; }
   #watchlist-table thead { display: none; }
@@ -866,6 +870,18 @@ body.about-page #page-background {
   }
   .search-container button {
     transform: none;
+  }
+  #import-btn,
+  #export-btn {
+    display: none;
+  }
+  #watchlist-table td.col-score,
+  #watchlist-table td.ai-cell {
+    display: flex;
+    justify-content: center;
+  }
+  #watchlist-table td.ai-cell {
+    margin-top: 8px;
   }
   #watchlist-table th,
   #watchlist-table td {

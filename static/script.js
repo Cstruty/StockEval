@@ -286,8 +286,10 @@ function sortTable(column, asc) {
 
 // Live search for tickers and show suggestion dropdown
 async function searchTicker() {
-    const query = document.getElementById("search").value;
+    const searchInput = document.getElementById("search");
+    const query = searchInput.value;
     const suggestionsDiv = document.getElementById("suggestions");
+    suggestionsDiv.style.width = `${searchInput.offsetWidth}px`;
     if (query.length < 1) {
         suggestionsDiv.innerHTML = '';
         return;
@@ -298,6 +300,7 @@ async function searchTicker() {
     data.forEach(stock => {
         const item = document.createElement("div");
         item.className = "suggestion-item";
+        item.tabIndex = 0;
         const country = stock.CountryShort ? ` -${stock.CountryShort}` : '';
         item.innerText = `${stock.Name} (${stock.Symbol})${country}`;
         item.onclick = () => {
@@ -306,7 +309,39 @@ async function searchTicker() {
             evaluateStock(stock.Symbol);
             suggestionsDiv.innerHTML = '';
         };
+        item.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                (item.nextElementSibling || suggestionsDiv.firstElementChild).focus();
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                if (item.previousElementSibling) {
+                    item.previousElementSibling.focus();
+                } else {
+                    searchInput.focus();
+                }
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                item.click();
+            }
+        });
         suggestionsDiv.appendChild(item);
+    });
+}
+
+const searchInputField = document.getElementById('search');
+if (searchInputField) {
+    searchInputField.addEventListener('keydown', (e) => {
+        const suggestionsDiv = document.getElementById('suggestions');
+        if (!suggestionsDiv) return;
+        const items = suggestionsDiv.querySelectorAll('.suggestion-item');
+        if (e.key === 'ArrowDown' && items.length) {
+            e.preventDefault();
+            items[0].focus();
+        } else if (e.key === 'ArrowUp' && items.length) {
+            e.preventDefault();
+            items[items.length - 1].focus();
+        }
     });
 }
 

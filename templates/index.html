@@ -38,7 +38,7 @@
             <div class="search-container">
                 <div class="input-wrapper">
                     <!-- Ticker search box -->
-                    <input id="search" type="text" style="width: 210px" oninput="searchTicker()"
+                    <input id="search" type="text" oninput="searchTicker()"
                         placeholder="Search by name or symbol" autocomplete="off" />
 
                     <!-- Dropdown for search suggestions -->
@@ -53,7 +53,7 @@
                     onchange="importFromExcel(event)" />
 
                 <!-- Import button (opens file picker) -->
-                <button onclick="document.getElementById('excel-import').click()" style="margin-top: 10px;">
+                <button id="import-btn" onclick="document.getElementById('excel-import').click()" style="margin-top: 10px;">
                     <svg viewBox="0 0 24 24" width="12" height="12">
                         <path d="M8 11h-6v10h20v-10h-6v-2h8v14h-24v-14h8v2zm-1-4l5-6 5 6h-4v11h-2v-11h-4z" />
                     </svg>
