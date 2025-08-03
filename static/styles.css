@@ -873,7 +873,7 @@ body.about-page #page-background {
   }
   #import-btn,
   #export-btn {
-    display: none;
+    display: none !important;
   }
   #watchlist-table td.col-score,
   #watchlist-table td.ai-cell {
