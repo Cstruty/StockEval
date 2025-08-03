@@ -170,6 +170,26 @@ function saveWeights() {
     showToast('Scores updated');
 }
 
+/** Hide or show metric columns in a row based on current weights */
+function applyColumnVisibility(row) {
+    const columnMap = {
+        roce: 'roce',
+        interestCov: 'interestcov',
+        grossMargin: 'gross_margin',
+        netMargin: 'net_margin',
+        ccr: 'ccr',
+        gpAssets: 'gp_assets',
+        peRatio: 'pe_ratio',
+        dividendYield: 'dividend_yield'
+    };
+    Object.entries(columnMap).forEach(([key, cls]) => {
+        const cell = row.querySelector(`.col-${cls}`);
+        if (cell) {
+            cell.style.display = (scoringWeights[key] || 0) ? '' : 'none';
+        }
+    });
+}
+
 // ==== SCORING & RENDERING ====
 
 // Convert metric value (handle %, x, $ etc)
@@ -324,6 +344,7 @@ async function evaluateStock(symbol) {
         rowNode.dataset.ccr = parseMetric(data["Cash Conversion Ratio (FCF)"], true);
         rowNode.dataset.gp_assets = parseMetric(data["Gross Profit / Assets"], true);
         rowNode.dataset.ai = 0;
+        applyColumnVisibility(rowNode);
         document.getElementById("watchlist-body").appendChild(rowNode);
         updateScores();
     } catch (err) {
