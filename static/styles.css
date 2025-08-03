@@ -460,24 +460,6 @@ input[type="number"]:focus,
   height: 18px;
   pointer-events: none;
 }
-
-.weight-toggle.rotate-cw {
-  animation: rotateCW 0.3s linear;
-}
-
-.weight-toggle.rotate-ccw {
-  animation: rotateCCW 0.3s linear;
-}
-
-@keyframes rotateCW {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-@keyframes rotateCCW {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(-360deg); }
-}
 #weight-modal-content input[type="number"] {
   padding: 6px 10px;
   text-align: right;

@@ -732,10 +732,10 @@ document.querySelectorAll('.weight-toggle').forEach(btn => {
         renderer: 'svg',
         loop: false,
         autoplay: false,
-        path: 'static/icons/add-delete.json'
+        path: '/static/icons/add-delete.json'
     });
     btn._lottie = anim;
-    anim.addEventListener('DOMLoaded', () => {
-        anim.goToAndStop(anim.totalFrames, true); // show delete state
-    });
+    const showDelete = () => anim.goToAndStop(anim.totalFrames, true);
+    anim.addEventListener('DOMLoaded', showDelete);
+    anim.addEventListener('data_ready', showDelete);
 });
