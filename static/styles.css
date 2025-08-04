@@ -12,10 +12,7 @@ body {
 
 /* ==== Navigation Bar ==== */
 nav {
-  display: flex;
-  justify-content: center;
-  gap: 30px;
-  padding: 20px 0;
+  display: none;
 }
 
 nav a {
@@ -806,9 +803,9 @@ body.about-page #page-background {
 
 /* ==== Mobile Layout Adjustments ==== */
 @media (max-width: 600px) {
-  nav { position: fixed; bottom: 0; left: 0; width: 100%; background: #1e1e1e; border-top: 1px solid #444; justify-content: space-around; padding: 10px 0; gap: 0; opacity: 1; }
+  nav { position: fixed; bottom: 0; left: 0; width: 100%; background: #1e1e1e; border-top: 1px solid #444; justify-content: space-around; padding: 10px 0; gap: 0; display: flex; }
   body { padding-bottom: 60px; }
-  nav a { display: flex; flex-direction: column; align-items: center; font-size: 12px; }
+  nav a { display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 12px; flex: 1; padding: 10px 0; }
   #watchlist-table thead { display: none; }
   #watchlist-table tr {
     display: grid;
