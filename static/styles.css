@@ -818,8 +818,30 @@ body.about-page #page-background {
     backdrop-filter: blur(5px); /* optional: make semi-transparency look clean */
   }
 
+  html,
   body {
-    padding-bottom: calc(60px + env(safe-area-inset-bottom)); /* make room for nav */
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  body {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  #initial-view,
+  #results-view {
+    height: calc(100vh - 60px - env(safe-area-inset-bottom));
+    margin-top: 0;
+  }
+
+  #initial-view {
+    overflow-y: auto;
+  }
+
+  #results-view {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
   }
 
   nav a {
@@ -830,6 +852,23 @@ body.about-page #page-background {
     padding: 10px 20px;
     flex: 1;
     color: white; /* ensure visible on dark nav background */
+  }
+
+  input[type="text"],
+  input[type="number"],
+  #search {
+    font-size: 16px;
+  }
+
+  #watchlist {
+    flex: 1 1 auto;
+    height: auto;
+    max-height: none;
+    overflow-y: auto;
+  }
+
+  #result {
+    flex-shrink: 0;
   }
 
   #watchlist-table thead {
