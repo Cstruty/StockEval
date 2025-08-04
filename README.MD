@@ -10,6 +10,8 @@ This Python script screens a list of stock tickers using Yahoo Finance data via 
 
 Based on these metrics, it calculates an overall score (0–100) for each stock and exports the results to a color-coded HTML file (`screened_stocks.html`).
 
+The web interface uses a small React single-page application served by Flask. The home page features a watchlist where you can search for tickers, fetch their metrics, and view results in a table. Navigation between the home, tools, and about pages is handled on the client side using React Router.
+
 ---
 
 ## Requirements
@@ -35,10 +37,6 @@ python app.py
 
 The console shows search queries and evaluations for troubleshooting.
 
-### Adjusting Scoring Weights
-Use the settings button on the web interface to open the weight modal. Adjust the
-weights so that the total equals 100 and click **Save** to update scores.
----
 ## Updating Ticker List
 The application now downloads the latest list of U.S. and Canadian tickers at
 startup using `fetch_latest_tickers()` in `ticker_fetcher.py`. The function
