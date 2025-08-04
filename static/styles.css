@@ -8,7 +8,7 @@ body {
   overflow-x: hidden;
   box-sizing: border-box;
   font-family: Arial, sans-serif;
-  background-color: #000;
+  background-color: #1e1e1e;
 }
 
 /* ==== Navigation Bar ==== */
@@ -60,9 +60,9 @@ span {
   height: 100vh;
   z-index: -1;
   pointer-events: none;
-  background: linear-gradient(135deg, #000, #fff);
-  background-size: 400% 400%;
-  animation: moveDiagonalGradient 30s ease infinite;
+  background: linear-gradient(135deg, #1e1e1e, #646464, #1e1e1e);
+  background-size: 300% 300%;
+  animation: moveDiagonalGradient 40s ease infinite;
 }
 
 @keyframes moveDiagonalGradient {
