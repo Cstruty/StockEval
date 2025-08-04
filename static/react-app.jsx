@@ -20,10 +20,128 @@ function NavBar() {
 }
 
 function Home() {
+  const [query, setQuery] = React.useState("");
+  const [suggestions, setSuggestions] = React.useState([]);
+  const [rows, setRows] = React.useState([]);
+
+  const handleChange = async (e) => {
+    const val = e.target.value;
+    setQuery(val);
+    if (!val) {
+      setSuggestions([]);
+      return;
+    }
+    try {
+      const resp = await fetch(`/search_ticker?q=${encodeURIComponent(val)}`);
+      if (resp.ok) {
+        const data = await resp.json();
+        setSuggestions(data);
+      }
+    } catch (err) {
+      console.error("search error", err);
+    }
+  };
+
+  const addTicker = async (symbol) => {
+    setQuery("");
+    setSuggestions([]);
+    try {
+      const resp = await fetch(`/evaluate/${symbol}`);
+      if (resp.ok) {
+        const data = await resp.json();
+        if (!data.error) {
+          setRows((prev) => [...prev.filter(r => r.Symbol !== data.Symbol), data]);
+        }
+      }
+    } catch (err) {
+      console.error("evaluate error", err);
+    }
+  };
+
+  const onSuggestionClick = (s) => addTicker(s.Symbol);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (query.trim()) {
+      addTicker(query.trim().toUpperCase());
+    }
+  };
+
   return (
     <div className="centered-view">
       <h1>Stock Watchlist</h1>
-      <p>This React front-end is under construction.</p>
+      <form onSubmit={handleSubmit} className="search-container">
+        <div className="input-wrapper">
+          <input
+            id="search"
+            type="text"
+            value={query}
+            onChange={handleChange}
+            placeholder="Enter ticker or company"
+            autoComplete="off"
+          />
+          {suggestions.length > 0 && (
+            <div id="suggestions">
+              {suggestions.map((s) => (
+                <div
+                  key={s.Symbol}
+                  className="suggestion-item"
+                  onClick={() => onSuggestionClick(s)}
+                >
+                  {s.Name} ({s.Symbol}) - {s.CountryShort}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        <button type="submit">Add</button>
+      </form>
+      {rows.length > 0 && (
+        <div id="watchlist">
+          <table id="watchlist-table">
+            <thead>
+              <tr>
+                {[
+                  "Symbol",
+                  "Company Name",
+                  "Country",
+                  "Price",
+                  "Dividend Yield",
+                  "P/E Ratio",
+                  "ROCE",
+                  "Interest Coverage",
+                  "Gross Margin",
+                  "Net Margin",
+                  "Cash Conversion Ratio (FCF)",
+                  "Gross Profit / Assets",
+                  "Score"
+                ].map((h) => (
+                  <th key={h}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((r) => (
+                <tr key={r.Symbol}>
+                  <td>{r["Symbol"]}</td>
+                  <td>{r["Company Name"]}</td>
+                  <td>{r["Country"]}</td>
+                  <td>{r["Price"]}</td>
+                  <td>{r["Dividend Yield"]}</td>
+                  <td>{r["P/E Ratio"]}</td>
+                  <td>{r["ROCE"]}</td>
+                  <td>{r["Interest Coverage"]}</td>
+                  <td>{r["Gross Margin"]}</td>
+                  <td>{r["Net Margin"]}</td>
+                  <td>{r["Cash Conversion Ratio (FCF)"]}</td>
+                  <td>{r["Gross Profit / Assets"]}</td>
+                  <td>{r["Score"]}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }
