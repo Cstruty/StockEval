@@ -803,9 +803,27 @@ body.about-page #page-background {
 
 /* ==== Mobile Layout Adjustments ==== */
 @media (max-width: 600px) {
-  nav { position: fixed; bottom: 0; left: 0; width: 100%; background: #1e1e1e; border-top: 1px solid #444; justify-content: space-around; padding: 10px 0; gap: 0; display: flex; }
+  nav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #1e1e1e;
+    border-top: 1px solid #444;
+    justify-content: space-around;
+    padding: 12px 0;
+    gap: 0;
+  }
   body { padding-bottom: 60px; }
-  nav a { display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 12px; flex: 1; padding: 10px 0; }
+  nav a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 12px;
+    padding: 10px 20px;
+    flex: 1;
+  }
   #watchlist-table thead { display: none; }
   #watchlist-table tr {
     display: grid;
@@ -874,8 +892,12 @@ body.about-page #page-background {
     transform: none;
   }
   .mobile-action-buttons {
+    /* hidden by default; revealed via showResults() */
     gap: 10px;
     margin-left: auto;
+  }
+  .mobile-action-buttons button {
+    padding: 10px 14px;
   }
   #import-btn,
   #export-btn {
