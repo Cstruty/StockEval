@@ -892,7 +892,7 @@ body.about-page #page-background {
     transform: none;
   }
   .mobile-action-buttons {
-    display: flex;
+    /* hidden by default; revealed via showResults() */
     gap: 10px;
     margin-left: auto;
   }
