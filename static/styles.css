@@ -812,10 +812,16 @@ body.about-page #page-background {
     background-color: #1e1e1e;
     border-top: 1px solid #444;
     justify-content: space-around;
-    padding: 12px 0;
+    padding: 12px 0 env(safe-area-inset-bottom); /* Add safe area inset */
     gap: 0;
+    z-index: 999; /* Ensure it's above any content or mobile overlays */
+    backdrop-filter: blur(5px); /* optional: make semi-transparency look clean */
   }
-  body { padding-bottom: 60px; }
+
+  body {
+    padding-bottom: calc(60px + env(safe-area-inset-bottom)); /* make room for nav */
+  }
+
   nav a {
     display: flex;
     flex-direction: column;
@@ -823,26 +829,34 @@ body.about-page #page-background {
     font-size: 12px;
     padding: 10px 20px;
     flex: 1;
+    color: white; /* ensure visible on dark nav background */
   }
-  #watchlist-table thead { display: none; }
+
+  #watchlist-table thead {
+    display: none;
+  }
+
   #watchlist-table tr {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     grid-template-rows: repeat(5, auto);
     margin-bottom: 10px;
-    background: rgba(255,255,255,0.1);
+    background: rgba(255, 255, 255, 0.1);
     padding: 10px;
     border-radius: 8px;
   }
+
   #watchlist-table td {
     display: block;
     text-align: left;
     border: none;
     padding: 4px 6px;
   }
+
   #watchlist-table td[data-label] {
     padding-top: 12px;
   }
+
   #watchlist-table td[data-label]::before {
     content: attr(data-label);
     display: block;
@@ -850,6 +864,8 @@ body.about-page #page-background {
     opacity: 0.7;
     margin-bottom: 2px;
   }
+}
+
   /* Custom layout for each cell */
   #watchlist-table td:nth-child(1) { grid-row: 1; grid-column: 1; }
   #watchlist-table td:nth-child(6) { grid-row: 1; grid-column: 2; }
