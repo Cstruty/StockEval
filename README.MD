@@ -10,6 +10,8 @@ This Python script screens a list of stock tickers using Yahoo Finance data via 
 
 Based on these metrics, it calculates an overall score (0–100) for each stock and exports the results to a color-coded HTML file (`screened_stocks.html`).
 
+The web interface is now built with a small React single-page application served by Flask. Navigation between the home, tools, and about pages is handled on the client side using React Router.
+
 ---
 
 ## Requirements
