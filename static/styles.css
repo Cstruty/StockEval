@@ -802,7 +802,22 @@ body.about-page #page-background {
 }
 
 /* ==== Mobile Layout Adjustments ==== */
+/* ==== Mobile Layout Adjustments ==== */
 @media (max-width: 600px) {
+  html, body {
+    height: 100dvh;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+
+  header {
+    flex: 0 0 auto;
+  }
+
   nav {
     display: flex;
     position: fixed;
@@ -816,10 +831,7 @@ body.about-page #page-background {
     padding-bottom: calc(12px + env(safe-area-inset-bottom));
     gap: 0;
   }
-  body {
-    padding-bottom: calc(60px + env(safe-area-inset-bottom));
-    padding-top: env(safe-area-inset-top);
-  }
+
   nav a {
     display: flex;
     flex-direction: column;
@@ -828,7 +840,25 @@ body.about-page #page-background {
     padding: 10px 20px;
     flex: 1;
   }
-  #watchlist-table thead { display: none; }
+  /* Scrollable card area */
+  #watchlist {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+
+  /* Optional: Limit how much height this section gets */
+  #watchlist-table {
+    height: auto;
+    padding-bottom: 0;
+  }
+
+  #watchlist-table thead {
+    display: none;
+  }
+
+  /* Increase card height slightly */
   #watchlist-table tr {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -837,17 +867,21 @@ body.about-page #page-background {
     background: rgba(255,255,255,0.1);
     padding: 10px;
     border-radius: 8px;
-    padding-bottom: calc(150px + env(safe-area-inset-bottom));
+    height: 300px; /* Adjust as needed */
+    box-sizing: border-box;
   }
+
   #watchlist-table td {
     display: block;
     text-align: left;
     border: none;
     padding: 4px 6px;
   }
+
   #watchlist-table td[data-label] {
     padding-top: 12px;
   }
+
   #watchlist-table td[data-label]::before {
     content: attr(data-label);
     display: block;
@@ -855,6 +889,9 @@ body.about-page #page-background {
     opacity: 0.7;
     margin-bottom: 2px;
   }
+}
+
+
   /* Custom layout for each cell */
   #watchlist-table td:nth-child(1) { grid-row: 1; grid-column: 1; }
   #watchlist-table td:nth-child(6) { grid-row: 1; grid-column: 2; }
