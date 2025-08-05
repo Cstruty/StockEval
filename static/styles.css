@@ -802,7 +802,6 @@ body.about-page #page-background {
 }
 
 /* ==== Mobile Layout Adjustments ==== */
-/* ==== Mobile Layout Adjustments ==== */
 @media (max-width: 600px) {
   html, body {
     height: 100dvh;
@@ -811,9 +810,6 @@ body.about-page #page-background {
     overflow: hidden;
     display: flex;
     flex-direction: column;
-  }
-  #stock-eval-body{
-      padding-top: 100px
   }
  
 
