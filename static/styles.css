@@ -812,7 +812,10 @@ body.about-page #page-background {
     display: flex;
     flex-direction: column;
   }
-
+  #stock-eval-body{
+      padding-top: 100px
+  }
+ 
 
   header {
     flex: 0 0 auto;
@@ -837,16 +840,12 @@ body.about-page #page-background {
     flex-direction: column;
     align-items: center;
     font-size: 12px;
-    padding: 10px 20px;
     flex: 1;
   }
   /* Scrollable card area */
   #watchlist {
-    flex: 1 1 auto;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
+    height:450px;
   }
-
 
   /* Optional: Limit how much height this section gets */
   #watchlist-table {
@@ -889,7 +888,6 @@ body.about-page #page-background {
     opacity: 0.7;
     margin-bottom: 2px;
   }
-}
 
 
   /* Custom layout for each cell */
@@ -925,6 +923,7 @@ body.about-page #page-background {
   #results-view {
     padding: 0 10px;
   }
+  
   .search-container {
     flex-direction: row;
     align-items: center;
