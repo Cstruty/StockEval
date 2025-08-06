@@ -89,12 +89,16 @@ span {
 
 /* Centered splash layout for initial screen */
 .centered-view.expanded {
-  display: flex;
   flex-direction: column;
   justify-content: center;  /* centers vertically */
   align-items: center;      /* centers horizontally */
   flex: 1;
   text-align: center;
+}
+@media (min-width: 1000px) {
+  .centered-view.expanded{
+    display: flex;
+  }
 }
 
 
