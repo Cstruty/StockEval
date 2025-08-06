@@ -14,11 +14,6 @@ function updateBodyPadding() {
 }
 
 updateBodyPadding();
-if (window.visualViewport) {
-    window.visualViewport.addEventListener('resize', updateBodyPadding);
-}
-window.addEventListener('resize', updateBodyPadding);
-window.addEventListener('orientationchange', updateBodyPadding);
 
 // ==== SCORING WEIGHTS & MODAL LOGIC ====
 
@@ -414,6 +409,7 @@ async function evaluateStock(symbol) {
         applyColumnVisibility(rowNode);
         document.getElementById("watchlist-body").appendChild(rowNode);
         updateScores();
+        updateBodyPadding();
     } catch (err) {
         console.error("Evaluation failed:", err);
     }
