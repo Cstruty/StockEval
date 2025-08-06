@@ -14,6 +14,7 @@ body {
 #stock-eval-body {
   padding-top: 100px; /* fallback when VisualViewport is unavailable */
   overflow-y: auto;
+  height: 100vh; /* fallback for browsers without dvh */
   height: 100dvh;
 }
 

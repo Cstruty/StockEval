@@ -3,7 +3,13 @@
 const bodyEl = document.getElementById('stock-eval-body');
 
 function updateBodyPadding() {
-    const topOffset = window.visualViewport ? window.visualViewport.offsetTop : 0;
+    let topOffset = 0;
+    if (window.visualViewport) {
+        topOffset = window.visualViewport.offsetTop;
+    } else {
+        const extra = document.documentElement.clientHeight - window.innerHeight;
+        topOffset = extra > 0 ? extra : 0;
+    }
     bodyEl.style.paddingTop = `${100 + topOffset}px`;
 }
 
@@ -11,6 +17,7 @@ updateBodyPadding();
 if (window.visualViewport) {
     window.visualViewport.addEventListener('resize', updateBodyPadding);
 }
+window.addEventListener('resize', updateBodyPadding);
 window.addEventListener('orientationchange', updateBodyPadding);
 
 // ==== SCORING WEIGHTS & MODAL LOGIC ====
