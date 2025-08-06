@@ -8,17 +8,25 @@ body {
   overflow-x: hidden;
   box-sizing: border-box;
   font-family: Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
 }
 
 /* ==== Navigation Bar ==== */
 nav {
-  display: none;
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  padding: 12px 0;
+  background-color: #1e1e1e;
 }
 
 nav a {
   color: white;
   text-decoration: none;
   font-weight: bold;
+  display: flex;
+  align-items: center;
 }
 
 nav a:hover {
@@ -81,16 +89,12 @@ span {
 
 /* Centered splash layout for initial screen */
 .centered-view.expanded {
+  display: flex;
   flex-direction: column;
   justify-content: center;  /* centers vertically */
   align-items: center;      /* centers horizontally */
-  min-height: 100vh;        /* full viewport height */
+  flex: 1;
   text-align: center;
-}
-@media (min-width: 1000px) {
-  .centered-view.expanded{
-    display:flex
-  }
 }
 
 
@@ -978,9 +982,13 @@ body.about-page #page-background {
     height: 600px !important;
     min-height: 600px !important;
   }
+  .about-container {
+    padding-bottom: 100px;
+  }
   #tools-container {
     flex-direction: column;
     padding: 20px;
+    padding-bottom: 100px;
   }
   .tools-column + .tools-column {
     border-left: none;
