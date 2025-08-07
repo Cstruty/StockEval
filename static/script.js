@@ -1,3 +1,20 @@
+// ==== Layout & Viewport Adjustments ====
+
+const bodyEl = document.getElementById('stock-eval-body');
+
+function updateBodyPadding() {
+    let topOffset = 0;
+    if (window.visualViewport) {
+        topOffset = window.visualViewport.offsetTop;
+    } else {
+        const extra = document.documentElement.clientHeight - window.innerHeight;
+        topOffset = extra > 0 ? extra : 0;
+    }
+    bodyEl.style.paddingTop = `${100 + topOffset}px`;
+}
+
+updateBodyPadding();
+
 // ==== SCORING WEIGHTS & MODAL LOGIC ====
 
 // Default scoring weights for all metrics
@@ -392,6 +409,7 @@ async function evaluateStock(symbol) {
         applyColumnVisibility(rowNode);
         document.getElementById("watchlist-body").appendChild(rowNode);
         updateScores();
+        updateBodyPadding();
     } catch (err) {
         console.error("Evaluation failed:", err);
     }

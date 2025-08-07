@@ -12,6 +12,14 @@ body {
   flex-direction: column;
 }
 
+/* Body container adjusts padding for mobile browser chrome */
+#stock-eval-body {
+  padding-top: 100px; /* fallback when VisualViewport is unavailable */
+  overflow-y: auto;
+  height: 100vh; /* fallback for browsers without dvh */
+  height: 100dvh;
+}
+
 /* ==== Navigation Bar ==== */
 nav {
   display: flex;
