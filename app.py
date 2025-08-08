@@ -1,15 +1,19 @@
 # ==== Imports & Initialization ====
 
+"""Flask application exposing endpoints for the StockEval web interface."""
+
 from flask import Flask, render_template, request, jsonify
 import pandas as pd
 import os
 from datetime import datetime, timedelta
-from StockEval import evaluate_single_ticker  # Your stock evaluation logic
-from ticker_fetcher import main as fetch_main  # Your ticker fetcher/updater
+from StockEval import evaluate_single_ticker  # Core stock evaluation logic
+from ticker_fetcher import main as fetch_main  # Script used to refresh tickers
 
 app = Flask(__name__)
 
+# Path to the cached ticker list
 TICKERS_CSV = "tickers.csv"
+# DataFrame holding all available tickers
 ticker_df = pd.DataFrame()
 
 # ==== Helpers ====
@@ -66,15 +70,16 @@ def search_ticker():
     if not query:
         return jsonify([])
 
-    # Starts-with search on Name or Symbol
+    # First, grab tickers whose names or symbols *start* with the query
     starts_with = ticker_df[
-        ticker_df['Name'].str.lower().str.startswith(query) | 
+        ticker_df['Name'].str.lower().str.startswith(query) |
         ticker_df['Symbol'].str.lower().str.startswith(query)
     ]
-    # Contains search, excluding any "starts with" hits
+    # Then search for tickers that merely *contain* the query and haven't
+    # already been matched above
     contains = ticker_df[
         ~ticker_df.index.isin(starts_with.index) & (
-            ticker_df['Name'].str.lower().str.contains(query) | 
+            ticker_df['Name'].str.lower().str.contains(query) |
             ticker_df['Symbol'].str.lower().str.contains(query)
         )
     ]
@@ -85,13 +90,15 @@ def search_ticker():
     matches = pd.concat([starts_with, contains]).head(10)
 
     def country_short(c):
+        """Return a short country code for display in the UI."""
         if isinstance(c, str):
             if c.lower() == 'canada':
                 return 'CAD'
             if c.lower() == 'united states':
                 return 'USA'
-            return c[:3].upper()
+            return c[:3].upper()  # Fallback to first three characters
         return ''
+
     matches['CountryShort'] = matches['Country'].apply(country_short)
 
     # Build JSON response for search box
@@ -120,12 +127,14 @@ def run_qualitative():
 
     results = []
     for ticker in tickers:
+        # Run the expensive AI evaluation only when requested by the client
         result = evaluate_single_ticker(ticker.upper(), run_ai=True)
         if "Qualitative" in result:
             results.append({
                 "Symbol": result["Symbol"],
                 "Qualitative": result["Qualitative"]
             })
+
     return jsonify(results)
 
 # ==== Run the app ====

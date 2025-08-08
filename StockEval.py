@@ -1,3 +1,5 @@
+"""Core stock evaluation logic used by the Flask app."""
+
 import yfinance as yf
 import pandas as pd
 import requests
@@ -34,11 +36,11 @@ def calc_roce(ticker_obj):
     ROCE = Operating Income / (Total Assets - Current Liabilities)
     """
     try:
-        fin = ticker_obj.financials
+        fin = ticker_obj.financials  # Income statement data
         if fin is None or fin.empty:
             return 0
-        ebit = fin.loc['Operating Income'].values[0]
-        balance_sheet = ticker_obj.balance_sheet
+        ebit = fin.loc['Operating Income'].values[0]  # Earnings before interest and taxes
+        balance_sheet = ticker_obj.balance_sheet  # Balance sheet data
         if balance_sheet is None or balance_sheet.empty:
             return 0
         total_assets = balance_sheet.loc['Total Assets'].values[0]
@@ -57,7 +59,7 @@ def calc_interest_coverage(ticker_obj):
         fin = ticker_obj.financials
         if fin is None or fin.empty or 'Operating Income' not in fin.index:
             return 0
-        ebit = fin.loc['Operating Income'].dropna().iloc[0]
+        ebit = fin.loc['Operating Income'].dropna().iloc[0]  # EBIT
         possible_labels = [
             'Interest Expense',
             'Interest Expense Non Operating',
@@ -66,6 +68,7 @@ def calc_interest_coverage(ticker_obj):
         ]
         interest_expense = 0
         for label in possible_labels:
+            # Search common rows for interest expense
             if label in fin.index:
                 vals = fin.loc[label].dropna()
                 if not vals.empty:
@@ -73,6 +76,7 @@ def calc_interest_coverage(ticker_obj):
                     break
         if interest_expense == 0:
             # Try any label with "interest" in name but not "income"
+            # As a last resort, scan for any row containing "interest"
             interest_rows = [l for l in fin.index if 'interest' in l.lower() and 'income' not in l.lower()]
             for label in interest_rows:
                 vals = fin.loc[label].dropna()
@@ -88,7 +92,7 @@ def calc_net_margin(ticker_obj):
     Calculate Net Margin: Net Income / Revenue (quarterly financials preferred)
     """
     try:
-        fin = ticker_obj.quarterly_financials
+        fin = ticker_obj.quarterly_financials  # Prefer more recent quarterly data
         if fin is None or fin.empty:
             return 0
         net_income = fin.loc['Net Income'].values[0] if 'Net Income' in fin.index else 0
@@ -108,6 +112,7 @@ def calc_cash_conversion_ratio_ttm(ticker_obj):
         fin_q = ticker_obj.quarterly_financials
         if cf_q is None or fin_q is None or cf_q.empty or fin_q.empty:
             return 0
+        # Sum the last four quarters to approximate trailing twelve months
         cfo = (
             cf_q.loc['Operating Cash Flow'].iloc[:4].sum()
             if 'Operating Cash Flow' in cf_q.index
@@ -128,6 +133,7 @@ def calc_pe_ratio(ticker_obj):
     """
     try:
         info = ticker_obj.info
+        # Use trailing P/E if available; otherwise fall back to forward P/E
         pe = info.get("trailingPE") or info.get("forwardPE") or 0
         return pe
     except Exception:
@@ -162,6 +168,7 @@ def gather_metrics(ticker_obj):
         "name": info.get("longName", "N/A"),
         "price": info.get("currentPrice", 0),
         "country": info.get("country"),
+        # Raw dividend yield is stored as a decimal (e.g. 0.02 for 2%)
         "div_yield_raw": info.get("dividendYield") or 0,
         "pe_ratio": calc_pe_ratio(ticker_obj),
         "roce": calc_roce(ticker_obj),
@@ -189,47 +196,24 @@ Dividend Yield: {metrics['div_yield_raw']:.2%}"""
 # ==== Scoring and Formatting ====
 
 def calculate_score(roce, interest_cov, gross_margin, net_margin, ccr, gp_assets, pe_ratio, div_yield):
-    """
-    Composite scoring logic using weighted metrics.
-    Caps each sub-score at max value.
-    """
+    """Composite scoring logic using weighted metrics."""
     score = 0
+    # ROCE and interest coverage dominate the score
     score += max(min((roce / 0.15) * 30, 30), 0)
     score += max(min((interest_cov / 10) * 30, 30), 0)
+    # Profitability and efficiency metrics carry smaller weights
     score += max(min((gross_margin / 0.40) * 10, 10), 0)
     score += max(min((net_margin / 0.15) * 10, 10), 0)
     score += max(min((ccr / 0.90) * 5, 5), 0)
     score += max(min((gp_assets / 0.3) * 5, 5), 0)
+    # Cheap valuation and dividend yield round things out
     score += max(min((20 / pe_ratio) * 5 if pe_ratio else 0, 5), 0)
     score += max(min((div_yield / 0.03) * 5, 5), 0)
     return min(round(score), 100)
 
-def color_metric(val, good, okay):
-    """
-    Color code a metric string based on thresholds (for HTML display).
-    """
-    try:
-        val_num = float(val.strip('%x'))
-    except Exception:
-        return val
-    color = 'green' if val_num >= good else 'orange' if val_num >= okay else 'red'
-    return f'<span style="color:{color}">{val}</span>'
-
-def color_score(val):
-    """
-    Color code a score string (out of 100) for HTML display.
-    """
-    try:
-        val_num = float(val.replace('/100', ''))
-    except Exception:
-        return val
-    color = 'green' if val_num >= 80 else 'orange' if val_num >= 50 else 'red'
-    return f'<span style="color:{color}">{val}</span>'
-
 def highlight(text):
-    """
-    Highlight Yes/No, Final Score, and Confidence metrics in AI qualitative text (HTML).
-    """
+    """Highlight key terms in the qualitative analysis HTML."""
+    # Emphasize yes/no answers from the model
     text = re.sub(r'\bYes\b', r'<span style="color:green;font-weight:bold;">Yes</span>', text)
     text = re.sub(r'\bNo\b', r'<span style="color:red;font-weight:bold;">No</span>', text)
 
@@ -246,6 +230,7 @@ def highlight(text):
             return f'{match.group(1)}<span style="color:{color};font-weight:bold;">{score_str}</span>'
         except Exception:
             return match.group(0)
+
     text = re.sub(r'(?i)(Final Score:\s*)(\d+/8)', color_final_score, text)
 
     def color_confidence(match):
@@ -261,6 +246,7 @@ def highlight(text):
             return f'{match.group(1)}<span style="color:{color};font-weight:bold;">{match.group(2)}</span>'
         except Exception:
             return match.group(0)
+
     text = re.sub(r'(?i)(Confidence:\s*)(\d+%?)', color_confidence, text)
     return text
 
@@ -294,6 +280,7 @@ Financial summary:
 
 """
     headers = {
+        # Basic headers required by the OpenRouter API
         "Authorization": f"Bearer {API_KEY}",
         "Content-Type": "application/json",
         "HTTP-Referer": "http://localhost",
@@ -327,6 +314,7 @@ def evaluate_single_ticker(ticker, run_ai=False):
     """
     try:
         stock = yf.Ticker(ticker)
+        # Pull and compute all numeric metrics
         metrics = gather_metrics(stock)
         div_yield = (
             f"{metrics['div_yield_raw']:.2f}%"
@@ -348,6 +336,7 @@ def evaluate_single_ticker(ticker, run_ai=False):
 
         qual = ""
         if run_ai:
+            # Optionally run the slower LLM-based qualitative analysis
             qual_resp = ask_qualitative_questions(ticker, summary)
             if qual_resp:
                 qual = highlight(qual_resp.replace('\n', '<br>'))

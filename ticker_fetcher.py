@@ -1,3 +1,5 @@
+"""Utilities for downloading and normalizing stock ticker lists."""
+
 import requests
 import json
 import csv
@@ -11,7 +13,9 @@ def clean_name(name):
     """
     Remove parentheticals and common suffixes (e.g. 'Common Stock', 'Class A') from a company name.
     """
+    # Remove anything in parentheses
     name = re.sub(r'\s*\((.*?)\)', '', name)
+    # Strip common suffixes that clutter the company name
     name = re.sub(r'\b(Common Stock|Ordinary Shares|Class [A-Z]|ADR|ADS|Units|Warrants)\b', '', name, flags=re.IGNORECASE)
     return name.strip()
 
@@ -131,7 +135,7 @@ def main():
 
     all_rows = []
 
-    # For Canada, append .TO to symbol for Yahoo-style lookup
+    # Append ".TO" to Canadian symbols for Yahoo Finance compatibility
     for row in dedup.values():
         if row["Country"].lower() == "canada":
             row["Symbol"] = f"{row['Symbol']}.TO"
