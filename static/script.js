@@ -148,13 +148,13 @@ function saveWeights() {
     }
     const columnMap = {
         roce: 'roce',
-        interestCov: 'interestcov',
-        grossMargin: 'gross_margin',
-        netMargin: 'net_margin',
+        interestCov: 'interestCov',
+        grossMargin: 'grossMargin',
+        netMargin: 'netMargin',
         ccr: 'ccr',
-        gpAssets: 'gp_assets',
-        peRatio: 'pe_ratio',
-        dividendYield: 'dividend_yield'
+        gpAssets: 'gpAssets',
+        peRatio: 'peRatio',
+        dividendYield: 'dividendYield'
     };
     const rows = document.querySelectorAll('.weight-item');
     deletedMetrics.clear();
@@ -184,13 +184,13 @@ function saveWeights() {
 function applyColumnVisibility(row) {
     const columnMap = {
         roce: 'roce',
-        interestCov: 'interestcov',
-        grossMargin: 'gross_margin',
-        netMargin: 'net_margin',
+        interestCov: 'interestCov',
+        grossMargin: 'grossMargin',
+        netMargin: 'netMargin',
         ccr: 'ccr',
-        gpAssets: 'gp_assets',
-        peRatio: 'pe_ratio',
-        dividendYield: 'dividend_yield'
+        gpAssets: 'gpAssets',
+        peRatio: 'peRatio',
+        dividendYield: 'dividendYield'
     };
     Object.entries(columnMap).forEach(([key, cls]) => {
         const cell = row.querySelector(`.col-${cls}`);
@@ -239,13 +239,13 @@ function updateScores() {
     document.querySelectorAll('#watchlist-body tr').forEach(row => {
         const metrics = {
             roce: parseFloat(row.dataset.roce || 0),
-            interestCov: parseFloat(row.dataset.interestcov || 0),
-            grossMargin: parseFloat(row.dataset.gross_margin || 0),
-            netMargin: parseFloat(row.dataset.net_margin || 0),
+            interestCov: parseFloat(row.dataset.interestCov || 0),
+            grossMargin: parseFloat(row.dataset.grossMargin || 0),
+            netMargin: parseFloat(row.dataset.netMargin || 0),
             ccr: parseFloat(row.dataset.ccr || 0),
-            gpAssets: parseFloat(row.dataset.gp_assets || 0),
-            peRatio: parseFloat(row.dataset.pe_ratio || 0),
-            dividendYield: parseFloat(row.dataset.dividend_yield || 0)
+            gpAssets: parseFloat(row.dataset.gpAssets || 0),
+            peRatio: parseFloat(row.dataset.peRatio || 0),
+            dividendYield: parseFloat(row.dataset.dividendYield || 0)
         };
         const score = calculateScore(metrics);
         const cell = row.cells[11];
@@ -380,14 +380,14 @@ async function evaluateStock(symbol) {
         rowNode.dataset.company = data["Company Name"] || '';
         rowNode.dataset.country = data.Country || '';
         rowNode.dataset.price = parseMetric(data.Price, false);
-        rowNode.dataset.dividend_yield = parseMetric(data["Dividend Yield"], true);
-        rowNode.dataset.pe_ratio = parseMetric(data["P/E Ratio"], false);
+        rowNode.dataset.dividendYield = parseMetric(data["Dividend Yield"], true);
+        rowNode.dataset.peRatio = parseMetric(data["P/E Ratio"], false);
         rowNode.dataset.roce = parseMetric(data.ROCE, true);
-        rowNode.dataset.interestcov = parseMetric(data["Interest Coverage"], false);
-        rowNode.dataset.gross_margin = parseMetric(data["Gross Margin"], true);
-        rowNode.dataset.net_margin = parseMetric(data["Net Margin"], true);
+        rowNode.dataset.interestCov = parseMetric(data["Interest Coverage"], false);
+        rowNode.dataset.grossMargin = parseMetric(data["Gross Margin"], true);
+        rowNode.dataset.netMargin = parseMetric(data["Net Margin"], true);
         rowNode.dataset.ccr = parseMetric(data["Cash Conversion Ratio (FCF)"], true);
-        rowNode.dataset.gp_assets = parseMetric(data["Gross Profit / Assets"], true);
+        rowNode.dataset.gpAssets = parseMetric(data["Gross Profit / Assets"], true);
         rowNode.dataset.ai = 0;
         applyColumnVisibility(rowNode);
         document.getElementById("watchlist-body").appendChild(rowNode);
@@ -658,14 +658,14 @@ function buildRow(data) {
     ];
     const classMap = {
         "Price": "price",
-        "Dividend Yield": "dividend_yield",
-        "P/E Ratio": "pe_ratio",
+        "Dividend Yield": "dividendYield",
+        "P/E Ratio": "peRatio",
         "ROCE": "roce",
-        "Interest Coverage": "interestcov",
-        "Gross Margin": "gross_margin",
-        "Net Margin": "net_margin",
+        "Interest Coverage": "interestCov",
+        "Gross Margin": "grossMargin",
+        "Net Margin": "netMargin",
         "Cash Conversion Ratio (FCF)": "ccr",
-        "Gross Profit / Assets": "gp_assets",
+        "Gross Profit / Assets": "gpAssets",
         "Score": "score"
     };
     let row = `<tr id="row-${data.Symbol}" data-company="${data["Company Name"] || ''}" data-country="${data.Country || ''}">`;

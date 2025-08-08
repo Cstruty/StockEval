@@ -9,7 +9,7 @@ import os
 
 # ==== Helpers ====
 
-def clean_name(name):
+def cleanName(name):
     """
     Remove parentheticals and common suffixes (e.g. 'Common Stock', 'Class A') from a company name.
     """
@@ -21,7 +21,7 @@ def clean_name(name):
 
 # ==== Fetch NASDAQ (US) stocks from Nasdaq API ====
 
-def get_nasdaq_rows():
+def getNasdaqRows():
     """
     Download and parse NASDAQ/US stock list from the Nasdaq API.
     Cleans company names, keeps only required fields.
@@ -32,77 +32,77 @@ def get_nasdaq_rows():
     response.raise_for_status()
     data = json.loads(response.content)
     rows = data.get("data", {}).get("rows", [])
-    json_to_csv = {
+    jsonToCsv = {
         "Symbol": "symbol",
         "Name": "name",
         "Market Cap": "marketCap",
         "Country": "country",
     }
-    cleaned_rows = []
+    cleanedRows = []
     for row in rows:
         if row.get("symbol") and row.get("name"):
-            clean_company_name = clean_name(row.get("name", ""))
-            cleaned_row = {csv_col: row.get(json_key, "") for csv_col, json_key in json_to_csv.items()}
-            cleaned_row["Name"] = clean_company_name
-            cleaned_rows.append(cleaned_row)
-    return cleaned_rows
+            cleanCompanyName = cleanName(row.get("name", ""))
+            cleanedRow = {csvCol: row.get(jsonKey, "") for csvCol, jsonKey in jsonToCsv.items()}
+            cleanedRow["Name"] = cleanCompanyName
+            cleanedRows.append(cleanedRow)
+    return cleanedRows
 
 # ==== Fetch TSX (Canada) stocks from TSX Excel sheet ====
 
-def get_tsx_rows():
+def getTsxRows():
     """
     Download and parse the TSX (Toronto Stock Exchange) Excel file.
     Cleans names, finds the market cap column, and returns a list of dicts.
     """
-    excel_url = "https://www.tsx.com/resource/en/571"
-    excel_path = "tsx_companies.xlsx"
+    excelUrl = "https://www.tsx.com/resource/en/571"
+    excelPath = "tsx_companies.xlsx"
     headers = {
         "Referer": "https://www.tsx.com/listings/current-market-statistics",
         "User-Agent": "Mozilla/5.0"
     }
 
     # Download the Excel file
-    resp = requests.get(excel_url, headers=headers, timeout=30)
-    with open(excel_path, "wb") as f:
+    resp = requests.get(excelUrl, headers=headers, timeout=30)
+    with open(excelPath, "wb") as f:
         f.write(resp.content)
 
     # Use ExcelFile context to ensure file is closed after parsing
-    with pd.ExcelFile(excel_path) as xl:
+    with pd.ExcelFile(excelPath) as xl:
         # Sheet name may change (find the first "TSX Issuers...")
-        sheet_name = None
+        sheetName = None
         for s in xl.sheet_names:
             if s.startswith("TSX Issuers"):
-                sheet_name = s
+                sheetName = s
                 break
-        if not sheet_name:
+        if not sheetName:
             raise Exception("No TSX Issuers sheet found!")
-        df = xl.parse(sheet_name, header=9)
+        df = xl.parse(sheetName, header=9)
 
     df = df.dropna(axis=1, how="all")
     df = df[df['Root\nTicker'].notna()]
 
     # Find market cap column dynamically (should start with "Market Cap (C$)")
-    cap_col = [col for col in df.columns if col.startswith("Market Cap (C$)")]
-    cap_col = cap_col[0] if cap_col else None
+    capCol = [col for col in df.columns if col.startswith("Market Cap (C$)")]
+    capCol = capCol[0] if capCol else None
 
     rows = []
     for _, row in df.iterrows():
         rows.append({
             "Symbol": str(row['Root\nTicker']).strip(),
             "Name": str(row['Name']).strip(),
-            "Market Cap": row.get(cap_col, 0) if cap_col else 0,
+            "Market Cap": row.get(capCol, 0) if capCol else 0,
             "Country": "Canada",
         })
 
     # Delete the Excel file after reading to avoid clutter
     try:
-        os.remove(excel_path)
+        os.remove(excelPath)
     except Exception as e:
-        print(f"Warning: could not delete {excel_path}: {e}")
+        print(f"Warning: could not delete {excelPath}: {e}")
 
     return rows
 
-def normalize_name(name):
+def normalizeName(name):
     """
     Normalize a company name for deduplication: lowercase, no spaces.
     """
@@ -111,42 +111,42 @@ def normalize_name(name):
 # ==== Main routine: Download, deduplicate, and write to tickers.csv ====
 
 def main():
-    out_fields = ["Symbol", "Name", "Market Cap", "Country"]
+    outFields = ["Symbol", "Name", "Market Cap", "Country"]
 
     # Download both sources
-    nasdaq_rows = get_nasdaq_rows()
-    tsx_rows = get_tsx_rows()
+    nasdaqRows = getNasdaqRows()
+    tsxRows = getTsxRows()
 
     dedup = {}
 
     # Add all NASDAQ/US tickers (US wins unless TSX duplicates)
-    for row in nasdaq_rows:
-        base_symbol = row["Symbol"].upper()
-        norm_name = normalize_name(row["Name"])
-        key = (base_symbol, norm_name)
+    for row in nasdaqRows:
+        baseSymbol = row["Symbol"].upper()
+        normName = normalizeName(row["Name"])
+        key = (baseSymbol, normName)
         dedup[key] = dict(row)  # US version by default
 
     # Add/overwrite with TSX/Canadian tickers (preferred for duplicates)
-    for row in tsx_rows:
-        base_symbol = row["Symbol"].upper()
-        norm_name = normalize_name(row["Name"])
-        key = (base_symbol, norm_name)
+    for row in tsxRows:
+        baseSymbol = row["Symbol"].upper()
+        normName = normalizeName(row["Name"])
+        key = (baseSymbol, normName)
         dedup[key] = dict(row)  # Canada wins if duplicate
 
-    all_rows = []
+    allRows = []
 
     # Append ".TO" to Canadian symbols for Yahoo Finance compatibility
     for row in dedup.values():
         if row["Country"].lower() == "canada":
             row["Symbol"] = f"{row['Symbol']}.TO"
-        all_rows.append(row)
+        allRows.append(row)
 
     # Write combined list to tickers.csv
     with open("tickers.csv", "w", newline='', encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=out_fields)
+        writer = csv.DictWriter(f, fieldnames=outFields)
         writer.writeheader()
-        writer.writerows(all_rows)
-    print(f"Saved {len(all_rows)} tickers to tickers.csv")
+        writer.writerows(allRows)
+    print(f"Saved {len(allRows)} tickers to tickers.csv")
 
 # ==== Run script directly ====
 

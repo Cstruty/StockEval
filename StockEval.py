@@ -10,205 +10,205 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # ==== Configuration ====
-API_KEY = os.getenv("API_KEY")
-API_URL = "https://openrouter.ai/api/v1/chat/completions"
+apiKey = os.getenv("API_KEY")
+apiUrl = "https://openrouter.ai/api/v1/chat/completions"
 
 # ==== Metric Calculation Helpers ====
 
-def get_current_liabilities(balance_sheet):
+def getCurrentLiabilities(balanceSheet):
     """
     Try to find current liabilities in a balance sheet using common label names.
     """
-    possible_keys = [
+    possibleKeys = [
         'Current Liabilities',
         'Total Current Liabilities',
         'Total Current Liab',
         'Total Liabilities',
     ]
-    for key in possible_keys:
-        if key in balance_sheet.index:
-            return balance_sheet.loc[key].values[0]
+    for key in possibleKeys:
+        if key in balanceSheet.index:
+            return balanceSheet.loc[key].values[0]
     return 0
 
-def calc_roce(ticker_obj):
+def calcRoce(tickerObj):
     """
     Calculate Return on Capital Employed (ROCE).
     ROCE = Operating Income / (Total Assets - Current Liabilities)
     """
     try:
-        fin = ticker_obj.financials  # Income statement data
+        fin = tickerObj.financials  # Income statement data
         if fin is None or fin.empty:
             return 0
         ebit = fin.loc['Operating Income'].values[0]  # Earnings before interest and taxes
-        balance_sheet = ticker_obj.balance_sheet  # Balance sheet data
-        if balance_sheet is None or balance_sheet.empty:
+        balanceSheet = tickerObj.balance_sheet  # Balance sheet data
+        if balanceSheet is None or balanceSheet.empty:
             return 0
-        total_assets = balance_sheet.loc['Total Assets'].values[0]
-        current_liabilities = get_current_liabilities(balance_sheet)
-        capital_employed = total_assets - current_liabilities
-        return ebit / capital_employed if capital_employed else 0
+        totalAssets = balanceSheet.loc['Total Assets'].values[0]
+        currentLiabilities = getCurrentLiabilities(balanceSheet)
+        capitalEmployed = totalAssets - currentLiabilities
+        return ebit / capitalEmployed if capitalEmployed else 0
     except Exception:
         return 0
 
-def calc_interest_coverage(ticker_obj):
+def calcInterestCoverage(tickerObj):
     """
     Calculate Interest Coverage Ratio.
     Coverage = EBIT / Interest Expense (try multiple possible row names)
     """
     try:
-        fin = ticker_obj.financials
+        fin = tickerObj.financials
         if fin is None or fin.empty or 'Operating Income' not in fin.index:
             return 0
         ebit = fin.loc['Operating Income'].dropna().iloc[0]  # EBIT
-        possible_labels = [
+        possibleLabels = [
             'Interest Expense',
             'Interest Expense Non Operating',
             'Net Interest Income',
             'Total Other Finance Cost'
         ]
-        interest_expense = 0
-        for label in possible_labels:
+        interestExpense = 0
+        for label in possibleLabels:
             # Search common rows for interest expense
             if label in fin.index:
                 vals = fin.loc[label].dropna()
                 if not vals.empty:
-                    interest_expense = abs(vals.iloc[0])
+                    interestExpense = abs(vals.iloc[0])
                     break
-        if interest_expense == 0:
+        if interestExpense == 0:
             # Try any label with "interest" in name but not "income"
             # As a last resort, scan for any row containing "interest"
-            interest_rows = [l for l in fin.index if 'interest' in l.lower() and 'income' not in l.lower()]
-            for label in interest_rows:
+            interestRows = [l for l in fin.index if 'interest' in l.lower() and 'income' not in l.lower()]
+            for label in interestRows:
                 vals = fin.loc[label].dropna()
                 if not vals.empty:
-                    interest_expense = abs(vals.iloc[0])
+                    interestExpense = abs(vals.iloc[0])
                     break
-        return ebit / interest_expense if interest_expense else 0
+        return ebit / interestExpense if interestExpense else 0
     except Exception:
         return 0
 
-def calc_net_margin(ticker_obj):
+def calcNetMargin(tickerObj):
     """
     Calculate Net Margin: Net Income / Revenue (quarterly financials preferred)
     """
     try:
-        fin = ticker_obj.quarterly_financials  # Prefer more recent quarterly data
+        fin = tickerObj.quarterly_financials  # Prefer more recent quarterly data
         if fin is None or fin.empty:
             return 0
-        net_income = fin.loc['Net Income'].values[0] if 'Net Income' in fin.index else 0
+        netIncome = fin.loc['Net Income'].values[0] if 'Net Income' in fin.index else 0
         revenue = fin.loc['Total Revenue'].values[0] if 'Total Revenue' in fin.index else (
             fin.loc['Operating Revenue'].values[0] if 'Operating Revenue' in fin.index else 0
         )
-        return net_income / revenue if revenue else 0
+        return netIncome / revenue if revenue else 0
     except Exception:
         return 0
 
-def calc_cash_conversion_ratio_ttm(ticker_obj):
+def calcCashConversionRatioTtm(tickerObj):
     """
     Calculate Cash Conversion Ratio (TTM): Operating Cash Flow / Net Income
     """
     try:
-        cf_q = ticker_obj.quarterly_cashflow
-        fin_q = ticker_obj.quarterly_financials
-        if cf_q is None or fin_q is None or cf_q.empty or fin_q.empty:
+        cfQ = tickerObj.quarterly_cashflow
+        finQ = tickerObj.quarterly_financials
+        if cfQ is None or finQ is None or cfQ.empty or finQ.empty:
             return 0
         # Sum the last four quarters to approximate trailing twelve months
         cfo = (
-            cf_q.loc['Operating Cash Flow'].iloc[:4].sum()
-            if 'Operating Cash Flow' in cf_q.index
+            cfQ.loc['Operating Cash Flow'].iloc[:4].sum()
+            if 'Operating Cash Flow' in cfQ.index
             else 0
         )
         ni = (
-            fin_q.loc['Net Income'].iloc[:4].sum()
-            if 'Net Income' in fin_q.index
+            finQ.loc['Net Income'].iloc[:4].sum()
+            if 'Net Income' in finQ.index
             else 0
         )
         return cfo / ni if ni else 0
     except Exception:
         return 0
 
-def calc_pe_ratio(ticker_obj):
+def calcPeRatio(tickerObj):
     """
     Calculate Price/Earnings Ratio using yfinance info dict.
     """
     try:
-        info = ticker_obj.info
+        info = tickerObj.info
         # Use trailing P/E if available; otherwise fall back to forward P/E
         pe = info.get("trailingPE") or info.get("forwardPE") or 0
         return pe
     except Exception:
         return 0
 
-def calc_gross_profit_to_assets(ticker_obj):
+def calcGrossProfitToAssets(tickerObj):
     """
     Calculate Gross Profit / Total Assets.
     """
     try:
-        info = ticker_obj.info
-        balance_sheet = ticker_obj.balance_sheet
-        if balance_sheet is None or balance_sheet.empty:
+        info = tickerObj.info
+        balanceSheet = tickerObj.balance_sheet
+        if balanceSheet is None or balanceSheet.empty:
             return 0
-        total_assets = balance_sheet.loc['Total Assets'].values[0]
-        gross_profit = info.get("grossProfits", None)
-        if gross_profit is None or total_assets == 0:
+        totalAssets = balanceSheet.loc['Total Assets'].values[0]
+        grossProfit = info.get("grossProfits", None)
+        if grossProfit is None or totalAssets == 0:
             return 0
-        return gross_profit / total_assets
+        return grossProfit / totalAssets
     except Exception:
         return 0
 
-def gather_metrics(ticker_obj):
+def gatherMetrics(tickerObj):
     """Collect commonly used metrics for a ticker.
 
     This helper centralizes yfinance calls so that individual functions
     don't have to repeat the same lookups.  It returns the raw values used
     for scoring and display.
     """
-    info = ticker_obj.info
+    info = tickerObj.info
     metrics = {
         "name": info.get("longName", "N/A"),
         "price": info.get("currentPrice", 0),
         "country": info.get("country"),
         # Raw dividend yield is stored as a decimal (e.g. 0.02 for 2%)
-        "div_yield_raw": info.get("dividendYield") or 0,
-        "pe_ratio": calc_pe_ratio(ticker_obj),
-        "roce": calc_roce(ticker_obj),
-        "interest_cov": calc_interest_coverage(ticker_obj),
-        "gross_margin": info.get("grossMargins", 0),
-        "net_margin": calc_net_margin(ticker_obj),
-        "ccr": calc_cash_conversion_ratio_ttm(ticker_obj),
-        "gp_assets": calc_gross_profit_to_assets(ticker_obj),
+        "divYieldRaw": info.get("dividendYield") or 0,
+        "peRatio": calcPeRatio(tickerObj),
+        "roce": calcRoce(tickerObj),
+        "interestCov": calcInterestCoverage(tickerObj),
+        "grossMargin": info.get("grossMargins", 0),
+        "netMargin": calcNetMargin(tickerObj),
+        "ccr": calcCashConversionRatioTtm(tickerObj),
+        "gpAssets": calcGrossProfitToAssets(tickerObj),
     }
     return metrics
 
-def build_summary(metrics):
+def buildSummary(metrics):
     """Create a human readable summary string from metric values."""
     return (
         f"""ROCE: {metrics['roce']:.2%}
-Interest Coverage: {metrics['interest_cov']:.2f}x
-Gross Margin: {metrics['gross_margin']:.2%}
-Net Margin: {metrics['net_margin']:.2%}
+Interest Coverage: {metrics['interestCov']:.2f}x
+Gross Margin: {metrics['grossMargin']:.2%}
+Net Margin: {metrics['netMargin']:.2%}
 Cash Conversion Ratio: {metrics['ccr']:.2%}
-Gross Profit to Assets: {metrics['gp_assets']:.2%}
-P/E Ratio: {metrics['pe_ratio']:.2f}
-Dividend Yield: {metrics['div_yield_raw']:.2%}"""
+Gross Profit to Assets: {metrics['gpAssets']:.2%}
+P/E Ratio: {metrics['peRatio']:.2f}
+Dividend Yield: {metrics['divYieldRaw']:.2%}"""
     )
 
 # ==== Scoring and Formatting ====
 
-def calculate_score(roce, interest_cov, gross_margin, net_margin, ccr, gp_assets, pe_ratio, div_yield):
+def calculateScore(roce, interestCov, grossMargin, netMargin, ccr, gpAssets, peRatio, divYield):
     """Composite scoring logic using weighted metrics."""
     score = 0
     # ROCE and interest coverage dominate the score
     score += max(min((roce / 0.15) * 30, 30), 0)
-    score += max(min((interest_cov / 10) * 30, 30), 0)
+    score += max(min((interestCov / 10) * 30, 30), 0)
     # Profitability and efficiency metrics carry smaller weights
-    score += max(min((gross_margin / 0.40) * 10, 10), 0)
-    score += max(min((net_margin / 0.15) * 10, 10), 0)
+    score += max(min((grossMargin / 0.40) * 10, 10), 0)
+    score += max(min((netMargin / 0.15) * 10, 10), 0)
     score += max(min((ccr / 0.90) * 5, 5), 0)
-    score += max(min((gp_assets / 0.3) * 5, 5), 0)
+    score += max(min((gpAssets / 0.3) * 5, 5), 0)
     # Cheap valuation and dividend yield round things out
-    score += max(min((20 / pe_ratio) * 5 if pe_ratio else 0, 5), 0)
-    score += max(min((div_yield / 0.03) * 5, 5), 0)
+    score += max(min((20 / peRatio) * 5 if peRatio else 0, 5), 0)
+    score += max(min((divYield / 0.03) * 5, 5), 0)
     return min(round(score), 100)
 
 def highlight(text):
@@ -217,26 +217,26 @@ def highlight(text):
     text = re.sub(r'\bYes\b', r'<span style="color:green;font-weight:bold;">Yes</span>', text)
     text = re.sub(r'\bNo\b', r'<span style="color:red;font-weight:bold;">No</span>', text)
 
-    def color_final_score(match):
-        score_str = match.group(2)
+    def colorFinalScore(match):
+        scoreStr = match.group(2)
         try:
-            score = int(score_str.split('/')[0])
+            score = int(scoreStr.split('/')[0])
             if score >= 7:
                 color = 'green'
             elif score >= 5:
                 color = 'orange'
             else:
                 color = 'red'
-            return f'{match.group(1)}<span style="color:{color};font-weight:bold;">{score_str}</span>'
+            return f'{match.group(1)}<span style="color:{color};font-weight:bold;">{scoreStr}</span>'
         except Exception:
             return match.group(0)
 
-    text = re.sub(r'(?i)(Final Score:\s*)(\d+/8)', color_final_score, text)
+    text = re.sub(r'(?i)(Final Score:\s*)(\d+/8)', colorFinalScore, text)
 
-    def color_confidence(match):
-        conf_str = match.group(2).replace('%', '')
+    def colorConfidence(match):
+        confStr = match.group(2).replace('%', '')
         try:
-            conf = int(conf_str)
+            conf = int(confStr)
             if conf >= 80:
                 color = 'green'
             elif conf >= 60:
@@ -247,17 +247,17 @@ def highlight(text):
         except Exception:
             return match.group(0)
 
-    text = re.sub(r'(?i)(Confidence:\s*)(\d+%?)', color_confidence, text)
+    text = re.sub(r'(?i)(Confidence:\s*)(\d+%?)', colorConfidence, text)
     return text
 
 # ==== AI Qualitative Questions ====
 
-def ask_qualitative_questions(ticker, financial_summary):
+def askQualitativeQuestions(ticker, financialSummary):
     """
     Query OpenRouter/Deepseek API for qualitative questions about the stock, based on summary.
     Returns a formatted string or a default fallback on error.
     """
-    prompt = f"""For {ticker}, respond clearly in bullet points. 
+    prompt = f"""For {ticker}, respond clearly in bullet points.
 Each bullet point must start with "Yes" or "No", followed by a short label of the question in parentheses, then a brief explanation.
 Do not restate the question.
 
@@ -276,30 +276,30 @@ Answer the following:
 
 Also add a confidence metric after the score out 100%
 Financial summary:
-{financial_summary}
+{financialSummary}
 
 """
     headers = {
         # Basic headers required by the OpenRouter API
-        "Authorization": f"Bearer {API_KEY}",
+        "Authorization": f"Bearer {apiKey}",
         "Content-Type": "application/json",
         "HTTP-Referer": "http://localhost",
         "X-Title": "Stock Screener App"
     }
-    json_data = {
+    jsonData = {
         "model": "deepseek/deepseek-chat-v3-0324:free",
         "messages": [{"role": "user", "content": prompt}],
         "max_tokens": 300,
         "temperature": 0.7,
         "stream": False
     }
-    response = requests.post(API_URL, headers=headers, json=json_data)
+    response = requests.post(apiUrl, headers=headers, json=jsonData)
     if response.status_code != 200:
         print("Error:", response.status_code, response.text)
         return "No qualitative analysis available."
     try:
-        result_json = response.json()
-        content = result_json['choices'][0]['message']['content']
+        resultJson = response.json()
+        content = resultJson['choices'][0]['message']['content']
         return content
     except Exception as e:
         print(f"Error parsing response: {e}")
@@ -307,7 +307,7 @@ Financial summary:
 
 # ==== Main Entry: Evaluate One Ticker ====
 
-def evaluate_single_ticker(ticker, run_ai=False):
+def evaluateSingleTicker(ticker, runAi=False):
     """
     Main function to evaluate one stock: fetch yfinance data, calculate all metrics and score,
     and run qualitative analysis if requested.
@@ -315,46 +315,46 @@ def evaluate_single_ticker(ticker, run_ai=False):
     try:
         stock = yf.Ticker(ticker)
         # Pull and compute all numeric metrics
-        metrics = gather_metrics(stock)
-        div_yield = (
-            f"{metrics['div_yield_raw']:.2f}%"
-            if metrics['div_yield_raw']
+        metrics = gatherMetrics(stock)
+        divYield = (
+            f"{metrics['divYieldRaw']:.2f}%"
+            if metrics['divYieldRaw']
             else "N/A"
         )
-        score_val = calculate_score(
+        scoreVal = calculateScore(
             metrics["roce"],
-            metrics["interest_cov"],
-            metrics["gross_margin"],
-            metrics["net_margin"],
+            metrics["interestCov"],
+            metrics["grossMargin"],
+            metrics["netMargin"],
             metrics["ccr"],
-            metrics["gp_assets"],
-            metrics["pe_ratio"],
-            metrics["div_yield_raw"],
+            metrics["gpAssets"],
+            metrics["peRatio"],
+            metrics["divYieldRaw"],
         )
 
-        summary = build_summary(metrics)
+        summary = buildSummary(metrics)
 
         qual = ""
-        if run_ai:
+        if runAi:
             # Optionally run the slower LLM-based qualitative analysis
-            qual_resp = ask_qualitative_questions(ticker, summary)
-            if qual_resp:
-                qual = highlight(qual_resp.replace('\n', '<br>'))
+            qualResp = askQualitativeQuestions(ticker, summary)
+            if qualResp:
+                qual = highlight(qualResp.replace('\n', '<br>'))
 
         return {
             "Symbol": ticker,
             "Company Name": metrics["name"],
             "Country": metrics["country"],
             "Price": f"${metrics['price']:.2f}",
-            "Dividend Yield": div_yield,
-            "P/E Ratio": f"{metrics['pe_ratio']:.2f}" if metrics['pe_ratio'] else "N/A",
+            "Dividend Yield": divYield,
+            "P/E Ratio": f"{metrics['peRatio']:.2f}" if metrics['peRatio'] else "N/A",
             "ROCE": f"{round(metrics['roce'] * 100)}%",
-            "Interest Coverage": f"{round(metrics['interest_cov'])}x",
-            "Gross Margin": f"{round(metrics['gross_margin'] * 100)}%",
-            "Net Margin": f"{round(metrics['net_margin'] * 100)}%",
+            "Interest Coverage": f"{round(metrics['interestCov'])}x",
+            "Gross Margin": f"{round(metrics['grossMargin'] * 100)}%",
+            "Net Margin": f"{round(metrics['netMargin'] * 100)}%",
             "Cash Conversion Ratio (FCF)": f"{round(metrics['ccr'] * 100)}%",
-            "Gross Profit / Assets": f"{round(metrics['gp_assets'] * 100)}%",
-            "Score": f"{round(score_val)}/100",
+            "Gross Profit / Assets": f"{round(metrics['gpAssets'] * 100)}%",
+            "Score": f"{round(scoreVal)}/100",
             "Qualitative": qual
         }
     except Exception as e:
@@ -363,53 +363,53 @@ def evaluate_single_ticker(ticker, run_ai=False):
 
 # ==== Batch Screener for Many Tickers (Optional) ====
 
-def screen_stocks(tickers, run_ai=True):
+def screenStocks(tickers, runAi=True):
     """
     Evaluate and screen a batch of tickers; return (dataframe, qualitative dataframe).
     """
     screened = []
-    qualitative_list = []
+    qualitativeList = []
 
     for ticker in tickers:
         print(f"Evaluating {ticker}...")
         try:
             stock = yf.Ticker(ticker)
-            metrics = gather_metrics(stock)
-            div_yield = (
-                f"{round(metrics['div_yield_raw'], 5)}%"
-                if metrics['div_yield_raw']
+            metrics = gatherMetrics(stock)
+            divYield = (
+                f"{round(metrics['divYieldRaw'], 5)}%"
+                if metrics['divYieldRaw']
                 else "N/A"
             )
 
             print(
-                f"{ticker}: Price=${metrics['price']:.2f}, DivYld={div_yield}, "
-                f"P/E={metrics['pe_ratio']:.2f}, ROCE={metrics['roce']:.2%}, "
-                f"IntCov={metrics['interest_cov']:.2f}, GM={metrics['gross_margin']:.2%}, "
-                f"NM={metrics['net_margin']:.2%}, CCR={metrics['ccr']:.2%}, "
-                f"GP/Assets={metrics['gp_assets']:.2%}"
+                f"{ticker}: Price=${metrics['price']:.2f}, DivYld={divYield}, "
+                f"P/E={metrics['peRatio']:.2f}, ROCE={metrics['roce']:.2%}, "
+                f"IntCov={metrics['interestCov']:.2f}, GM={metrics['grossMargin']:.2%}, "
+                f"NM={metrics['netMargin']:.2%}, CCR={metrics['ccr']:.2%}, "
+                f"GP/Assets={metrics['gpAssets']:.2%}"
             )
 
-            score_val = round(
-                calculate_score(
+            scoreVal = round(
+                calculateScore(
                     metrics['roce'],
-                    metrics['interest_cov'],
-                    metrics['gross_margin'],
-                    metrics['net_margin'],
+                    metrics['interestCov'],
+                    metrics['grossMargin'],
+                    metrics['netMargin'],
                     metrics['ccr'],
-                    metrics['gp_assets'],
-                    metrics['pe_ratio'],
-                    metrics['div_yield_raw'],
+                    metrics['gpAssets'],
+                    metrics['peRatio'],
+                    metrics['divYieldRaw'],
                 ),
                 2,
             )
 
-            summary = build_summary(metrics)
+            summary = buildSummary(metrics)
 
             qual = "Qualitative analysis not run."
-            if run_ai:
-                qual_resp = ask_qualitative_questions(ticker, summary)
-                if qual_resp:
-                    qual = highlight(qual_resp.replace('\n', '<br>'))
+            if runAi:
+                qualResp = askQualitativeQuestions(ticker, summary)
+                if qualResp:
+                    qual = highlight(qualResp.replace('\n', '<br>'))
                 else:
                     qual = "No qualitative analysis available."
 
@@ -417,24 +417,24 @@ def screen_stocks(tickers, run_ai=True):
                 "Ticker": ticker,
                 "Company Name": metrics["name"],
                 "Current Price": f"${metrics['price']:.2f}",
-                "Dividend Yield": div_yield,
-                "P/E Ratio": f"{metrics['pe_ratio']:.2f}" if metrics['pe_ratio'] else "N/A",
+                "Dividend Yield": divYield,
+                "P/E Ratio": f"{metrics['peRatio']:.2f}" if metrics['peRatio'] else "N/A",
                 "ROCE": f"{round(metrics['roce'] * 100)}%",
-                "Interest Coverage": f"{round(metrics['interest_cov'])}x",
-                "Gross Margin": f"{round(metrics['gross_margin'] * 100)}%",
-                "Net Margin": f"{round(metrics['net_margin'] * 100)}%",
+                "Interest Coverage": f"{round(metrics['interestCov'])}x",
+                "Gross Margin": f"{round(metrics['grossMargin'] * 100)}%",
+                "Net Margin": f"{round(metrics['netMargin'] * 100)}%",
                 "Cash Conversion Ratio (FCF)": f"{round(metrics['ccr'] * 100)}%",
-                "Gross Profit / Assets": f"{round(metrics['gp_assets'] * 100)}%",
-                "Score": f"{round(score_val)}/100",
+                "Gross Profit / Assets": f"{round(metrics['gpAssets'] * 100)}%",
+                "Score": f"{round(scoreVal)}/100",
             })
 
-            qualitative_list.append({
+            qualitativeList.append({
                 "Ticker": ticker,
                 "Qualitative Analysis": qual,
             })
         except Exception as e:
             print(f"Failed to evaluate {ticker}: {e}")
 
-    df_screened = pd.DataFrame(screened)
-    df_qual = pd.DataFrame(qualitative_list)
-    return df_screened, df_qual
+    dfScreened = pd.DataFrame(screened)
+    dfQual = pd.DataFrame(qualitativeList)
+    return dfScreened, dfQual
