@@ -6,39 +6,39 @@ from flask import Flask, render_template, request, jsonify
 import pandas as pd
 import os
 from datetime import datetime, timedelta
-from StockEval import evaluate_single_ticker  # Core stock evaluation logic
-from ticker_fetcher import main as fetch_main  # Script used to refresh tickers
+from StockEval import evaluateSingleTicker  # Core stock evaluation logic
+from ticker_fetcher import main as fetchMain  # Script used to refresh tickers
 
 app = Flask(__name__)
 
 # Path to the cached ticker list
-TICKERS_CSV = "tickers.csv"
+tickersCsv = "tickers.csv"
 # DataFrame holding all available tickers
-ticker_df = pd.DataFrame()
+tickerDf = pd.DataFrame()
 
 # ==== Helpers ====
 
-def is_file_older_than_months(file_path, months):
+def isFileOlderThanMonths(filePath, months):
     """Check if a file's last-modified time is older than N months."""
-    if not os.path.exists(file_path):
+    if not os.path.exists(filePath):
         return True
-    file_time = datetime.fromtimestamp(os.path.getmtime(file_path))
-    return datetime.now() - file_time > timedelta(days=30 * months)
+    fileTime = datetime.fromtimestamp(os.path.getmtime(filePath))
+    return datetime.now() - fileTime > timedelta(days=30 * months)
 
 # ==== Ticker CSV Initialization ====
 
 try:
     # Refresh tickers if CSV is old, otherwise use cached
-    if is_file_older_than_months(TICKERS_CSV, 3):
+    if isFileOlderThanMonths(tickersCsv, 3):
         print("Ticker CSV is older than 3 months. Refreshing...")
-        fetch_main()  # Updates the CSV file
-    ticker_df = pd.read_csv(TICKERS_CSV)
+        fetchMain()  # Updates the CSV file
+    tickerDf = pd.read_csv(tickersCsv)
 except Exception as e:
     print(f"Using cached tickers due to error: {e}")
-    if os.path.exists(TICKERS_CSV):
-        ticker_df = pd.read_csv(TICKERS_CSV)
+    if os.path.exists(tickersCsv):
+        tickerDf = pd.read_csv(tickersCsv)
     else:
-        ticker_df = pd.DataFrame(columns=["Symbol", "Name", "Market", "Market Cap"])  # fallback/empty
+        tickerDf = pd.DataFrame(columns=["Symbol", "Name", "Market", "Market Cap"])  # fallback/empty
 
 # ==== Routes ====
 
@@ -49,18 +49,18 @@ def index():
 
 
 @app.route('/AboutMe')
-def about_me():
+def aboutMe():
     """Render About Me page."""
     return render_template('about.html')
 
 
 @app.route('/OtherTools')
-def other_tools():
+def otherTools():
     """Render Other Tools page."""
     return render_template('tools.html')
 
 @app.route('/search_ticker')
-def search_ticker():
+def searchTicker():
     """
     Ticker search endpoint.
     Returns best matches (top 10, sorted by market cap) for autocomplete.
@@ -71,25 +71,25 @@ def search_ticker():
         return jsonify([])
 
     # First, grab tickers whose names or symbols *start* with the query
-    starts_with = ticker_df[
-        ticker_df['Name'].str.lower().str.startswith(query) |
-        ticker_df['Symbol'].str.lower().str.startswith(query)
+    startsWith = tickerDf[
+        tickerDf['Name'].str.lower().str.startswith(query) |
+        tickerDf['Symbol'].str.lower().str.startswith(query)
     ]
     # Then search for tickers that merely *contain* the query and haven't
     # already been matched above
-    contains = ticker_df[
-        ~ticker_df.index.isin(starts_with.index) & (
-            ticker_df['Name'].str.lower().str.contains(query) |
-            ticker_df['Symbol'].str.lower().str.contains(query)
+    contains = tickerDf[
+        ~tickerDf.index.isin(startsWith.index) & (
+            tickerDf['Name'].str.lower().str.contains(query) |
+            tickerDf['Symbol'].str.lower().str.contains(query)
         )
     ]
-    starts_with = starts_with.sort_values(by='Market Cap', ascending=False)
+    startsWith = startsWith.sort_values(by='Market Cap', ascending=False)
     contains = contains.sort_values(by='Market Cap', ascending=False)
 
     # Combine, trim to 10, and add a short country code
-    matches = pd.concat([starts_with, contains]).head(10)
+    matches = pd.concat([startsWith, contains]).head(10)
 
-    def country_short(c):
+    def countryShort(c):
         """Return a short country code for display in the UI."""
         if isinstance(c, str):
             if c.lower() == 'canada':
@@ -99,7 +99,7 @@ def search_ticker():
             return c[:3].upper()  # Fallback to first three characters
         return ''
 
-    matches['CountryShort'] = matches['Country'].apply(country_short)
+    matches['CountryShort'] = matches['Country'].apply(countryShort)
 
     # Build JSON response for search box
     filtered = matches[['Name', 'Symbol', 'CountryShort']]
@@ -110,11 +110,11 @@ def search_ticker():
 def evaluate(ticker):
     """Evaluate a ticker and return its data for the table (no AI)."""
     print(f"Evaluating ticker: {ticker}")
-    result = evaluate_single_ticker(ticker.upper(), run_ai=False)
+    result = evaluateSingleTicker(ticker.upper(), runAi=False)
     return jsonify(result)
 
 @app.route("/run_qualitative", methods=["POST"])
-def run_qualitative():
+def runQualitative():
     """
     POST endpoint to run qualitative (AI) analysis for a list of tickers.
     Used for "AI Analysis" column and batch runs.
@@ -128,7 +128,7 @@ def run_qualitative():
     results = []
     for ticker in tickers:
         # Run the expensive AI evaluation only when requested by the client
-        result = evaluate_single_ticker(ticker.upper(), run_ai=True)
+        result = evaluateSingleTicker(ticker.upper(), runAi=True)
         if "Qualitative" in result:
             results.append({
                 "Symbol": result["Symbol"],
