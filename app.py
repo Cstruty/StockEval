@@ -7,7 +7,7 @@ import pandas as pd
 import os
 from datetime import datetime, timedelta
 from StockEval import evaluateSingleTicker  # Core stock evaluation logic
-from ticker_fetcher import main as fetchMain  # Script used to refresh tickers
+from tickerFetcher import main as fetchMain  # Script used to refresh tickers
 
 app = Flask(__name__)
 
