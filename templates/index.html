@@ -6,7 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no, viewport-fit=cover">
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
     <title>Stock Watchlist</title>
-    <link rel="icon" type="image/png" href="{{ url_for('static', filename='icons/website-icon.png') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='icons/logo-32.png') }}">
+    <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
 </head>
 
@@ -31,7 +32,12 @@
 
         <!-- Initial centered view: Shows search + import before watchlist is loaded -->
         <div id="initial-view" class="centered-view expanded">
-            <h1>Stock Watchlist</h1>
+            <div style="display: flex; align-items: center; justify-content: center;">
+                <img src="static/icons/logo.png" alt="Logo" style="height: 40px; margin-right: 10px;">
+                <h1 style="margin: 0;">Vitality</h1>
+            </div>
+
+            <!-- Ticker search and import controls -->
             <div class="search-container">
                 <div class="input-wrapper">
                     <input id="search" type="text" oninput="searchTicker()"
