@@ -211,11 +211,14 @@ span {
 }
 
 #info-btn {
+  display: none;
   width: 32px;
   height: 32px;
   padding: 0;
   border-radius: 50%;
   font-weight: bold;
+  align-items: center;
+  justify-content: center;
 }
 
 #title-bar {

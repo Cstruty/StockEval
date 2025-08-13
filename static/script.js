@@ -652,6 +652,7 @@ window.showResults = function () {
     const quoteContainer = document.getElementById('quote-container');
     const pageBackground = document.getElementById("page-background");
     const mobileActions = document.querySelector('.mobile-action-buttons');
+    const infoBtn = document.getElementById('info-btn');
     if (initialView) {
         initialView.classList.remove('expanded');
         initialView.classList.add('shrunk');
@@ -663,6 +664,7 @@ window.showResults = function () {
         }
     }
     if (resultsView) resultsView.style.display = 'block';
+    if (infoBtn) infoBtn.style.display = 'flex';
 };
 
 /** Build a table row (HTML) for a new stock */
