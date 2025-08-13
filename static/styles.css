@@ -391,8 +391,9 @@ td button {
   margin-right: 0;
 }
 
-/* Slightly smaller settings button */
-#settings-btn {
+/* Slightly smaller settings button and matching mobile gear */
+#settings-btn,
+#mobile-score-btn {
   padding: 6px 20px;
   font-size: 0.85em;
   line-height: 1;
