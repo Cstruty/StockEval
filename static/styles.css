@@ -241,6 +241,11 @@ span {
   padding-left: 20px;
 }
 
+.info-list li {
+  margin: 8px 0;
+  line-height: 1.4;
+}
+
 #watchlist-table {
   width: 100%;
   table-layout: fixed;
