@@ -81,7 +81,9 @@
 
         <!-- Watchlist view  -->
         <div id="results-view" style="display: none;">
-            <div id="watchlist">
+            <div id="watchlist-wrapper">
+                <button id="info-btn" onclick="openInfoModal()" title="Column descriptions">ℹ</button>
+                <div id="watchlist">
                 <table id="watchlist-table">
                     <thead>
                         <tr>
@@ -234,6 +236,7 @@
                     <!-- Dynamic table body for stock rows -->
                     <tbody id="watchlist-body"></tbody>
                 </table>
+                </div>
             </div>
 
             <!-- Results or alerts after table -->

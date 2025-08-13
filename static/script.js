@@ -609,8 +609,24 @@ function exportToExcel() {
 function showModal(title, content) {
     const modal = document.getElementById("ai-modal");
     const container = document.getElementById("modal-content");
-    container.innerHTML = `<h3>${title}</h3><p>${content}</p>`;
+    container.innerHTML = `<h3>${title}</h3>${content}`;
     modal.style.display = "flex";
+}
+
+function openInfoModal() {
+    const headers = document.querySelectorAll('#watchlist-table thead th');
+    let list = '<ul class="info-list">';
+    headers.forEach(th => {
+        const desc = th.getAttribute('title');
+        const labelEl = th.querySelector('.th-label');
+        const rawLabel = labelEl ? labelEl.innerText : th.textContent;
+        const label = rawLabel.replace(/▲|▼/g, '').trim();
+        if (desc) {
+            list += `<li><strong>${label}</strong>: ${desc}</li>`;
+        }
+    });
+    list += '</ul>';
+    showModal('Column Information', list);
 }
 function closeModal() {
     document.getElementById("ai-modal").style.display = "none";

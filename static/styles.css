@@ -210,6 +210,31 @@ span {
   box-sizing: border-box;
 }
 
+#watchlist-wrapper {
+  display: flex;
+  align-items: flex-start;
+}
+
+#watchlist-wrapper #info-btn {
+  margin-right: 8px;
+}
+
+#watchlist-wrapper #watchlist {
+  flex: 1;
+}
+
+#info-btn {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border-radius: 50%;
+  font-weight: bold;
+}
+
+.info-list {
+  list-style: disc;
+  padding-left: 20px;
+}
 
 #watchlist-table {
   width: 100%;
