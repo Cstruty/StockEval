@@ -395,7 +395,7 @@ td button {
 #settings-btn,
 #mobile-score-btn {
   padding: 6px 20px;
-  font-size: 0.85em;
+  font-size: 20px;
   line-height: 1;
   border-radius: 6px;
   z-index: 20;
