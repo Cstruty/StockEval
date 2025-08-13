@@ -210,25 +210,27 @@ span {
   box-sizing: border-box;
 }
 
-#watchlist-wrapper {
-  display: flex;
-  align-items: flex-start;
-}
-
-#watchlist-wrapper #info-btn {
-  margin-right: 8px;
-}
-
-#watchlist-wrapper #watchlist {
-  flex: 1;
-}
-
 #info-btn {
   width: 32px;
   height: 32px;
   padding: 0;
   border-radius: 50%;
   font-weight: bold;
+}
+
+#title-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+#title-bar #info-btn {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 .info-list {

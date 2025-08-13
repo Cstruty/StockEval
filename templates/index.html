@@ -32,7 +32,8 @@
 
         <!-- Initial centered view: Shows search + import before watchlist is loaded -->
         <div id="initial-view" class="centered-view expanded">
-            <div style="display: flex; align-items: center; justify-content: center;">
+            <div id="title-bar">
+                <button id="info-btn" onclick="openInfoModal()" title="Column descriptions">ℹ</button>
                 <img src="static/icons/logo.png" alt="Logo" style="height: 40px; margin-right: 10px;">
                 <h1 style="margin: 0;">Vitality</h1>
             </div>
@@ -81,9 +82,7 @@
 
         <!-- Watchlist view  -->
         <div id="results-view" style="display: none;">
-            <div id="watchlist-wrapper">
-                <button id="info-btn" onclick="openInfoModal()" title="Column descriptions">ℹ</button>
-                <div id="watchlist">
+            <div id="watchlist">
                 <table id="watchlist-table">
                     <thead>
                         <tr>
@@ -236,7 +235,6 @@
                     <!-- Dynamic table body for stock rows -->
                     <tbody id="watchlist-body"></tbody>
                 </table>
-                </div>
             </div>
 
             <!-- Results or alerts after table -->
