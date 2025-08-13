@@ -391,14 +391,23 @@ td button {
   margin-right: 0;
 }
 
-/* Slightly smaller settings button and matching mobile gear */
+/* Settings and mobile score buttons */
 #settings-btn,
 #mobile-score-btn {
   padding: 6px 20px;
-  font-size: 0.85em;
   line-height: 1;
   border-radius: 6px;
   z-index: 20;
+}
+
+/* Slightly smaller settings gear in table header */
+#settings-btn {
+  font-size: 0.85em;
+}
+
+/* Larger mobile gear for better tap target */
+#mobile-score-btn {
+  font-size: 1.2em;
 }
 
 /* Button hover, focus, and disabled states */
