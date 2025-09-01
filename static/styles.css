@@ -1056,32 +1056,6 @@ body.about-page #page-background {
   min-height: 100vh;
   height: auto;
 }
-
-.photo-row {
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  gap: 32px;
-  /* space between photos */
-  margin-bottom: 32px;
-}
-
-#skiing-photo {
-  width: 480px;
-  height: 360px;
-}
-
-#profile-photo {
-  width: 385px;
-  height: 504px;
-}
-
-#fishing-photo {
-  width: 385px;
-  height: 504px;
-}
-
 .about-container p {
   max-width: 600px;
   text-align: center;

@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no, viewport-fit=cover">
     <title>About Me</title>
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='icons/logo-32.png') }}">
-    <!-- ==== Inline Styles for Links and Nav (can be moved to main CSS) ==== -->
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
     <style>
         a {
             color: white;
@@ -23,7 +24,6 @@
         #tools-container h2 {}
     </style>
     <!-- ==== Main App Styles ==== -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
 </head>
 
 <body class="about-page" style=" overflow-y: auto";>
@@ -53,9 +53,9 @@
 
             <!-- ==== Row of Personal Photos ==== -->
             <div class="photo-row">
-                <img src="{{ url_for('static', filename='icons/skiing.jpg') }}" alt="Skiing Photo" id="skiing-photo">
-                <img src="{{ url_for('static', filename='icons/graduation.jpg') }}" alt="Profile Photo" id="profile-photo">
-                <img src="{{ url_for('static', filename='icons/fishing.jpg') }}" alt="Fishing Photo" id="fishing-photo">
+                <img src="{{ url_for('static', filename='icons/graduation.jpg') }}" alt="Profile Photo" style="  width: 385px; height: 504px;" id="profile-photo">
+                                <img src="{{ url_for('static', filename='icons/skiing.jpg') }}" alt="Skiing Photo" style="width: 480px; height: 360px;" id="skiing-photo">
+                <img src="{{ url_for('static', filename='icons/fishing.jpg') }}" alt="Fishing Photo" style="  width: 385px; height: 504px;" id="fishing-photo">
             </div>
 
             <!-- ==== Short Personal Introduction ==== -->
@@ -66,19 +66,22 @@
                 it was inspire by my favourite stock youtuber 
                 <a href="https://www.youtube.com/@TheCashFlowCompounder" target="_blank">The Cash Flow Computer</a>.
                 If you have any suggestions on how I can improve it, please email me at
-                <a href="collinstruthers@gmail.com" target="_blank">collinstruthers@gmail.com</a>
+                <a href="collinstruthers@gmail.com" target="_blank">vitalitymetrics@gmail.com</a>
             </p>
 
             <!-- ==== Resume PDF Viewer ==== -->
+            <!-- 
             <div class="resume-viewer" style="padding-bottom: 100px;">
                 <iframe src="{{ url_for('static', filename='resume.pdf') }}"
                         width="100%" height="900px"
-                        style="border: none; min-height: 600px;">
+                        style="border: none; min-height: 600px;">-->
                     <!-- Fallback for browsers that can't embed PDFs -->
-                    This browser does not support PDFs. Please download the PDF to view it:
+                     
+                    <!--This browser does not support PDFs. Please download the PDF to view it:
                     <a href="{{ url_for('static', filename='resume.pdf') }}">Download PDF</a>
                 </iframe>
-            </div>
+            </div>-->
+            
 
     </div>
     <!-- ==== End About Container ==== -->
